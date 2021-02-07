@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>Francisco Souza</title>
+	<link href="https://blog.fsouza.dev/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://blog.fsouza.dev"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2021-02-07T00:00:00+00:00</updated>
+	<id>https://blog.fsouza.dev/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Hello World!</title>
+		<published>2021-02-07T00:00:00+00:00</published>
+		<updated>2021-02-07T00:00:00+00:00</updated>
+		<link href="https://blog.fsouza.dev/hello-world/" type="text/html"/>
+		<id>https://blog.fsouza.dev/hello-world/</id>
+		<content type="html">&lt;p&gt;This is my first post.&lt;&#x2F;p&gt;
+&lt;p&gt;And I am trying to test Zola, to confirm it&#x27;s a good match! Who knows?!&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s some Python:&lt;&#x2F;p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;import os
+
+print(os.getenv(&amp;quot;HOME&amp;quot;))
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+	</entry>
+</feed>
