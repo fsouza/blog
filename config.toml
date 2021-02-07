@@ -10,10 +10,7 @@ generate_feed = true
 feed_filename = "atom.xml"
 
 minify_html = true
-
-taxonomies = [
-  { name = "tags", feed = true, paginate_by = 9 },
-]
+theme = "hyde"
 
 [markdown]
 highlight_code = false
@@ -21,3 +18,9 @@ external_links_target_blank = true
 
 [extra]
 author = "Francisco Souza"
+hyde_reverse = true
+hyde_links = [
+    {url = "https://github.com/fsouza", name = "GitHub"},
+    {url = "https://linkedin.com/in/franciscosouza", name = "LinkedIn"},
+    {url = "https://twitter.com/franciscosouza", name = "Twitter"},
+]

@@ -1,11 +1,42 @@
-{% extends "content-list.html" %}
+{% extends "hyde/templates/index.html" %}
+
+<!-- prettier ignore -->
+{% block extra_head %}
+
+<!-- prettier ignore -->
+<link rel="stylesheet" href="{{ get_url(path="custom-style.css", cachebust=true)
+}}" />
+
+<!-- prettier ignore -->
+{% endblock %}
 
 <!-- prettier ignore -->
 {% block content %}
 
-<h1>{{ config.title }}</h1>
+<div class="posts">
+    {% for page in paginator.pages %}
+    <a class="post" href="{{ page.permalink }}">
+        <h1 class="post-title">{{ page.title }}</h1>
 
-{{ super() }}
+        <span class="post-date"
+            >{{ page.date | date(format="%B %d, %Y") }}</span
+        >
+
+        {{ page.content | split(pat="\n") | first | safe }}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="pagination">
+    {% if paginator.previous %}
+    <a href="{{ paginator.previous | safe }}">« Newer Posts</a>
+    {% endif %}
+
+    <!-- prettier ignore -->
+    {% if paginator.next %}
+    <a href="{{ paginator.next | safe }}">Older Posts »</a>
+    {% endif %}
+</div>
 
 <!-- prettier ignore -->
 {% endblock %}

@@ -1,23 +1,13 @@
-{% extends "base.html" %}
-
-<!-- prettier ignore -->
-{% block title %}{{ page.title }} | {{ super() }}{% endblock %}
+{% extends "index.html" %}
 
 <!-- prettier ignore -->
 {% block content %}
 
-<h1>{{ page.title }}</h1>
-
-<div class="metadata">
-    {{ page.date | date(format="%B %d, %Y") }}
-    <span class="tags">
-        {% for tag in page.taxonomies['tags'] %}
-        <a href="{{ get_taxonomy_url(kind="tags", name=tag) | safe }}">#{{ tag }}</a>&nbsp;
-        {% endfor %}
-    </span>
+<div class="post">
+    <h1 class="post-title">{{ page.title }}</h1>
+    <span class="post-date">{{ page.date | date(format="%B %d, %Y") }}</span>
+    {{ page.content | safe }}
 </div>
 
-{{ page.content | safe }}
-
 <!-- prettier ignore -->
-{% endblock %}
+{% endblock content %}

@@ -1,0 +1,27 @@
+.pagination > a {
+    display: inline-block;
+    font-size: 0.8em;
+    margin: 0 1.5em;
+}
+
+.posts > .post > p {
+    display: inline-block;
+}
+
+div.post {
+    padding: 0.2em 0.5em;
+}
+
+a.post {
+    display: block;
+    padding: 0.2em 0.5em;
+}
+
+a.post > p {
+    color: #515151;
+}
+
+a.post:hover {
+    background-color: #fafafa;
+    text-decoration: none;
+}
