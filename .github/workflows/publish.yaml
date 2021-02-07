@@ -13,8 +13,15 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Deploy to gh-pages branch
-        uses: shalzz/zola-deploy-action@v0.13.0
-        env:
-          PAGES_BRANCH: gh-pages
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: download zola
+        run: |
+          curl -sLO https://github.com/getzola/zola/releases/download/v0.13.0/zola-v0.13.0-x86_64-unknown-linux-gnu.tar.gz | tar -xzf -
+
+      - name: build
+        run: ./zola build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.7.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
