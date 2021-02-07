@@ -21,6 +21,10 @@ jobs:
       - name: build
         run: ./zola build
 
+      - name: write cname
+        run: |
+          echo blog.fsouza.dev > public/CNAME
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3.7.3
         with:
