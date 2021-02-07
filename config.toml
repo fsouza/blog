@@ -1,10 +1,23 @@
+title = "Francisco Souza"
 base_url = "https://blog.fsouza.dev"
 
 compile_sass = false
 
+default_language = "en"
 build_search_index = true
+
+generate_feed = true
+feed_filename = "atom.xml"
+
+minify_html = true
+
+taxonomies = [
+  { name = "tags", feed = true, paginate_by = 9 },
+]
 
 [markdown]
 highlight_code = false
+external_links_target_blank = true
 
 [extra]
+author = "Francisco Souza"
