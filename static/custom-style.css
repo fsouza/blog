@@ -33,3 +33,11 @@ a.post:hover {
 .post pre {
     background-color: #f9f9f9 !important; /* kill me please */
 }
+
+.sidebar-nav-item {
+    display: inline-block;
+}
+
+.sidebar-nav-item:not(:last-child)::after {
+    content: " |";
+}
