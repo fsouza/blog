@@ -9,11 +9,11 @@ build_search_index = true
 generate_feed = true
 feed_filename = "atom.xml"
 
-minify_html = true
 theme = "hyde"
 
 [markdown]
-highlight_code = false
+highlight_code = true
+highlight_theme = "ir-white"
 external_links_target_blank = true
 
 [extra]
