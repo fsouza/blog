@@ -29,3 +29,7 @@ a.post:hover {
 .content.container {
     max-width: unset;
 }
+
+.post pre {
+    background-color: #f9f9f9 !important; /* kill me please */
+}
