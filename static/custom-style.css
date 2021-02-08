@@ -25,3 +25,7 @@ a.post:hover {
     background-color: #fafafa;
     text-decoration: none;
 }
+
+.content.container {
+    max-width: unset;
+}
