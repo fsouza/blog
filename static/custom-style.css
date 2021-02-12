@@ -15,6 +15,7 @@ div.post {
 a.post {
     display: block;
     padding: 0.2em 0.5em;
+    margin: 0;
 }
 
 a.post > p {

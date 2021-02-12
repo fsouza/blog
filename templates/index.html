@@ -22,7 +22,7 @@
             >{{ page.date | date(format="%B %d, %Y") }}</span
         >
 
-        {{ page.content | split(pat="\n") | first | safe }}
+        <p>{{ page.content | split(pat="\n") | first | striptags | trim_end_matches(pat=".") }}...</p>
     </a>
     {% endfor %}
 </div>
