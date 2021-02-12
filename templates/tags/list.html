@@ -1,0 +1,20 @@
+{% extends "index.html" %}
+
+<!-- prettier ignore -->
+{% block title %}{{ taxonomy.name | title }} - {{ super() }}{% endblock %}
+
+<!-- prettier ignore -->
+{% block content %}
+<div class="taxonomy">
+    <h1 class="head">{{ taxonomy.name | title }}</h1>
+    <ul>
+        {% for term in terms %}
+        <li>
+            <a href="{{ term.permalink | safe }}">{{ term.name }}</a>
+            ({{ term.pages | length }} post{{ term.pages | length |
+            pluralize(singular="", plural="s") }})
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

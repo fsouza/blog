@@ -11,6 +11,10 @@ feed_filename = "atom.xml"
 
 theme = "hyde"
 
+taxonomies = [
+    { name = "tags", paginate_by = 9 },
+]
+
 [markdown]
 highlight_code = true
 highlight_theme = "ir-white"

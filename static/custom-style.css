@@ -42,3 +42,31 @@ a.post:hover {
 .sidebar-nav-item:not(:last-child)::after {
     content: " |";
 }
+
+.post > .tags {
+    font-size: 0.8em;
+    list-style: none;
+    margin: 0 0 1em;
+    padding: 0;
+}
+
+.post > .tags > li {
+    display: inline-block;
+}
+
+.post > .tags > li:not(:first-child) {
+    margin-left: 0.3em;
+}
+
+.post > .post-date {
+    margin-bottom: 0;
+}
+
+h1.head {
+    margin-bottom: 1em;
+    padding: 0.2em 0.2em;
+}
+
+h2.post-title {
+    font-size: 36px;
+}

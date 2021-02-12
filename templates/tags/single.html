@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+
+<!-- prettier ignore -->
+{% block title %}{{ taxonomy.name | title }} | {{ term.name }} | {{ super() }}{%
+endblock %}
+
+<!-- prettier ignore -->
+{% block content %}
+<h1 class="head">{{ taxonomy.name | title }}: {{ term.name }}</h1>
+
+<!-- prettier ignore -->
+{{ super() }}
+
+<!-- prettier ignore -->
+{% endblock %}
