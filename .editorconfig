@@ -1,0 +1,3 @@
+[*.{css,html,js,ml,toml}]
+indent_style = spaces
+indent_size = 4
