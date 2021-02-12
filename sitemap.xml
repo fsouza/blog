@@ -10,4 +10,19 @@
     <url>
         <loc>https://blog.fsouza.dev/page/1/</loc>
     </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/blogging/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/blogging/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/testing/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/testing/page/1/</loc>
+    </url>
 </urlset>
