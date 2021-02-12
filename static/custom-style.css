@@ -63,10 +63,11 @@ a.post:hover {
 }
 
 h1.head {
+    font-size: 44px;
     margin-bottom: 1em;
     padding: 0.2em 0.2em;
 }
 
 h2.post-title {
-    font-size: 36px;
+    font-size: 40px;
 }
