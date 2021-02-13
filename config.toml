@@ -25,6 +25,5 @@ author = "Francisco Souza"
 hyde_reverse = true
 hyde_links = [
     {url = "https://github.com/fsouza", name = "GitHub"},
-    {url = "https://linkedin.com/in/franciscosouza", name = "LinkedIn"},
     {url = "https://twitter.com/franciscosouza", name = "Twitter"},
 ]
