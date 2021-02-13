@@ -25,9 +25,9 @@
 &lt;&#x2F;ul&gt;
 &lt;!-- END doctoc generated TOC please keep comment here to allow auto update --&gt;
 &lt;h2 id=&quot;intro&quot;&gt;Intro&lt;&#x2F;h2&gt;
-&lt;p&gt;Back in June 2020, when I was migrating my Neovim configuration to Lua and to
-the native LSP client available in neovim 0.5.0, my main language at work was
-TypeScript and we used &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;prettier.io&quot;&gt;prettier&lt;&#x2F;a&gt; to keep our code
+&lt;p&gt;Back in June of 2020, when I was migrating my Neovim configuration to Lua and
+to the native LSP client available in neovim 0.5.0, my main language at work
+was TypeScript and we used &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;prettier.io&quot;&gt;prettier&lt;&#x2F;a&gt; to keep our code
 formatted, and I had it configured to format-on-save with
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;neoclide&#x2F;coc-prettier&quot;&gt;coc-prettier&lt;&#x2F;a&gt;. One of the first
 issues I ran into was performance: saving files became deadly slow, to the
@@ -113,7 +113,7 @@ twice.&lt;&#x2F;p&gt;
 through the issue about slow startups in prettier, someone suggests using
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;josephfrazier&#x2F;prettier_d&quot;&gt;prettier_d&lt;&#x2F;a&gt;, but after looking at
 how large that project was, I was a bit scared.&lt;&#x2F;p&gt;
-&lt;p&gt;Doing some more research, I found about
+&lt;p&gt;Doing some more research, I found
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;mantoni&#x2F;eslint_d.js&#x2F;&quot;&gt;eslint_d.js&lt;&#x2F;a&gt;, which solves a similar
 issue for eslint, by introducing a daemon which supports binding on a TCP
 socket! And the author of eslint_d.js extracted its core functionality in a
@@ -237,9 +237,19 @@ comments:&lt;&#x2F;p&gt;
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;end
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;And here&#x27;s a simple implementation of &lt;code&gt;write_to_buf&lt;&#x2F;code&gt;. The trickiest bit is
-error handling: the way errors are reported isn&#x27;t great, but it&#x27;s acceptable :)&lt;&#x2F;p&gt;
+error handling: the way errors are reported isn&#x27;t great, but it&#x27;s acceptable:
+if prettier fails, the last line contains a message in the format &lt;code&gt;# exit &amp;lt;code&amp;gt; ...&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
 &lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#014a69;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;write_to_buf&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;)
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#014a69;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;new_lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;split&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#00ff00;&quot;&gt;\n&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;)
+
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#898989;&quot;&gt;-- check for errors
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#582b00;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;new_lines&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;#&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;new_lines&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;], &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;^# exit %d+&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;then
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;error&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#582b00;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;format&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;failed to format with prettier: %s&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;data&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;))
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;end
+
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#898989;&quot;&gt;-- write contents
+  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.api.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;nvim_buf_set_lines&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;new_lines&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;)
 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;end
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now you can throw all of that in a &lt;code&gt;format()&lt;&#x2F;code&gt; function and invoke it on write!&lt;&#x2F;p&gt;
@@ -251,7 +261,7 @@ handling and cursor positioning, checkout
 in my dotfiles repo.&lt;&#x2F;p&gt;
 &lt;&#x2F;blockquote&gt;
 &lt;h2 id=&quot;not-just-typescript-and-javascript&quot;&gt;Not just TypeScript and JavaScript&lt;&#x2F;h2&gt;
-&lt;p&gt;Users of prettier are aware of that, but prettier is not just about JavaScript
+&lt;p&gt;Users of prettier are aware of this, but prettier is not just about JavaScript
 and TypeScript, it can be used with many other file formats, including HTML,
 Markdown, CSS, YAML, JSON and others. Check the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;prettier.io&#x2F;docs&#x2F;en&#x2F;options.html#parser&quot;&gt;parser configuration in
 prettier docs&lt;&#x2F;a&gt; for a full

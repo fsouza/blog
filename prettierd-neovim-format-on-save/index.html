@@ -85,9 +85,9 @@
 </ul>
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 <h2 id="intro">Intro</h2>
-<p>Back in June 2020, when I was migrating my Neovim configuration to Lua and to
-the native LSP client available in neovim 0.5.0, my main language at work was
-TypeScript and we used <a rel="noopener" target="_blank" href="https://prettier.io">prettier</a> to keep our code
+<p>Back in June of 2020, when I was migrating my Neovim configuration to Lua and
+to the native LSP client available in neovim 0.5.0, my main language at work
+was TypeScript and we used <a rel="noopener" target="_blank" href="https://prettier.io">prettier</a> to keep our code
 formatted, and I had it configured to format-on-save with
 <a rel="noopener" target="_blank" href="https://github.com/neoclide/coc-prettier">coc-prettier</a>. One of the first
 issues I ran into was performance: saving files became deadly slow, to the
@@ -173,7 +173,7 @@ twice.</p>
 through the issue about slow startups in prettier, someone suggests using
 <a rel="noopener" target="_blank" href="https://github.com/josephfrazier/prettier_d">prettier_d</a>, but after looking at
 how large that project was, I was a bit scared.</p>
-<p>Doing some more research, I found about
+<p>Doing some more research, I found
 <a rel="noopener" target="_blank" href="https://github.com/mantoni/eslint_d.js/">eslint_d.js</a>, which solves a similar
 issue for eslint, by introducing a daemon which supports binding on a TCP
 socket! And the author of eslint_d.js extracted its core functionality in a
@@ -297,9 +297,19 @@ comments:</p>
 </span><span style="color:#016692;">end
 </span></code></pre>
 <p>And here's a simple implementation of <code>write_to_buf</code>. The trickiest bit is
-error handling: the way errors are reported isn't great, but it's acceptable :)</p>
+error handling: the way errors are reported isn't great, but it's acceptable:
+if prettier fails, the last line contains a message in the format <code># exit &lt;code&gt; ...</code>.</p>
 <pre style="background-color:#ffffff;">
 <code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#877611;">function </span><span style="color:#a15001;">write_to_buf</span><span style="color:#010101;">(</span><span style="color:#696989;">data</span><span style="color:#010101;">, </span><span style="color:#696989;">bufnr</span><span style="color:#010101;">)
+  </span><span style="color:#014a69;">local </span><span style="color:#696989;">new_lines </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span style="color:#010101;">.</span><span style="color:#696989;">split</span><span style="color:#010101;">(</span><span style="color:#696989;">data</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&#39;</span><span style="color:#010101;">)
+
+  </span><span style="color:#898989;">-- check for errors
+  </span><span style="color:#016692;">if </span><span style="color:#582b00;">string</span><span style="color:#010101;">.</span><span style="color:#7a7025;">find</span><span style="color:#010101;">(</span><span style="color:#696989;">new_lines</span><span style="color:#010101;">[</span><span style="color:#016692;">#</span><span style="color:#696989;">new_lines</span><span style="color:#010101;">], </span><span style="color:#009f78;">&#39;^# exit %d+&#39;</span><span style="color:#010101;">) </span><span style="color:#016692;">then
+    </span><span style="color:#7a7025;">error</span><span style="color:#010101;">(</span><span style="color:#582b00;">string</span><span style="color:#010101;">.</span><span style="color:#7a7025;">format</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;failed to format with prettier: %s&#39;</span><span style="color:#010101;">, </span><span style="color:#696989;">data</span><span style="color:#010101;">))
+  </span><span style="color:#016692;">end
+
+  </span><span style="color:#898989;">-- write contents
+  </span><span style="color:#696989;">vim</span><span style="color:#010101;">.api.</span><span style="color:#696989;">nvim_buf_set_lines</span><span style="color:#010101;">(</span><span style="color:#696989;">bufnr</span><span style="color:#010101;">, </span><span style="color:#8c008a;">0</span><span style="color:#010101;">, </span><span style="color:#016692;">-</span><span style="color:#8c008a;">1</span><span style="color:#010101;">, </span><span style="color:#333366;">false</span><span style="color:#010101;">, </span><span style="color:#696989;">new_lines</span><span style="color:#010101;">)
 </span><span style="color:#016692;">end
 </span></code></pre>
 <p>Now you can throw all of that in a <code>format()</code> function and invoke it on write!</p>
@@ -311,7 +321,7 @@ handling and cursor positioning, checkout
 in my dotfiles repo.</p>
 </blockquote>
 <h2 id="not-just-typescript-and-javascript">Not just TypeScript and JavaScript</h2>
-<p>Users of prettier are aware of that, but prettier is not just about JavaScript
+<p>Users of prettier are aware of this, but prettier is not just about JavaScript
 and TypeScript, it can be used with many other file formats, including HTML,
 Markdown, CSS, YAML, JSON and others. Check the <a rel="noopener" target="_blank" href="https://prettier.io/docs/en/options.html#parser">parser configuration in
 prettier docs</a> for a full
