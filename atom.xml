@@ -108,7 +108,7 @@ dependencies).&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;strong&gt;And how is it fast to format-on-save using VSCode&#x2F;coc-prettier?&lt;&#x2F;strong&gt; Simple:
 both coc-prettier and Visual Studio Code are long-running node.js processes,
 which host prettier as a library, therefore paying the initialization cost
-twice.&lt;&#x2F;p&gt;
+once.&lt;&#x2F;p&gt;
 &lt;p&gt;The solution is simple: we need a long-running node.js process! If you read
 through the issue about slow startups in prettier, someone suggests using
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;josephfrazier&#x2F;prettier_d&quot;&gt;prettier_d&lt;&#x2F;a&gt;, but after looking at
