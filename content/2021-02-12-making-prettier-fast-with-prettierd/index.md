@@ -1,10 +1,15 @@
 +++
-title = "Gotta go fast: making format-on-save fast with prettierd"
+title = "Making format-on-save fast with prettierd"
 draft = true
 
 [taxonomies]
 tags = ["javascript", "neovim", "prettier", "typescript"]
 +++
+
+<!-- START doctoc -->
+<!-- END doctoc -->
+
+## Intro
 
 Back in June 2020, when I was migrating my Neovim configuration to Lua and to
 the native LSP client available in neovim 0.5.0, my main language at work was
@@ -111,7 +116,9 @@ which host prettier as a library, therefore paying the initialization cost
 twice.
 
 The solution is simple: we need a long-running node.js process! If you read
-through the issue about slow startups in prettier, someone suggests using [prettier_d](), but after looking at how large that project was, I was a bit scared.
+through the issue about slow startups in prettier, someone suggests using
+[prettier_d](https://github.com/josephfrazier/prettier_d), but after looking at
+how large that project was, I was a bit scared.
 
 Doing some more research, I found about
 [eslint_d.js](https://github.com/mantoni/eslint_d.js/), which solves a similar
@@ -122,12 +129,169 @@ I could combine that library with prettier and make
 [prettierd](https://github.com/fsouza/prettierd), a TCP-enabled daemon for
 formatting code using prettier!
 
-## Integrating Neovim with prettierd
+## Installing and starting prettierd
 
 The code for prettierd is pretty boring, as it is basically a tiny wrapper
 around core_d to invoke the proper prettier functions whenever the server
-receives a "request".
+receives a "request". The two important things to know about are:
 
-While ...
+1. You can install it with npm and start it with `prettierd start`:
+
+```
+％ npm install -g @fsouza/prettierd
+％ prettierd start
+```
+
+Alternatively you can do both things with `npx`:
+
+```
+％ npx -p @fsouza/prettierd prettierd start
+```
+
+2. When it starts, prettierd writes a file with its port number and token
+
+```
+％ cat ~/.prettierd
+53561 cb2ad753df0aca85
+```
+
+This means that prettierd is running on port 53561 and we can use the token
+`cb2ad753df0aca85` in our requests to format our source code.
+
+core_d's protocol is pretty simple:
+
+
+```
+<token> <working-dir> <file-name>\n
+<file-content>
+```
+
+For example, we can use netcat:
+
+```
+％ echo "cb2ad753df0aca85 $PWD sample2.ts" | cat - sample2.ts | /usr/bin/time nc localhost 53561 >sample2-formatted.ts
+        0.14 real         0.00 user         0.00 sys
+```
+
+Remember how formatting `sample2.ts` took over 1 second? Not anymore. :)
+
+## Integrating Neovim with prettierd
+
+Using netcat is great and we could probably write a shell script that we could
+use in our (fun fact: someone else did this, check the bonus section!), but
+Neovim is powerful enough to connect directly to the TCP server.
+
+How? Neovim has an event loop, which is implemented using
+[libuv](https://libuv.org). libuv is probably the best event loop there in the
+wild, but don't quote me :) Besides shipping the event loop and all the libuv
+code, Neovim also bundles [luv](https://github.com/luvit/luv) and expose the
+loop as a Lua API, so we can use `vim.loop.<nice-async-things>`! Taylor
+Thompson has written an amazing post about the [using libuv in
+Neovim](https://teukka.tech/vimloop.html), go check it out if you're curious :)
+
+Among the utilities provided by libuv, there's a tcp module which includes both
+a TCP client and a TCP server! In our case we want to use a client, so we
+invoke the `tcp_connect` function:
+
+```lua
+local callback = ...
+local port = 53561
+local token = 'cb2ad753df0aca85'
+local client = vim.loop.new_tcp()
+vim.loop.tcp_connect(client, '127.0.0.1', port, callback)
+```
+
+Since this is async world, we need to pass a callback that gets executed
+whenever the connection happens (or in case something goes wrong). So the first
+thing we do in our callback is check for errors, which looks familiar for Go
+developers:
+
+```lua
+local callback = function(err)
+  if err then
+    error(err)
+  end
+
+  ...
+end
+```
+
+If there are no errors, it means we can send the contents of our file to the
+remote server. We have the port and the token, but we also need the contents of
+the buffer. So let's grab the contents of the current buffer and send that to
+the server, then read back the response and write it back to the buffer! This
+time I'll include the entire implementation of the callback, with some inline
+comments:
+
+```lua
+local callback = function(err)
+  if err then
+    error(err)
+  end
+
+  -- grab the contents of the buffer and add first row to match core_d's protocol
+  local bufnr = vim.api.nvim_get_current_buf()
+  local first_line = string.format('%s %s %s', token, vim.loop.cwd(), 'sample2.js')
+  local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+  table.insert(lines, 1, first_line)
+
+  -- start reading the response
+  local response = ''
+  vim.loop.read_start(client, function(read_err, chunk)
+    -- check if there was any error reading data back, if so, close the
+    -- connection and report the error.
+    if read_err then
+      vim.loop.close(client)
+      error('failed to read data from prettierd: ' .. read_err)
+    end
+
+    -- libuv will call this callback with no data and no error when it's done,
+    -- so if there's data, concatenate it into the final response. Otherwise it
+    -- means we're done, so invoke the `write_to_buf` to write the data back.
+    if chunk then
+      response = response .. chunk
+    else
+      vim.loop.close(client)
+      write_to_buf(response, bufnr)
+    end
+  end)
+
+  -- write the request
+  vim.loop.write(client, table.concat(lines, '\n'))
+
+  -- signal to the server that we're done writing the request
+  vim.loop.shutdown(client)
+end
+```
+
+And here's a simple implementation of `write_to_buf`. The trickiest bit is
+error handling: the way errors are reported isn't great, but it's acceptable :)
+
+```lua
+local function write_to_buf(data, bufnr)
+end
+```
+
+Now you can throw all of that in a `format()` function and invoke it on write!
+
+> **Note:** the code here is a simplified version of what I actually use. For
+> the actual config, including automatic process management, retries, error
+> handling and cursor positioning, checkout
+> [prettierd.lua](https://github.com/fsouza/dotfiles/blob/20aa0be6d06224224a50d24c5b63929f16cdb7da/nvim/lua/fsouza/plugin/prettierd.lua#L56)
+> in my dotfiles repo.
+
+## Not just TypeScript and JavaScript
+
+Users of prettier are aware of that, but prettier is not just about JavaScript
+and TypeScript, it can be used with many other file formats, including HTML,
+Markdown, CSS, YAML, JSON and others. Check the [parser configuration in
+prettier docs](https://prettier.io/docs/en/options.html#parser) for a full
+list, and keep in mind that additional file types can be added via plugins!
 
 ## Bonus: using it on the command line with prettierme
+
+If you want to use Vim instead of Neovim, or don't want to maintain a TCP
+client in your editor configuration, you can leverage [Ruy Adorno's
+prettierme](https://github.com/ruyadorno/prettierme) to use a command line
+interface that is more similar to the standard prettier interface. prettierme
+is basically a wrapper around our `netcat` example.
