@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Using Juju to orchestrate CentOS-based cloud services | Francisco Souza</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;hyde.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+      
+
+      
+
+<!-- prettier ignore -->
+<link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;custom-style.css?h=ba0519df2c42bed2580586a8dd75e921efcb39764b8cdb2d703798a2c92873a0" />
+
+<!-- prettier ignore -->
+
+    </head>
+
+    <body class=" layout-reverse">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;blog.fsouza.dev"><h1>Francisco Souza</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;github.com&#x2F;fsouza">GitHub</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;linkedin.com&#x2F;in&#x2F;franciscosouza">LinkedIn</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;twitter.com&#x2F;franciscosouza">Twitter</a></li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+<div class="post">
+    <h1 class="post-title">Using Juju to orchestrate CentOS-based cloud services</h1>
+    <span class="post-date">July 28, 2012</span>
+    <ul class="tags">
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/centos/"
+                >#centos</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/juju/"
+                >#juju</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/python/"
+                >#python</a
+            >
+        </li>
+        
+    </ul>
+    <p>Earlier this week I had the opportunity to meet <a rel="noopener" target="_blank" href="https://twitter.com/kylemacdonald/">Kyle
+MacDonald</a>, head of <a rel="noopener" target="_blank" href="http://cloud.ubuntu.com/">Ubuntu
+Cloud</a>, during <a rel="noopener" target="_blank" href="http://fisl.org.br/13">FISL</a>, and he
+was surprised when we told him we are <a rel="noopener" target="_blank" href="https://lists.ubuntu.com/archives/juju-dev/2012-June/000001.html">using Juju with
+CentOS</a> at
+Globo.com. Then I decided to write this post explaining how we came up with a
+<a rel="noopener" target="_blank" href="https://github.com/globocom/juju-centos-6">patched version of Juju</a> that
+allows us to have CentOS clouds managed by Juju.<a name="more"></a></p>
+<p>For those who doesn't know Juju, it's a service orchestration tool, focused on
+<a rel="noopener" target="_blank" href="https://en.wikipedia.org/wiki/DevOps">devops</a> &quot;development method&quot;. It allows
+you to deploy services on clouds, local machine and even bare metal machines
+(using Canonical's MAAS).</p>
+<p>It's based on <a rel="noopener" target="_blank" href="https://juju.ubuntu.com/docs/charm-store.html">charms</a> and very
+straightforward to use. Here is a very basic set of commands with which you can
+deploy a Wordpress related to a MySQL service:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">% juju bootstrap
+% juju deploy mysql
+% juju deploy wordpress
+% juju add-relation wordpress mysql
+% juju expose wordpress
+</span></code></pre>
+<p>These commands will boostrap the environment, setting up a bootstrap machine
+which will manage your services; deploy mysql and wordpress instances; add a
+relation between them; and expose the wordpress port. The voilà, we have a
+wordpress deployed, and ready to serve our posts. Amazing, huh?</p>
+<p>But there is an issue: although you can install the <code>juju</code> command line tool in
+almost any OS (including Mac OS), right now you are able do deploy only
+Ubuntu-based services (you must use an Ubuntu instance or container).</p>
+<p>To change this behavior, and enable Juju to spawn CentOS instances (and
+containers, if you have a CentOS lxc template), we need to develop and apply
+some changes to Juju and
+<a rel="noopener" target="_blank" href="https://help.ubuntu.com/community/CloudInit">cloud-init</a>. Juju uses cloud-init
+to spawn machines with proper dependencies set up, and it's based on modules.
+All we need to do, is add a module able to install rpm packages using <code>yum</code>.</p>
+<p><code>cloud-init</code> modules are Python modules that starts with <code>cc_</code> and implement a
+<code>handle</code> function (for example, a module called &quot;yum_packages&quot; would be written
+to a file called <code>cc_yum_packages.py</code>). So, here is the code for the module
+<code>yum_packages</code>:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#016692;">import </span><span style="color:#010101;">subprocess
+</span><span style="color:#016692;">import </span><span style="color:#010101;">traceback
+
+</span><span style="color:#016692;">from </span><span style="color:#010101;">cloudinit </span><span style="color:#016692;">import </span><span style="color:#010101;">CloudConfig, util
+
+frequency </span><span style="color:#016692;">= </span><span style="color:#010101;">CloudConfig.per_instance
+
+</span><span style="color:#016692;">def </span><span style="color:#a15001;">yum_install</span><span style="color:#010101;">(</span><span style="color:#696989;">packages</span><span style="color:#010101;">):
+    cmd </span><span style="color:#016692;">= </span><span style="color:#010101;">[</span><span style="color:#009f78;">&quot;yum&quot;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&quot;--quiet&quot;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&quot;--assumeyes&quot;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&quot;install&quot;</span><span style="color:#010101;">]
+    cmd.</span><span style="color:#696989;">extend</span><span style="color:#010101;">(packages)
+    subprocess.</span><span style="color:#696989;">check_call</span><span style="color:#010101;">(cmd)
+
+</span><span style="color:#016692;">def </span><span style="color:#a15001;">handle</span><span style="color:#010101;">(</span><span style="color:#696989;">_name</span><span style="color:#010101;">, </span><span style="color:#696989;">cfg</span><span style="color:#010101;">, </span><span style="color:#696989;">_cloud</span><span style="color:#010101;">, </span><span style="color:#696989;">log</span><span style="color:#010101;">, </span><span style="color:#696989;">args</span><span style="color:#010101;">):
+    pkglist </span><span style="color:#016692;">= </span><span style="color:#010101;">util.</span><span style="color:#696989;">get_cfg_option_list_or_str</span><span style="color:#010101;">(cfg, </span><span style="color:#009f78;">&quot;packages&quot;</span><span style="color:#010101;">, [])
+
+    </span><span style="color:#016692;">if </span><span style="color:#010101;">pkglist:
+        </span><span style="color:#016692;">try</span><span style="color:#010101;">:
+            </span><span style="color:#696989;">yum_install</span><span style="color:#010101;">(pkglist)
+        </span><span style="color:#016692;">except </span><span style="color:#010101;">subprocess.CalledProcessError:
+            log.</span><span style="color:#696989;">warn</span><span style="color:#010101;">(</span><span style="color:#009f78;">&quot;Failed to install yum packages: </span><span style="color:#00ff00;">%s</span><span style="color:#009f78;">&quot; </span><span style="color:#016692;">% </span><span style="color:#010101;">pkglist)
+            log.</span><span style="color:#696989;">debug</span><span style="color:#010101;">(traceback.</span><span style="color:#696989;">format_exc</span><span style="color:#010101;">())
+            </span><span style="color:#016692;">raise
+
+    return </span><span style="color:#333366;">True
+</span></code></pre>
+<p>The module installs all packages listed in cloud-init yaml file. If we want to install <code>emacs-nox</code> package, we would write this yaml file and use it as user data in the instance:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">#cloud-config
+modules:
+ - yum_packages
+packages: [emacs-nox]
+</span></code></pre>
+<p><code>cloud-init</code> already works on Fedora, with Python 2.7, but to work on CentOS 6, with Python 2.6, it needs a patch:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">--- cloudinit/util.py 2012-05-22 12:18:21.000000000 -0300
++++ cloudinit/util.py 2012-05-31 12:44:24.000000000 -0300
+@@ -227,7 +227,7 @@
+         stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+     out, err = sp.communicate(input_)
+     if sp.returncode is not 0:
+-        raise subprocess.CalledProcessError(sp.returncode, args, (out, err))
++        raise subprocess.CalledProcessError(sp.returncode, args)
+     return(out, err)
+</span></code></pre>
+<p>I've packet up this module and this patch in a <a rel="noopener" target="_blank" href="https://github.com/globocom/cloudinit-centos-6">RPM
+package</a> that must be
+pre-installed in the lxc template and AMI images. Now, we need to change Juju
+in order to make it use the <code>yum_packages</code> module, and include all RPM packages
+that we need to install when the machine borns.</p>
+<p>Is Juju, there is a class that is responsible for building and rendering the
+YAML file used by cloud-init. We can extend it and change only two methods:
+<code>_collect_packages</code>, that returns the list of packages that will be installed
+in the machine after it is spawned; and <code>render</code> that returns the file itself.
+Here is our <code>CentOSCloudInit</code> class (within the patch):</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">diff -u juju-0.5-bzr531.orig/juju/providers/common/cloudinit.py juju-0.5-bzr531/juju/providers/common/cloudinit.py
+--- juju-0.5-bzr531.orig/juju/providers/common/cloudinit.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531/juju/providers/common/cloudinit.py 2012-05-31 15:55:13.342884919 -0300
+@@ -324,3 +324,32 @@
+             &quot;machine-id&quot;: self._machine_id,
+             &quot;juju-provider-type&quot;: self._provider_type,
+             &quot;juju-zookeeper-hosts&quot;: self._join_zookeeper_hosts()}
++
++
++class CentOSCloudInit(CloudInit):
++
++    def _collect_packages(self):
++        packages = [
++            &quot;bzr&quot;, &quot;byobu&quot;, &quot;tmux&quot;, &quot;python-setuptools&quot;, &quot;python-twisted&quot;,
++            &quot;python-txaws&quot;, &quot;python-zookeeper&quot;, &quot;python-devel&quot;, &quot;juju&quot;]
++        if self._zookeeper:
++            packages.extend([
++                &quot;zookeeper&quot;, &quot;libzookeeper&quot;, &quot;libzookeeper-devel&quot;])
++        return packages
++
++    def render(self):
++        &quot;&quot;&quot;Get content for a cloud-init file with appropriate specifications.
++
++        :rtype: str
++
++        :raises: :exc:`juju.errors.CloudInitError` if there isn&#39;t enough
++            information to create a useful cloud-init.
++        &quot;&quot;&quot;
++        self._validate()
++        return format_cloud_init(
++            self._ssh_keys,
++            packages=self._collect_packages(),
++            repositories=self._collect_repositories(),
++            scripts=self._collect_scripts(),
++            data=self._collect_machine_data(),
++            modules=[&quot;ssh&quot;, &quot;yum_packages&quot;, &quot;runcmd&quot;])
+</span></code></pre>
+<p>The other change we need is in the <code>format_cloud_init</code> function, in order to
+make it recognize the <code>modules</code> parameter that we used above, and tell
+cloud-init to not run <code>apt-get</code> (update nor upgrade). Here is the patch:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">diff -ur juju-0.5-bzr531.orig/juju/providers/common/utils.py juju-0.5-bzr531/juju/providers/common/utils.py
+--- juju-0.5-bzr531.orig/juju/providers/common/utils.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531/juju/providers/common/utils.py 2012-05-31 15:44:06.605014021 -0300
+@@ -85,7 +85,7 @@
+
+ def format_cloud_init(
+-    authorized_keys, packages=(), repositories=None, scripts=None, data=None):
++    authorized_keys, packages=(), repositories=None, scripts=None, data=None, modules=None):
+     &quot;&quot;&quot;Format a user-data cloud-init file.
+
+     This will enable package installation, and ssh access, and script
+@@ -117,8 +117,8 @@
+         structure.
+     &quot;&quot;&quot;
+     cloud_config = {
+-        &quot;apt-update&quot;: True,
+-        &quot;apt-upgrade&quot;: True,
++        &quot;apt-update&quot;: False,
++        &quot;apt-upgrade&quot;: False,
+         &quot;ssh_authorized_keys&quot;: authorized_keys,
+         &quot;packages&quot;: [],
+         &quot;output&quot;: {&quot;all&quot;: &quot;| tee -a /var/log/cloud-init-output.log&quot;}}
+@@ -136,6 +136,11 @@
+     if scripts:
+         cloud_config[&quot;runcmd&quot;] = scripts
+
++    if modules:
++        cloud_config[&quot;modules&quot;] = modules
++
+     output = safe_dump(cloud_config)
+     output = &quot;#cloud-config\n%s&quot; % (output)
+     return output
+</span></code></pre>
+<p>This patch is also packed up within
+<a rel="noopener" target="_blank" href="https://github.com/globocom/juju-centos-6">juju-centos-6</a> repository, which
+provides sources for building RPM packages for juju, and also some pre-built
+RPM packages.</p>
+<p>Now just build an AMI image with <code>cloudinit</code> pre-installed, configure your juju
+<code>environments.yaml</code> file to use this image in the environment and you are ready
+to deploy cloud services on CentOS machines using Juju!</p>
+<p>Some caveats:</p>
+<ul>
+<li>Juju needs a user called <code>ubuntu</code> to interact with its machines, so you will
+need to create this user in your CentOS AMI/template.</li>
+<li>You need to host all RPM packages for
+<a rel="noopener" target="_blank" href="https://github.com/globocom/juju-centos-6">juju</a>,
+<a rel="noopener" target="_blank" href="https://github.com/globocom/cloudinit-centos-6">cloud-init</a> and following
+dependencies in some <code>yum</code> repository (I haven't submitted them to any public
+repository):
+<ul>
+<li><a rel="noopener" target="_blank" href="https://github.com/globocom/python-txaws-centos-6">python-txaws</a></li>
+<li><a rel="noopener" target="_blank" href="https://github.com/globocom/python-txzookeeper-centos-6">python-txzookeeper</a></li>
+<li><a rel="noopener" target="_blank" href="https://github.com/globocom/zookeeper-centos-6">zookeeper</a></li>
+</ul>
+</li>
+<li>With this patched Juju, you will have a pure-centos cloud. It does not enable
+you to have multiple OSes in the same environment.</li>
+</ul>
+<p>It's important to notice that we are going to put some effort to make the Go
+version of juju born supporting multiple OSes, ideally through an interface
+that makes it extensible to any other OS, not Ubuntu and CentOS only.</p>
+
+</div>
+
+<!-- prettier ignore -->
+
+        </div>
+
+    </body>
+
+</html>

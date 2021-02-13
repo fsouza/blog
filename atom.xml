@@ -275,6 +275,211 @@ is basically a wrapper around our &lt;code&gt;netcat&lt;&#x2F;code&gt; example.&
 </content>
 	</entry>
 	<entry xml:lang="en">
+		<title>Using Juju to orchestrate CentOS-based cloud services</title>
+		<published>2012-07-28T00:00:00+00:00</published>
+		<updated>2012-07-28T00:00:00+00:00</updated>
+		<link href="https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/" type="text/html"/>
+		<id>https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/</id>
+		<content type="html">&lt;p&gt;Earlier this week I had the opportunity to meet &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;kylemacdonald&#x2F;&quot;&gt;Kyle
+MacDonald&lt;&#x2F;a&gt;, head of &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;cloud.ubuntu.com&#x2F;&quot;&gt;Ubuntu
+Cloud&lt;&#x2F;a&gt;, during &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;fisl.org.br&#x2F;13&quot;&gt;FISL&lt;&#x2F;a&gt;, and he
+was surprised when we told him we are &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;lists.ubuntu.com&#x2F;archives&#x2F;juju-dev&#x2F;2012-June&#x2F;000001.html&quot;&gt;using Juju with
+CentOS&lt;&#x2F;a&gt; at
+Globo.com. Then I decided to write this post explaining how we came up with a
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;juju-centos-6&quot;&gt;patched version of Juju&lt;&#x2F;a&gt; that
+allows us to have CentOS clouds managed by Juju.&lt;a name=&quot;more&quot;&gt;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;For those who doesn&#x27;t know Juju, it&#x27;s a service orchestration tool, focused on
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;DevOps&quot;&gt;devops&lt;&#x2F;a&gt; &amp;quot;development method&amp;quot;. It allows
+you to deploy services on clouds, local machine and even bare metal machines
+(using Canonical&#x27;s MAAS).&lt;&#x2F;p&gt;
+&lt;p&gt;It&#x27;s based on &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;juju.ubuntu.com&#x2F;docs&#x2F;charm-store.html&quot;&gt;charms&lt;&#x2F;a&gt; and very
+straightforward to use. Here is a very basic set of commands with which you can
+deploy a Wordpress related to a MySQL service:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;% juju bootstrap
+% juju deploy mysql
+% juju deploy wordpress
+% juju add-relation wordpress mysql
+% juju expose wordpress
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These commands will boostrap the environment, setting up a bootstrap machine
+which will manage your services; deploy mysql and wordpress instances; add a
+relation between them; and expose the wordpress port. The voilà, we have a
+wordpress deployed, and ready to serve our posts. Amazing, huh?&lt;&#x2F;p&gt;
+&lt;p&gt;But there is an issue: although you can install the &lt;code&gt;juju&lt;&#x2F;code&gt; command line tool in
+almost any OS (including Mac OS), right now you are able do deploy only
+Ubuntu-based services (you must use an Ubuntu instance or container).&lt;&#x2F;p&gt;
+&lt;p&gt;To change this behavior, and enable Juju to spawn CentOS instances (and
+containers, if you have a CentOS lxc template), we need to develop and apply
+some changes to Juju and
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;help.ubuntu.com&#x2F;community&#x2F;CloudInit&quot;&gt;cloud-init&lt;&#x2F;a&gt;. Juju uses cloud-init
+to spawn machines with proper dependencies set up, and it&#x27;s based on modules.
+All we need to do, is add a module able to install rpm packages using &lt;code&gt;yum&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;cloud-init&lt;&#x2F;code&gt; modules are Python modules that starts with &lt;code&gt;cc_&lt;&#x2F;code&gt; and implement a
+&lt;code&gt;handle&lt;&#x2F;code&gt; function (for example, a module called &amp;quot;yum_packages&amp;quot; would be written
+to a file called &lt;code&gt;cc_yum_packages.py&lt;&#x2F;code&gt;). So, here is the code for the module
+&lt;code&gt;yum_packages&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#016692;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;subprocess
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;traceback
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;from &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;cloudinit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;CloudConfig, util
+
+frequency &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;CloudConfig.per_instance
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;yum_install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;packages&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;):
+    cmd &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;yum&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;--quiet&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;--assumeyes&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;install&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;]
+    cmd.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;extend&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(packages)
+    subprocess.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;check_call&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(cmd)
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;handle&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;_name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;cfg&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;_cloud&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;log&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;args&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;):
+    pkglist &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;util.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;get_cfg_option_list_or_str&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(cfg, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;packages&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, [])
+
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;pkglist:
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;try&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;:
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;yum_install&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(pkglist)
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;except &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;subprocess.CalledProcessError:
+            log.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;warn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;Failed to install yum packages: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#00ff00;&quot;&gt;%s&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;% &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;pkglist)
+            log.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;debug&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(traceback.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;format_exc&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;())
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;raise
+
+    return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;True
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The module installs all packages listed in cloud-init yaml file. If we want to install &lt;code&gt;emacs-nox&lt;&#x2F;code&gt; package, we would write this yaml file and use it as user data in the instance:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;#cloud-config
+modules:
+ - yum_packages
+packages: [emacs-nox]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;cloud-init&lt;&#x2F;code&gt; already works on Fedora, with Python 2.7, but to work on CentOS 6, with Python 2.6, it needs a patch:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;--- cloudinit&#x2F;util.py 2012-05-22 12:18:21.000000000 -0300
++++ cloudinit&#x2F;util.py 2012-05-31 12:44:24.000000000 -0300
+@@ -227,7 +227,7 @@
+         stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+     out, err = sp.communicate(input_)
+     if sp.returncode is not 0:
+-        raise subprocess.CalledProcessError(sp.returncode, args, (out, err))
++        raise subprocess.CalledProcessError(sp.returncode, args)
+     return(out, err)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I&#x27;ve packet up this module and this patch in a &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;cloudinit-centos-6&quot;&gt;RPM
+package&lt;&#x2F;a&gt; that must be
+pre-installed in the lxc template and AMI images. Now, we need to change Juju
+in order to make it use the &lt;code&gt;yum_packages&lt;&#x2F;code&gt; module, and include all RPM packages
+that we need to install when the machine borns.&lt;&#x2F;p&gt;
+&lt;p&gt;Is Juju, there is a class that is responsible for building and rendering the
+YAML file used by cloud-init. We can extend it and change only two methods:
+&lt;code&gt;_collect_packages&lt;&#x2F;code&gt;, that returns the list of packages that will be installed
+in the machine after it is spawned; and &lt;code&gt;render&lt;&#x2F;code&gt; that returns the file itself.
+Here is our &lt;code&gt;CentOSCloudInit&lt;&#x2F;code&gt; class (within the patch):&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;diff -u juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py
+--- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:55:13.342884919 -0300
+@@ -324,3 +324,32 @@
+             &amp;quot;machine-id&amp;quot;: self._machine_id,
+             &amp;quot;juju-provider-type&amp;quot;: self._provider_type,
+             &amp;quot;juju-zookeeper-hosts&amp;quot;: self._join_zookeeper_hosts()}
++
++
++class CentOSCloudInit(CloudInit):
++
++    def _collect_packages(self):
++        packages = [
++            &amp;quot;bzr&amp;quot;, &amp;quot;byobu&amp;quot;, &amp;quot;tmux&amp;quot;, &amp;quot;python-setuptools&amp;quot;, &amp;quot;python-twisted&amp;quot;,
++            &amp;quot;python-txaws&amp;quot;, &amp;quot;python-zookeeper&amp;quot;, &amp;quot;python-devel&amp;quot;, &amp;quot;juju&amp;quot;]
++        if self._zookeeper:
++            packages.extend([
++                &amp;quot;zookeeper&amp;quot;, &amp;quot;libzookeeper&amp;quot;, &amp;quot;libzookeeper-devel&amp;quot;])
++        return packages
++
++    def render(self):
++        &amp;quot;&amp;quot;&amp;quot;Get content for a cloud-init file with appropriate specifications.
++
++        :rtype: str
++
++        :raises: :exc:`juju.errors.CloudInitError` if there isn&amp;#39;t enough
++            information to create a useful cloud-init.
++        &amp;quot;&amp;quot;&amp;quot;
++        self._validate()
++        return format_cloud_init(
++            self._ssh_keys,
++            packages=self._collect_packages(),
++            repositories=self._collect_repositories(),
++            scripts=self._collect_scripts(),
++            data=self._collect_machine_data(),
++            modules=[&amp;quot;ssh&amp;quot;, &amp;quot;yum_packages&amp;quot;, &amp;quot;runcmd&amp;quot;])
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The other change we need is in the &lt;code&gt;format_cloud_init&lt;&#x2F;code&gt; function, in order to
+make it recognize the &lt;code&gt;modules&lt;&#x2F;code&gt; parameter that we used above, and tell
+cloud-init to not run &lt;code&gt;apt-get&lt;&#x2F;code&gt; (update nor upgrade). Here is the patch:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;diff -ur juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py
+--- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:44:06.605014021 -0300
+@@ -85,7 +85,7 @@
+
+ def format_cloud_init(
+-    authorized_keys, packages=(), repositories=None, scripts=None, data=None):
++    authorized_keys, packages=(), repositories=None, scripts=None, data=None, modules=None):
+     &amp;quot;&amp;quot;&amp;quot;Format a user-data cloud-init file.
+
+     This will enable package installation, and ssh access, and script
+@@ -117,8 +117,8 @@
+         structure.
+     &amp;quot;&amp;quot;&amp;quot;
+     cloud_config = {
+-        &amp;quot;apt-update&amp;quot;: True,
+-        &amp;quot;apt-upgrade&amp;quot;: True,
++        &amp;quot;apt-update&amp;quot;: False,
++        &amp;quot;apt-upgrade&amp;quot;: False,
+         &amp;quot;ssh_authorized_keys&amp;quot;: authorized_keys,
+         &amp;quot;packages&amp;quot;: [],
+         &amp;quot;output&amp;quot;: {&amp;quot;all&amp;quot;: &amp;quot;| tee -a &#x2F;var&#x2F;log&#x2F;cloud-init-output.log&amp;quot;}}
+@@ -136,6 +136,11 @@
+     if scripts:
+         cloud_config[&amp;quot;runcmd&amp;quot;] = scripts
+
++    if modules:
++        cloud_config[&amp;quot;modules&amp;quot;] = modules
++
+     output = safe_dump(cloud_config)
+     output = &amp;quot;#cloud-config\n%s&amp;quot; % (output)
+     return output
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This patch is also packed up within
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;juju-centos-6&quot;&gt;juju-centos-6&lt;&#x2F;a&gt; repository, which
+provides sources for building RPM packages for juju, and also some pre-built
+RPM packages.&lt;&#x2F;p&gt;
+&lt;p&gt;Now just build an AMI image with &lt;code&gt;cloudinit&lt;&#x2F;code&gt; pre-installed, configure your juju
+&lt;code&gt;environments.yaml&lt;&#x2F;code&gt; file to use this image in the environment and you are ready
+to deploy cloud services on CentOS machines using Juju!&lt;&#x2F;p&gt;
+&lt;p&gt;Some caveats:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Juju needs a user called &lt;code&gt;ubuntu&lt;&#x2F;code&gt; to interact with its machines, so you will
+need to create this user in your CentOS AMI&#x2F;template.&lt;&#x2F;li&gt;
+&lt;li&gt;You need to host all RPM packages for
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;juju-centos-6&quot;&gt;juju&lt;&#x2F;a&gt;,
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;cloudinit-centos-6&quot;&gt;cloud-init&lt;&#x2F;a&gt; and following
+dependencies in some &lt;code&gt;yum&lt;&#x2F;code&gt; repository (I haven&#x27;t submitted them to any public
+repository):
+&lt;ul&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;python-txaws-centos-6&quot;&gt;python-txaws&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;python-txzookeeper-centos-6&quot;&gt;python-txzookeeper&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;globocom&#x2F;zookeeper-centos-6&quot;&gt;zookeeper&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;With this patched Juju, you will have a pure-centos cloud. It does not enable
+you to have multiple OSes in the same environment.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;It&#x27;s important to notice that we are going to put some effort to make the Go
+version of juju born supporting multiple OSes, ideally through an interface
+that makes it extensible to any other OS, not Ubuntu and CentOS only.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
 		<title>Setting up a Django production environment: compiling and configuring nginx</title>
 		<published>2011-11-06T00:00:00+00:00</published>
 		<updated>2011-11-06T00:00:00+00:00</updated>

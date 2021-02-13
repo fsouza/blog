@@ -32,6 +32,12 @@
         <loc>https://blog.fsouza.dev/tags/bdd/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/centos/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/centos/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/concurrency/</loc>
     </url>
     <url>
@@ -80,6 +86,12 @@
         <loc>https://blog.fsouza.dev/tags/jquery/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/juju/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/juju/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/neovim/</loc>
     </url>
     <url>
@@ -124,5 +136,9 @@
     <url>
         <loc>https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/</loc>
         <lastmod>2011-05-28</lastmod>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/</loc>
+        <lastmod>2012-07-28</lastmod>
     </url>
 </urlset>
