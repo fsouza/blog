@@ -20,9 +20,9 @@ tags = ["javascript", "neovim", "prettier", "typescript"]
 
 ## Intro
 
-Back in June 2020, when I was migrating my Neovim configuration to Lua and to
-the native LSP client available in neovim 0.5.0, my main language at work was
-TypeScript and we used [prettier](https://prettier.io) to keep our code
+Back in June of 2020, when I was migrating my Neovim configuration to Lua and
+to the native LSP client available in neovim 0.5.0, my main language at work
+was TypeScript and we used [prettier](https://prettier.io) to keep our code
 formatted, and I had it configured to format-on-save with
 [coc-prettier](https://github.com/neoclide/coc-prettier). One of the first
 issues I ran into was performance: saving files became deadly slow, to the
@@ -129,7 +129,7 @@ through the issue about slow startups in prettier, someone suggests using
 [prettier_d](https://github.com/josephfrazier/prettier_d), but after looking at
 how large that project was, I was a bit scared.
 
-Doing some more research, I found about
+Doing some more research, I found
 [eslint_d.js](https://github.com/mantoni/eslint_d.js/), which solves a similar
 issue for eslint, by introducing a daemon which supports binding on a TCP
 socket! And the author of eslint_d.js extracted its core functionality in a
@@ -274,10 +274,21 @@ end
 ```
 
 And here's a simple implementation of `write_to_buf`. The trickiest bit is
-error handling: the way errors are reported isn't great, but it's acceptable :)
+error handling: the way errors are reported isn't great, but it's acceptable:
+if prettier fails, the last line contains a message in the format `# exit
+<code> ...`.
 
 ```lua
 local function write_to_buf(data, bufnr)
+  local new_lines = vim.split(data, '\n')
+
+  -- check for errors
+  if string.find(new_lines[#new_lines], '^# exit %d+') then
+    error(string.format('failed to format with prettier: %s', data))
+  end
+
+  -- write contents
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
 end
 ```
 
@@ -291,7 +302,7 @@ Now you can throw all of that in a `format()` function and invoke it on write!
 
 ## Not just TypeScript and JavaScript
 
-Users of prettier are aware of that, but prettier is not just about JavaScript
+Users of prettier are aware of this, but prettier is not just about JavaScript
 and TypeScript, it can be used with many other file formats, including HTML,
 Markdown, CSS, YAML, JSON and others. Check the [parser configuration in
 prettier docs](https://prettier.io/docs/en/options.html#parser) for a full
