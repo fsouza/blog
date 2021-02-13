@@ -11,6 +11,10 @@
         <loc>https://blog.fsouza.dev/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/prettierd-neovim-format-on-save/</loc>
+        <lastmod>2021-02-12</lastmod>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/</loc>
     </url>
     <url>
@@ -20,9 +24,33 @@
         <loc>https://blog.fsouza.dev/tags/blogging/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/javascript/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/javascript/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/neovim/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/neovim/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/prettier/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/prettier/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/testing/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/testing/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/typescript/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/typescript/page/1/</loc>
     </url>
 </urlset>
