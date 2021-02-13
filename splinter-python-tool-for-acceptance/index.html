@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Splinter: Python tool for acceptance tests on web applications | Francisco Souza</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;hyde.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+      
+
+      
+
+<!-- prettier ignore -->
+<link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;custom-style.css?h=ba0519df2c42bed2580586a8dd75e921efcb39764b8cdb2d703798a2c92873a0" />
+
+<!-- prettier ignore -->
+
+    </head>
+
+    <body class=" layout-reverse">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;blog.fsouza.dev"><h1>Francisco Souza</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;github.com&#x2F;fsouza">GitHub</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;linkedin.com&#x2F;in&#x2F;franciscosouza">LinkedIn</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;twitter.com&#x2F;franciscosouza">Twitter</a></li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+<div class="post">
+    <h1 class="post-title">Splinter: Python tool for acceptance tests on web applications</h1>
+    <span class="post-date">May 14, 2011</span>
+    <ul class="tags">
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/django/"
+                >#django</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/python/"
+                >#python</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/selenium/"
+                >#selenium</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/web-development/"
+                >#web-development</a
+            >
+        </li>
+        
+    </ul>
+    <p><a rel="noopener" target="_blank" href="https://github.com/jnicklas/capybara">Capybara</a> and
+<a rel="noopener" target="_blank" href="https://github.com/brynary/webrat">Webrat</a> are great Ruby tools for acceptance
+tests. A few months ago, we started a great tool for acceptance tests in
+<a rel="noopener" target="_blank" href="https://python.org/">Python</a> web applications, called
+<a rel="noopener" target="_blank" href="http://splinter.rtfd.org">Splinter</a>. There are many acceptance test
+tools on Python world: <a rel="noopener" target="_blank" href="http://seleniumhq.org/">Selenium</a>,
+<a rel="noopener" target="_blank" href="https://github.com/idealistdev/alfajor">Alfajor</a>,
+<a rel="noopener" target="_blank" href="http://www.getwindmill.com/">Windmill</a>,
+<a rel="noopener" target="_blank" href="http://wwwsearch.sourceforge.net/mechanize/">Mechanize</a>,
+<a rel="noopener" target="_blank" href="https://pypi.python.org/pypi/zope.testbrowser">zope.testbrowser</a>, etc.
+Splinter was not created to be another acceptance tool, but an abstract layer
+over other tools, its goal is provide a unique API that make acceptance testing
+easier and funnier.</p>
+<p>In this post, I will show some basic usage of Splinter for simple web
+application tests. <a rel="noopener" target="_blank" href="https://github.com/cobrateam/splinter">Splinter</a> is a tool
+useful on tests of any web application. You can even test a Java web
+application using Splinter. This post example is a &quot;test&quot; of a Facebook
+feature, just because I want to focus on how to use Splinter, not on how to
+write a web application. The feature to be tested is the creation of an event
+(the Splinter sprint), following all the flow: first the user will login on
+Facebook, then click on &quot;Events&quot; menu item, then click on &quot;Create an Event&quot;
+button, enter all event information and click on &quot;Create event&quot; button. So,
+let’s do it…</p>
+<p>First step is create a
+<a rel="noopener" target="_blank" href="https://splinter.readthedocs.io/en/latest/api/driver-and-element-api.html#module-splinter.browser">Browser</a>
+instance, which will provide method for interactions with browser (where the
+browser is: Firefox, Chrome, etc.). The code we need for it is very simple:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser </span><span style="color:#016692;">= </span><span style="color:#696989;">Browser</span><span style="color:#010101;">(</span><span style="color:#009f78;">&quot;firefox&quot;</span><span style="color:#010101;">)
+</span></code></pre>
+<p><code>Browser</code> is a class and its constructor receives the driver to be used with
+that instance. Nowadays, there are three drivers for Splinter: <code>firefox</code>,
+<code>chrome</code> and <code>zope.testbrowser</code>. We are using Firefox, and you can easily use
+Chrome by simply changing the driver from <code>firefox</code> to <code>chrome</code>. It’s also very
+simple to add another driver to Splinter, and I plan to cover how to do that in
+another blog post here.</p>
+<p>A new browser session is started when we got the <code>browser</code> object, and this is
+the object used for Firefox interactions. Let's start a new event on Facebook,
+the Splinter Sprint. First of all, we need to <em>visit</em> the Facebook homepage.
+There is a <code>visit</code> method on Browser class, so we can use it:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">visit</span><span style="color:#010101;">(</span><span style="color:#009f78;">&quot;https://www.facebook.com&quot;</span><span style="color:#010101;">)
+</span></code></pre>
+<p><code>visit</code> is a blocking operation: it waits for page to load, then we can
+navigate, click on links, fill forms, etc. Now we have Facebook homepage opened
+on browser, and you probably know that we need to login on Facebook page, but
+what if we are already logged in? So, let's create a method that login on
+Facebook with provided authentication data only the user is not logged in
+(imagine we are on a <code>Test</code>Case class):</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#016692;">def </span><span style="color:#a15001;">do_login_if_need</span><span style="color:#010101;">(</span><span style="color:#696989;">self</span><span style="color:#010101;">, </span><span style="color:#696989;">username</span><span style="color:#010101;">, </span><span style="color:#696989;">password</span><span style="color:#010101;">):
+    </span><span style="color:#016692;">if </span><span style="color:#696989;">self</span><span style="color:#010101;">.browser.</span><span style="color:#696989;">is_element_present_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;div.menu_login_container&#39;</span><span style="color:#010101;">):
+        </span><span style="color:#696989;">self</span><span style="color:#010101;">.browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;email&#39;</span><span style="color:#010101;">, username)
+        </span><span style="color:#696989;">self</span><span style="color:#010101;">.browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;pass&#39;</span><span style="color:#010101;">, password)
+        </span><span style="color:#696989;">self</span><span style="color:#010101;">.browser.</span><span style="color:#696989;">find_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;div.menu_login_container input[type=&quot;submit&quot;]&#39;</span><span style="color:#010101;">).first.</span><span style="color:#696989;">click</span><span style="color:#010101;">()
+        </span><span style="color:#016692;">assert </span><span style="color:#696989;">self</span><span style="color:#010101;">.browser.</span><span style="color:#696989;">is_element_present_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;li#navAccount&#39;</span><span style="color:#010101;">)
+</span></code></pre>
+<p>What was made here? First of all, the method checks if there is an element
+present on the page, using a CSS selector. It checks for a <code>div</code> that contains
+the <em>username</em> and <em>password</em> fields. If that div is present, we tell the
+browser object to fill those fields, then find the <code>submit</code> button and click on
+it. The last line is an assert to guarantee that the login was successful and
+the current page is the Facebook homepage (by checking the presence of
+“Account” <code>li</code>).</p>
+<p>We could also <a rel="noopener" target="_blank" href="http://splinter.rtfd.org/en/latest/finding.html">find elements</a>
+by its texts, labels or whatever appears on screen, but remember: Facebook is
+an internationalized web application, and we can’t test it using only a
+specific language.</p>
+<p>Okay, now we know how to visit a webpage, check if an element is present, fill
+a form and click on a button. We're also logged in on Facebook and can finally
+go ahead create the <em>Splinter sprint</em> event. So, here is the event creation
+flow, for a user:</p>
+<ol>
+<li>On Facebook homepage, click on “Events” link, of left menu</li>
+<li>The “Events” page will load, so click on “Create an Event” button</li>
+<li>The user see a page with a form to create an event</li>
+<li>Fill the date and chose the time</li>
+<li>Define what is the name of the event, where it will happen and write a short
+description for it</li>
+<li>Invite some guests</li>
+<li>Upload a picture for the event</li>
+<li>Click on “Create Event” button</li>
+</ol>
+<p>We are going to do all these steps, except the 6th, because the Splinter Sprint
+will just be a public event and we don’t need to invite anybody. There are some
+boring AJAX requests on Facebook that we need to deal, so there is not only
+Splinter code for those steps above. First step is click on “Events” link. All
+we need to do is <code>find</code> the link and <code>click</code> on it:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">find_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;li#navItem_events a&#39;</span><span style="color:#010101;">).first.</span><span style="color:#696989;">click</span><span style="color:#010101;">()
+</span></code></pre>
+<p>The <code>find_by_css</code> method takes a CSS selector and returns an
+<a rel="noopener" target="_blank" href="http://splinter.rtfd.org/en/latest/api/element-list.html#splinter.element_list.ElementList">ElementList</a>.
+So, we get the first element of the list (even when the selector returns only
+an element, the return type is still a <em>list</em>) and click on it. Like <code>visit</code>
+method, <code>click</code> is a blocking operation: the driver will only listen for new
+actions when the request is finished (the page is loaded).</p>
+<p>We’re finally on &quot;new event&quot; page, and there is a form on screen waiting for data of the <em>Splinter Sprint</em>. Let’s fill the form. Here is the code for it:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;event_startIntlDisplay&#39;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;5/21/2011&#39;</span><span style="color:#010101;">)
+browser.</span><span style="color:#696989;">select</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;start_time_min&#39;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;480&#39;</span><span style="color:#010101;">)
+browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;name&#39;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;Splinter sprint&#39;</span><span style="color:#010101;">)
+browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;location&#39;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;Rio de Janeiro, Brazil&#39;</span><span style="color:#010101;">)
+browser.</span><span style="color:#696989;">fill</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;desc&#39;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;For more info, check out the #cobratem channel on freenode!&#39;</span><span style="color:#010101;">)
+</span></code></pre>
+<p>That is it: the event is going to happen on May 21th 2011, at 8:00 in the
+morning (480 minutes). As we know, the event name is <em>Splinter sprint</em>, and we
+are going to join some guys down here in Brazil. We filled out the form using
+<code>fill</code> and <code>select</code> methods.</p>
+<p>The <code>fill</code> method is used to fill a &quot;fillable&quot; field (a textarea, an input,
+etc.). It receives two strings: the first is the <em>name</em> of the field to fill
+and the second is the <em>value</em> that will fill the field. <code>select</code> is used to
+select an option in a select element (a “combo box”). It also receives two
+string parameters: the first is the <em>name</em> of the select element, and the
+second is the <em>value</em> of the option being selected.</p>
+<p>Imagine you have the following select element:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-html" data-lang="html"><span style="color:#00528b;">&lt;select </span><span style="color:#bc4d00;">name</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;gender&quot;</span><span style="color:#00528b;">&gt;
+    &lt;option </span><span style="color:#bc4d00;">value</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;m&quot;</span><span style="color:#00528b;">&gt;</span><span style="color:#010101;">Male</span><span style="color:#00528b;">&lt;/option&gt;
+    &lt;option </span><span style="color:#bc4d00;">value</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;f&quot;</span><span style="color:#00528b;">&gt;</span><span style="color:#010101;">Female</span><span style="color:#00528b;">&lt;/option&gt;
+&lt;/select&gt;
+</span></code></pre>
+<p>To select “Male”, you would call the select method this way:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">select</span><span style="color:#010101;">(</span><span style="color:#009f78;">&quot;gender&quot;</span><span style="color:#010101;">, </span><span style="color:#009f78;">&quot;m&quot;</span><span style="color:#010101;">)
+</span></code></pre>
+<p>The last action before click on “Create Event” button is upload a picture for
+the event. On new event page, Facebook loads the file field for picture
+uploading inside an <code>iframe</code>, so we need to switch to this frame and interact
+with the form present inside the frame. To show the frame, we need to click on
+“Add Event Photo” button and then switch to it, we already know how click on a
+link:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">find_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;div.eventEditUpload a.uiButton&#39;</span><span style="color:#010101;">).first.</span><span style="color:#696989;">click</span><span style="color:#010101;">()
+</span></code></pre>
+<p>When we click this link, Facebook makes an asynchronous request, which means
+the driver does not stay blocked waiting the end of the request, so if we try
+to interact with the frame BEFORE it appears, we will get an
+<code>ElementDoesNotExist</code> exception. Splinter provides the <code>is_element_present</code>
+method that receives an argument called <code>wait_time</code>, which is the time Splinter
+will wait for the element to appear on the screen. If the element does not
+appear on screen, we can’t go on, so we can assume the test failed (remember we
+are testing a Facebook feature):</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#016692;">if not </span><span style="color:#010101;">browser.</span><span style="color:#696989;">is_element_present_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;iframe#upload_pic_frame&#39;</span><span style="color:#010101;">, </span><span style="color:#696989;">wait_time</span><span style="color:#016692;">=</span><span style="color:#8c008a;">10</span><span style="color:#010101;">):
+    </span><span style="color:#696989;">fail</span><span style="color:#010101;">(</span><span style="color:#009f78;">&quot;The upload pic iframe did&#39;n&#39;t appear :(&quot;</span><span style="color:#010101;">)
+</span></code></pre>
+<p>The <code>is_element_present_by_css</code> method takes a CSS selector and tries to find
+an element using it. It also receives a <code>wait_time</code> parameter that indicates a
+time out for the search of the element. So, if the <code>iframe</code> element with
+<em>ID=”upload_pic_frame”</em> is not present or doesn’t appear in the screen after 10
+seconds, the method returns <code>False</code>, otherwise it returns <code>True</code>.</p>
+<blockquote>
+<p><strong>Important:</strong> <code>fail</code> is a pseudocode sample and doesn’t exist (if you’re
+using <code>unittest</code> library, you can invoke <code>self.fail</code> in a TestCase, exactly
+what I did in [complete snippet for this
+example](https://github.com/cobrateam/splinter/blob/master/samples/test_facebook_events.py
+&quot;Snippet for creating a new event on Facebook using Splinter&quot;), available at
+Github).</p>
+</blockquote>
+<p>Now we see the <code>iframe</code> element on screen and we can finally upload the
+picture. Imagine we have a variable that contains the path of the picture (and
+not a file object, <code>StringIO</code>, or something like this), and this variable name
+is <code>picture_path</code>, this is the code we need:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#016692;">with </span><span style="color:#010101;">browser.</span><span style="color:#696989;">get_iframe</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;upload_pic_frame&#39;</span><span style="color:#010101;">) </span><span style="color:#016692;">as </span><span style="color:#010101;">frame:
+    frame.</span><span style="color:#696989;">attach_file</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;pic&#39;</span><span style="color:#010101;">, picture_path)
+    time.</span><span style="color:#696989;">sleep</span><span style="color:#010101;">(</span><span style="color:#8c008a;">10</span><span style="color:#010101;">)
+</span></code></pre>
+<p>Splinter provides the <code>get_iframe</code> method that changes the context and returns
+another objet to interact with the content of the frame. So we call the
+<code>attach_file</code> method, who also receives two strings: the first is the <em>name</em> of
+the input element and the second is the absolute <em>path</em> to the file being sent.
+Facebook also uploads the picture asynchronously, but there’s no way to wait
+some element to appear on screen, so I just put Python to sleep 10 seconds on
+last line.</p>
+<p>After finish all these steps, we can finally click on “Create Event” button and
+asserts that Facebook created it:</p>
+<pre style="background-color:#ffffff;">
+<code class="language-python" data-lang="python"><span style="color:#010101;">browser.</span><span style="color:#696989;">find_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;label.uiButton input[type=&quot;submit&quot;]&#39;</span><span style="color:#010101;">).first.</span><span style="color:#696989;">click</span><span style="color:#010101;">()
+title </span><span style="color:#016692;">= </span><span style="color:#010101;">browser.</span><span style="color:#696989;">find_by_css</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;h1 span&#39;</span><span style="color:#010101;">).first.text
+</span><span style="color:#016692;">assert </span><span style="color:#010101;">title </span><span style="color:#016692;">== </span><span style="color:#009f78;">&#39;Splinter sprint&#39;
+</span></code></pre>
+<p>After create an event, Facebook redirects the browser to the event page, so we
+can check if it really happened by asserting the header of the page. That’s
+what the code above does: in the new event page, it click on submit button, and
+after the redirect, get the text of a span element and asserts that this text
+equals to <em>“Splinter sprint”</em>.</p>
+<p>That is it! This post was an overview on Splinter API. Check out the <a rel="noopener" target="_blank" href="https://github.com/cobrateam/splinter/blob/master/samples/test_facebook_events.py">complete
+snippet</a>,
+written as a test case and also check out <a rel="noopener" target="_blank" href="https://github.com/cobrateam/splinter">Splinter repository at
+Github</a>.</p>
+
+</div>
+
+<!-- prettier ignore -->
+
+        </div>
+
+    </body>
+
+</html>

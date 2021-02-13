@@ -15,6 +15,10 @@
         <lastmod>2021-02-12</lastmod>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/splinter-python-tool-for-acceptance/</loc>
+        <lastmod>2011-05-14</lastmod>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/</loc>
     </url>
     <url>
@@ -22,6 +26,12 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/blogging/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/django/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/django/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/javascript/</loc>
@@ -42,6 +52,18 @@
         <loc>https://blog.fsouza.dev/tags/prettier/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/python/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/python/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/selenium/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/selenium/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/testing/</loc>
     </url>
     <url>
@@ -52,5 +74,11 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/typescript/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/web-development/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/web-development/page/1/</loc>
     </url>
 </urlset>
