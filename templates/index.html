@@ -21,8 +21,11 @@
         <span class="post-date"
             >{{ page.date | date(format="%B %d, %Y") }}</span
         >
-
-        <p>{{ page.content | split(pat="\n") | first | striptags | trim_end_matches(pat=".") }}...</p>
+        <ul class="tags">
+            {% for tag in page.taxonomies["tags"] %}
+            <li>#{{ tag }}</li>
+            {% endfor %}
+        </ul>
     </a>
     {% endfor %}
 </div>
