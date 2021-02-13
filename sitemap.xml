@@ -4,6 +4,10 @@
         <loc>https://blog.fsouza.dev/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/go-solution-for-dining-philosophers/</loc>
+        <lastmod>2011-10-30</lastmod>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/page/1/</loc>
     </url>
     <url>
@@ -24,10 +28,28 @@
         <loc>https://blog.fsouza.dev/tags/bdd/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/concurrency/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/concurrency/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/django/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/django/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/go/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/go/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/golang/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/golang/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/jasmine/</loc>
