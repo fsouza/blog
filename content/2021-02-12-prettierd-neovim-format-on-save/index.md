@@ -28,8 +28,8 @@ formatted, and I had it configured to format-on-save with
 issues I ran into was performance: saving files became deadly slow, to the
 point where I gave up and disabled format-on-save.
 
-The thing is: prettier is known to be a faster code formatter, and I didn't
-have the issue before, so what's the  problem here? Is Neovim making prettier
+The thing is: prettier is known to be a fast code formatter, and I didn't have
+the issue before, so what's the  problem here? Is Neovim making prettier
 slower? Is coc-prettier doing some magic shit?
 
 Before we start looking into this, let's see how prettier behaves when
