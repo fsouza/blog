@@ -6,8 +6,18 @@ draft = true
 tags = ["javascript", "neovim", "prettier", "typescript"]
 +++
 
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Intro](#intro)
+- [Who cares?!](#who-cares)
+- ["My Visual Studio Code doesn't take a second to format-on-save, your Vim is trash"](#my-visual-studio-code-doesn-t-take-a-second-to-format-on-save-your-vim-is-trash)
+- [Installing and starting prettierd](#installing-and-starting-prettierd)
+- [Integrating Neovim with prettierd](#integrating-neovim-with-prettierd)
+- [Not just TypeScript and JavaScript](#not-just-typescript-and-javascript)
+- [Bonus: using it on the command line with prettierme](#bonus-using-it-on-the-command-line-with-prettierme)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Intro
 
