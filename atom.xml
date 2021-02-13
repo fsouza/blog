@@ -275,31 +275,6 @@ is basically a wrapper around our &lt;code&gt;netcat&lt;&#x2F;code&gt; example.&
 </content>
 	</entry>
 	<entry xml:lang="en">
-		<title>Hello World!</title>
-		<published>2021-02-07T00:00:00+00:00</published>
-		<updated>2021-02-07T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/hello-world/" type="text/html"/>
-		<id>https://blog.fsouza.dev/hello-world/</id>
-		<content type="html">&lt;p&gt;This is my first post.&lt;&#x2F;p&gt;
-&lt;p&gt;And I am trying to test Zola, to confirm it&#x27;s a good match! Who knows?!&lt;&#x2F;p&gt;
-&lt;p&gt;Here&#x27;s some Python to test the code block:&lt;&#x2F;p&gt;
-&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
-&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span style=&quot;color:#016692;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;os
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;import &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;sys
-
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() -&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#646409;&quot;&gt;int&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;:
-    home &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;os.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;getenv&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;HOME&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;)
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;home &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;is &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;None&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;:
-        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;2
-    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;0
-
-
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#646409;&quot;&gt;__name__ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;__main__&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;:
-    sys.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;exit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;())
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;</content>
-	</entry>
-	<entry xml:lang="en">
 		<title>Splinter: Python tool for acceptance tests on web applications</title>
 		<published>2011-05-14T00:00:00+00:00</published>
 		<updated>2011-05-14T00:00:00+00:00</updated>

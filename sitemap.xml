@@ -4,10 +4,6 @@
         <loc>https://blog.fsouza.dev/</loc>
     </url>
     <url>
-        <loc>https://blog.fsouza.dev/hello-world/</loc>
-        <lastmod>2021-02-07</lastmod>
-    </url>
-    <url>
         <loc>https://blog.fsouza.dev/page/1/</loc>
     </url>
     <url>
@@ -20,12 +16,6 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/</loc>
-    </url>
-    <url>
-        <loc>https://blog.fsouza.dev/tags/blogging/</loc>
-    </url>
-    <url>
-        <loc>https://blog.fsouza.dev/tags/blogging/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/django/</loc>
@@ -62,12 +52,6 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/selenium/page/1/</loc>
-    </url>
-    <url>
-        <loc>https://blog.fsouza.dev/tags/testing/</loc>
-    </url>
-    <url>
-        <loc>https://blog.fsouza.dev/tags/testing/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/typescript/</loc>
