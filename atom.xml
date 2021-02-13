@@ -32,8 +32,8 @@ formatted, and I had it configured to format-on-save with
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;neoclide&#x2F;coc-prettier&quot;&gt;coc-prettier&lt;&#x2F;a&gt;. One of the first
 issues I ran into was performance: saving files became deadly slow, to the
 point where I gave up and disabled format-on-save.&lt;&#x2F;p&gt;
-&lt;p&gt;The thing is: prettier is known to be a faster code formatter, and I didn&#x27;t
-have the issue before, so what&#x27;s the  problem here? Is Neovim making prettier
+&lt;p&gt;The thing is: prettier is known to be a fast code formatter, and I didn&#x27;t have
+the issue before, so what&#x27;s the  problem here? Is Neovim making prettier
 slower? Is coc-prettier doing some magic shit?&lt;&#x2F;p&gt;
 &lt;p&gt;Before we start looking into this, let&#x27;s see how prettier behaves when
 formatting a somewhat large TypeScript file:&lt;&#x2F;p&gt;
