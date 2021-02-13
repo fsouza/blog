@@ -275,6 +275,156 @@ is basically a wrapper around our &lt;code&gt;netcat&lt;&#x2F;code&gt; example.&
 </content>
 	</entry>
 	<entry xml:lang="en">
+		<title>Setting up a Django production environment: compiling and configuring nginx</title>
+		<published>2011-11-06T00:00:00+00:00</published>
+		<updated>2011-11-06T00:00:00+00:00</updated>
+		<link href="https://blog.fsouza.dev/setting-up-django-production/" type="text/html"/>
+		<id>https://blog.fsouza.dev/setting-up-django-production/</id>
+		<content type="html">&lt;p&gt;Here is another series of posts: now I’m going to write about setting up a
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;djangoproject.com&quot;&gt;Django&lt;&#x2F;a&gt; production environment using
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;nginx.org&quot;&gt;nginx&lt;&#x2F;a&gt; and &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;gunicorn.org&quot;&gt;Green Unicorn&lt;&#x2F;a&gt; in a
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;virtualenv.org&quot;&gt;virtual environment&lt;&#x2F;a&gt;. The subject in this first post is
+nginx, which is my favorite web server.&lt;&#x2F;p&gt;
+&lt;p&gt;This post explains how to install nginx from sources, compiling it (on Linux).
+You might want to use &lt;code&gt;apt&lt;&#x2F;code&gt;, &lt;code&gt;zif&lt;&#x2F;code&gt;, &lt;code&gt;yum&lt;&#x2F;code&gt; or &lt;code&gt;ports&lt;&#x2F;code&gt;, but I prefer building
+from sources. So, to build from sources, make sure you have all development
+dependencies (C headers, including the PCRE library headers, nginx rewrite
+module uses it). If you want to build nginx with SSL support, keep in mind that
+you will need the libssl headers too.&lt;&#x2F;p&gt;
+&lt;p&gt;Build nginx from source is a straightforward process: all you need to do is
+download it from the official site and build with some simple options. In our
+setup, we’re going to install nginx under &lt;code&gt;&#x2F;opt&#x2F;nginx&lt;&#x2F;code&gt;, and use it with the
+nginx system user. So, let’s download and extract the latest stable version
+(1.0.9) from nginx website:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;% curl -O http:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.0.9.tar.gz
+% tar -xzf nginx-1.0.9.tar.gz
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Once you have extracted it, just configure, compile and install:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;% .&#x2F;configure --prefix=&#x2F;opt&#x2F;nginx --user=nginx --group=nginx
+% make
+% [sudo] make install
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;As you can see, we provided the &lt;code&gt;&#x2F;opt&#x2F;nginx&lt;&#x2F;code&gt; to configure, make sure the &lt;code&gt;&#x2F;opt&lt;&#x2F;code&gt;
+directory exists. Also, make sure that there is a user and a group called
+&lt;em&gt;nginx&lt;&#x2F;em&gt;, if they don’t exist, add them:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;After that, you can start nginx using the command line below:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;% [sudo] &#x2F;opt&#x2F;nginx&#x2F;sbin&#x2F;nginx
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Linode provides an &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;library.linode.com&#x2F;assets&#x2F;634-init-deb.sh&quot;&gt;init
+script&lt;&#x2F;a&gt; that uses
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;man.he.net&#x2F;man8&#x2F;start-stop-daemon&quot;&gt;start-stop-daemon&lt;&#x2F;a&gt;, you might want
+to use it.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;h4 id=&quot;nginx-configuration&quot;&gt;nginx configuration&lt;&#x2F;h4&gt;
+&lt;p&gt;nginx comes with a default &lt;code&gt;nginx.conf&lt;&#x2F;code&gt; file, let’s change it to reflect the
+following configuration requirements:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;nginx should start workers with the &lt;code&gt;nginx&lt;&#x2F;code&gt; user&lt;&#x2F;li&gt;
+&lt;li&gt;nginx should have two worker processes&lt;&#x2F;li&gt;
+&lt;li&gt;the PID should be stored in the &lt;code&gt;&#x2F;opt&#x2F;nginx&#x2F;log&#x2F;nginx.pid&lt;&#x2F;code&gt; file&lt;&#x2F;li&gt;
+&lt;li&gt;nginx must have an access log in &lt;code&gt;&#x2F;opt&#x2F;nginx&#x2F;logs&#x2F;access.log&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;the configuration for the Django project we’re going to develop should be
+versioned with the entire code, so it must be included in the &lt;code&gt;nginx.conf&lt;&#x2F;code&gt;
+file (assume that the &lt;code&gt;library&lt;&#x2F;code&gt; project is in the directory &lt;code&gt;&#x2F;opt&#x2F;projects&lt;&#x2F;code&gt;).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;So here is the &lt;code&gt;nginx.conf&lt;&#x2F;code&gt; for the requirements above:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;user  nginx;
+worker_processes  2;
+
+pid logs&#x2F;nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application&#x2F;octet-stream;
+
+    log_format  main  &amp;#39;$remote_addr - $remote_user [$time_local] &amp;quot;$request&amp;quot; &amp;#39;
+                     &amp;#39;$status $body_bytes_sent &amp;quot;$http_referer&amp;quot; &amp;#39;
+                     &amp;#39;&amp;quot;$http_user_agent&amp;quot; &amp;quot;$http_x_forwarded_for&amp;quot;&amp;#39;;
+
+    access_log  logs&#x2F;access.log  main;
+
+    sendfile           on;
+    keepalive_timeout  65;
+
+    include &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;nginx.conf;
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we just need to write the configuration for our Django project. I’m using
+an old sample project written while I was working at
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;www.giran.com.br&quot;&gt;Giran&lt;&#x2F;a&gt;: the name is &lt;em&gt;lojas giranianas&lt;&#x2F;em&gt;, a nonsense
+portuguese joke with a famous brazilian store. It’s an unfinished showcase of
+products, it’s like an e-commerce project, but it can’t sell, so it’s just a
+product catalog. The code is available at
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;fast-track-django&quot;&gt;Github&lt;&#x2F;a&gt;. The &lt;code&gt;nginx.conf&lt;&#x2F;code&gt; file
+for the repository is here:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;server {
+    listen 80;
+    server_name localhost;
+
+    charset utf-8;
+
+    location &#x2F; {
+        proxy_set_header    X-Real-IP   $remote_addr;
+        proxy_set_header    Host        $http_host;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_pass http:&#x2F;&#x2F;localhost:8000;
+    }
+
+    location &#x2F;static {
+        root &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;;
+        expires 1d;
+    }
+}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The server listens on port &lt;code&gt;80&lt;&#x2F;code&gt;, responds for the &lt;code&gt;localhost&lt;&#x2F;code&gt; hostname (&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;www.w3.org&#x2F;Protocols&#x2F;rfc2616&#x2F;rfc2616-sec14.html&quot;&gt;read
+more about the Host
+header&lt;&#x2F;a&gt;). The
+&lt;code&gt;location &#x2F;static&lt;&#x2F;code&gt; directive says that nginx will serve the static files of the
+project. It also includes an &lt;code&gt;expires&lt;&#x2F;code&gt; directive for caching control. The
+&lt;code&gt;location &#x2F;&lt;&#x2F;code&gt; directive makes a &lt;code&gt;proxy_pass&lt;&#x2F;code&gt;, forwarding all requisitions to an
+upstream server listening on port 8000, this server is the subject of the next
+post of the series: the Green Unicorn (gunicorn) server.&lt;&#x2F;p&gt;
+&lt;p&gt;Not only the HTTP request itself is forwarded to the gunicorn server, but also
+some headers, that helps to properly deal with the request:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;X-Real-IP:&lt;&#x2F;strong&gt; forwards the remote address to the upstream server, so it can
+know the real IP of the user. When nginx forwards the request to gunicorn,
+without this header, all gunicorn will know is that there is a request coming
+from localhost (or wherever the nginx server is), the remote address is
+always the IP address of the machine where nginx is running (who actually
+make the request to gunicorn)&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Host:&lt;&#x2F;strong&gt; the &lt;code&gt;Host&lt;&#x2F;code&gt; header is forwarded so gunicorn can treat different
+requests for different hosts. Without this header, it will be impossible to
+Gunicorn to have these constraints&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;X-Forwarded-For:&lt;&#x2F;strong&gt; also known as XFF, this header provide more precise
+information about the real IP who makes the request. Imagine there are 10
+proxies between the user machine and your webserver, the XFF header will all
+these proxies comma separated. In order to not turn a proxy into an
+anonymizer, it’s a good practice to always forward this header.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;So that is it, in the next post we are going to install and run gunicorn. In
+other posts, we’ll see how to make automated deploys using
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;fabfile.org&quot;&gt;Fabric&lt;&#x2F;a&gt;, and some tricks on caching (using the
+&lt;code&gt;proxy_cache&lt;&#x2F;code&gt; directive and integrating Django, nginx and
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;memcached.org&quot;&gt;memcached&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;See you in next posts.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
 		<title>Go solution for the Dining philosophers problem</title>
 		<published>2011-10-30T00:00:00+00:00</published>
 		<updated>2011-10-30T00:00:00+00:00</updated>

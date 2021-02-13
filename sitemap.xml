@@ -15,6 +15,10 @@
         <lastmod>2021-02-12</lastmod>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/setting-up-django-production/</loc>
+        <lastmod>2011-11-06</lastmod>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/splinter-python-tool-for-acceptance/</loc>
         <lastmod>2011-05-14</lastmod>
     </url>
@@ -52,6 +56,12 @@
         <loc>https://blog.fsouza.dev/tags/golang/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/gunicorn/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/gunicorn/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/jasmine/</loc>
     </url>
     <url>
@@ -74,6 +84,12 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/neovim/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/nginx/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/nginx/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/prettier/</loc>

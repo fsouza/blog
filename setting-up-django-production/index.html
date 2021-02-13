@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <!-- viewport-fit=cover is to support iPhone X rounded corners and notch in landscape-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+
+      <title>Setting up a Django production environment: compiling and configuring nginx | Francisco Souza</title>
+
+      <!-- CSS -->
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;print.css" media="print">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;poole.css">
+      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;hyde.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+
+      
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+      
+
+      
+
+<!-- prettier ignore -->
+<link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;custom-style.css?h=ba0519df2c42bed2580586a8dd75e921efcb39764b8cdb2d703798a2c92873a0" />
+
+<!-- prettier ignore -->
+
+    </head>
+
+    <body class=" layout-reverse">
+        
+            <div class="sidebar">
+                <div class="container sidebar-sticky">
+                    <div class="sidebar-about">
+                        
+                            <a href="https:&#x2F;&#x2F;blog.fsouza.dev"><h1>Francisco Souza</h1></a>
+                            
+                        
+                    </div>
+
+                    <ul class="sidebar-nav">
+                        
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;github.com&#x2F;fsouza">GitHub</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;linkedin.com&#x2F;in&#x2F;franciscosouza">LinkedIn</a></li>
+                        
+                        <li class="sidebar-nav-item"><a href="https:&#x2F;&#x2F;twitter.com&#x2F;franciscosouza">Twitter</a></li>
+                        
+                        
+                    </ul>
+                </div>
+            </div>
+        
+
+        <div class="content container">
+            
+
+<div class="post">
+    <h1 class="post-title">Setting up a Django production environment: compiling and configuring nginx</h1>
+    <span class="post-date">November 06, 2011</span>
+    <ul class="tags">
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/django/"
+                >#django</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/gunicorn/"
+                >#gunicorn</a
+            >
+        </li>
+        
+        <!-- prettier ignore -->
+        <li>
+            <a href="https://blog.fsouza.dev/tags/nginx/"
+                >#nginx</a
+            >
+        </li>
+        
+    </ul>
+    <p>Here is another series of posts: now I’m going to write about setting up a
+<a rel="noopener" target="_blank" href="https://djangoproject.com">Django</a> production environment using
+<a rel="noopener" target="_blank" href="https://nginx.org">nginx</a> and <a rel="noopener" target="_blank" href="http://gunicorn.org">Green Unicorn</a> in a
+<a rel="noopener" target="_blank" href="http://virtualenv.org">virtual environment</a>. The subject in this first post is
+nginx, which is my favorite web server.</p>
+<p>This post explains how to install nginx from sources, compiling it (on Linux).
+You might want to use <code>apt</code>, <code>zif</code>, <code>yum</code> or <code>ports</code>, but I prefer building
+from sources. So, to build from sources, make sure you have all development
+dependencies (C headers, including the PCRE library headers, nginx rewrite
+module uses it). If you want to build nginx with SSL support, keep in mind that
+you will need the libssl headers too.</p>
+<p>Build nginx from source is a straightforward process: all you need to do is
+download it from the official site and build with some simple options. In our
+setup, we’re going to install nginx under <code>/opt/nginx</code>, and use it with the
+nginx system user. So, let’s download and extract the latest stable version
+(1.0.9) from nginx website:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">% curl -O http://nginx.org/download/nginx-1.0.9.tar.gz
+% tar -xzf nginx-1.0.9.tar.gz
+</span></code></pre>
+<p>Once you have extracted it, just configure, compile and install:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">% ./configure --prefix=/opt/nginx --user=nginx --group=nginx
+% make
+% [sudo] make install
+</span></code></pre>
+<p>As you can see, we provided the <code>/opt/nginx</code> to configure, make sure the <code>/opt</code>
+directory exists. Also, make sure that there is a user and a group called
+<em>nginx</em>, if they don’t exist, add them:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
+</span></code></pre>
+<p>After that, you can start nginx using the command line below:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">% [sudo] /opt/nginx/sbin/nginx
+</span></code></pre>
+<blockquote>
+<p>Linode provides an <a rel="noopener" target="_blank" href="https://library.linode.com/assets/634-init-deb.sh">init
+script</a> that uses
+<a rel="noopener" target="_blank" href="http://man.he.net/man8/start-stop-daemon">start-stop-daemon</a>, you might want
+to use it.</p>
+</blockquote>
+<h4 id="nginx-configuration">nginx configuration</h4>
+<p>nginx comes with a default <code>nginx.conf</code> file, let’s change it to reflect the
+following configuration requirements:</p>
+<ul>
+<li>nginx should start workers with the <code>nginx</code> user</li>
+<li>nginx should have two worker processes</li>
+<li>the PID should be stored in the <code>/opt/nginx/log/nginx.pid</code> file</li>
+<li>nginx must have an access log in <code>/opt/nginx/logs/access.log</code></li>
+<li>the configuration for the Django project we’re going to develop should be
+versioned with the entire code, so it must be included in the <code>nginx.conf</code>
+file (assume that the <code>library</code> project is in the directory <code>/opt/projects</code>).</li>
+</ul>
+<p>So here is the <code>nginx.conf</code> for the requirements above:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">user  nginx;
+worker_processes  2;
+
+pid logs/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  &#39;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#39;
+                     &#39;$status $body_bytes_sent &quot;$http_referer&quot; &#39;
+                     &#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;;
+
+    access_log  logs/access.log  main;
+
+    sendfile           on;
+    keepalive_timeout  65;
+
+    include /opt/projects/showcase/nginx.conf;
+}
+</span></code></pre>
+<p>Now we just need to write the configuration for our Django project. I’m using
+an old sample project written while I was working at
+<a rel="noopener" target="_blank" href="http://www.giran.com.br">Giran</a>: the name is <em>lojas giranianas</em>, a nonsense
+portuguese joke with a famous brazilian store. It’s an unfinished showcase of
+products, it’s like an e-commerce project, but it can’t sell, so it’s just a
+product catalog. The code is available at
+<a rel="noopener" target="_blank" href="https://github.com/fsouza/fast-track-django">Github</a>. The <code>nginx.conf</code> file
+for the repository is here:</p>
+<pre style="background-color:#ffffff;">
+<code><span style="color:#010101;">server {
+    listen 80;
+    server_name localhost;
+
+    charset utf-8;
+
+    location / {
+        proxy_set_header    X-Real-IP   $remote_addr;
+        proxy_set_header    Host        $http_host;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_pass http://localhost:8000;
+    }
+
+    location /static {
+        root /opt/projects/showcase/;
+        expires 1d;
+    }
+}
+</span></code></pre>
+<p>The server listens on port <code>80</code>, responds for the <code>localhost</code> hostname (<a rel="noopener" target="_blank" href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html">read
+more about the Host
+header</a>). The
+<code>location /static</code> directive says that nginx will serve the static files of the
+project. It also includes an <code>expires</code> directive for caching control. The
+<code>location /</code> directive makes a <code>proxy_pass</code>, forwarding all requisitions to an
+upstream server listening on port 8000, this server is the subject of the next
+post of the series: the Green Unicorn (gunicorn) server.</p>
+<p>Not only the HTTP request itself is forwarded to the gunicorn server, but also
+some headers, that helps to properly deal with the request:</p>
+<ul>
+<li><strong>X-Real-IP:</strong> forwards the remote address to the upstream server, so it can
+know the real IP of the user. When nginx forwards the request to gunicorn,
+without this header, all gunicorn will know is that there is a request coming
+from localhost (or wherever the nginx server is), the remote address is
+always the IP address of the machine where nginx is running (who actually
+make the request to gunicorn)</li>
+<li><strong>Host:</strong> the <code>Host</code> header is forwarded so gunicorn can treat different
+requests for different hosts. Without this header, it will be impossible to
+Gunicorn to have these constraints</li>
+<li><strong>X-Forwarded-For:</strong> also known as XFF, this header provide more precise
+information about the real IP who makes the request. Imagine there are 10
+proxies between the user machine and your webserver, the XFF header will all
+these proxies comma separated. In order to not turn a proxy into an
+anonymizer, it’s a good practice to always forward this header.</li>
+</ul>
+<p>So that is it, in the next post we are going to install and run gunicorn. In
+other posts, we’ll see how to make automated deploys using
+<a rel="noopener" target="_blank" href="http://fabfile.org">Fabric</a>, and some tricks on caching (using the
+<code>proxy_cache</code> directive and integrating Django, nginx and
+<a rel="noopener" target="_blank" href="https://memcached.org">memcached</a>).</p>
+<p>See you in next posts.</p>
+
+</div>
+
+<!-- prettier ignore -->
+
+        </div>
+
+    </body>
+
+</html>
