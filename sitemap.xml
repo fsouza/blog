@@ -18,16 +18,34 @@
         <loc>https://blog.fsouza.dev/tags/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/bdd/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/bdd/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/django/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/django/page/1/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/tags/jasmine/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/jasmine/page/1/</loc>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/tags/javascript/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/javascript/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/jquery/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/jquery/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/neovim/</loc>
@@ -64,5 +82,9 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/web-development/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/</loc>
+        <lastmod>2011-05-28</lastmod>
     </url>
 </urlset>

@@ -275,6 +275,186 @@ is basically a wrapper around our &lt;code&gt;netcat&lt;&#x2F;code&gt; example.&
 </content>
 	</entry>
 	<entry xml:lang="en">
+		<title>Testing jQuery plugins with Jasmine</title>
+		<published>2011-05-28T00:00:00+00:00</published>
+		<updated>2011-05-28T00:00:00+00:00</updated>
+		<link href="https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/" type="text/html"/>
+		<id>https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/</id>
+		<content type="html">&lt;p&gt;Since I started working at &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;globo.com&quot;&gt;Globo.com&lt;&#x2F;a&gt;, I developed some
+jQuery plugins (for internal use) with my team, and we are starting to test
+these plugins using &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;pivotal.github.com&#x2F;jasmine&#x2F;&quot;&gt;Jasmine&lt;&#x2F;a&gt;, &lt;em&gt;“a
+behavior-driven development framework for testing your JavaScript code”&lt;&#x2F;em&gt;. In
+this post, I will show how to develop a very simple jQuery plugin (based on an
+example that I learned with &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;rdworth.org&#x2F;&quot;&gt;Ricard D. Worth&lt;&#x2F;a&gt;): zebrafy.
+This plugin “zebrafies” a table, applying different classes to odd and even
+lines. Let’s start setting up a Jasmine environment... First step is download
+the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;pivotal.github.com&#x2F;jasmine&#x2F;download.html&quot;&gt;standalone version of
+Jasmine&lt;&#x2F;a&gt;, then extract it and
+edit the runner. The runner is a simple HTML file, that loads Jasmine and all
+JavaScript files you want to test. But, wait... why not test using node.js or
+something like this? Do I really need the browser on this test? You don’t
+&lt;strong&gt;need&lt;&#x2F;strong&gt;, but I think it is important to test a plugin that works with the DOM
+using a real browser. Let’s delete some files and lines from &lt;em&gt;SpecRunner.html&lt;&#x2F;em&gt;
+file, so we adapt it for our plugin. This is how the structure is going to look
+like:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.
+├── SpecRunner.html
+├── lib
+│   ├── jasmine-1.0.2
+│   │   ├── MIT.LICENSE
+│   │   ├── jasmine-html.js
+│   │   ├── jasmine.css
+│   │   └── jasmine.js
+│   └── jquery-1.6.1.min.js
+├── spec
+│   └── ZebrafySpec.js
+└── src
+    └── jquery.zebrafy.js
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;You can create the files &lt;code&gt;jquery.zebrafy.js&lt;&#x2F;code&gt; and &lt;code&gt;ZebrafySpec.js&lt;&#x2F;code&gt;, but
+remember: it is BDD, we need to describe
+the behavior first, then write the code. So let’s start writing the specs in
+&lt;code&gt;ZebrafySpec.js&lt;&#x2F;code&gt; file using Jasmine. If you are familiar with
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;rspec.info&quot;&gt;RSpec&lt;&#x2F;a&gt; syntax, it’s easy to understand how to write spec
+withs Jasmine, if you aren’t, here is the clue: Jasmine is a lib with some
+functions used for writing tests in an easier way. I’m going to explain each
+function “on demmand”, when we need something, we learn how to use it! ;)&lt;&#x2F;p&gt;
+&lt;p&gt;First of all, we need to start a new test suite. Jasmine provides the
+&lt;code&gt;describe&lt;&#x2F;code&gt; function for that, this function receives a string and another
+function (a callback). The string describes the test suite and the function is
+a callback that delimites the scope of the test suite. Here is the &lt;code&gt;Zebrafy&lt;&#x2F;code&gt;
+suite:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;describe&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;Zebrafy&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Let’s start describing the behavior we want to get from the plugin. The most
+basic is: we want different CSS classes for odd an even lines in a table.
+Jasmine provides the &lt;code&gt;it&lt;&#x2F;code&gt; function for writing the tests. It also receives a
+string and a callback: the string is a description for the test and the
+callback is the function executed as test. Here is the very first test:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;it&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;should apply classes zebrafy-odd and zebrafy-even to each other table lines&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;#zebra-table&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;zebrafy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;expect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;toBeZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay, here we go: in the first line of the callback, we are using jQuery to
+select a table using the &lt;code&gt;#zebra-table&lt;&#x2F;code&gt; selector, which will look up for a
+table with the ID attribute equals to &lt;em&gt;“zebra-table”&lt;&#x2F;em&gt;, but we don’t have this
+table in the DOM. What about add a new table to the DOM in a hook executed
+before the test run and remove the table in another hook that runs after the
+test? Jasmine provide two functions: &lt;code&gt;beforeEach&lt;&#x2F;code&gt; and &lt;code&gt;afterEach&lt;&#x2F;code&gt;. Both
+functions receive a callback function to be executed and, as the names suggest,
+the &lt;code&gt;beforeEach&lt;&#x2F;code&gt; callback is called before each test run, and the &lt;code&gt;afterEach&lt;&#x2F;code&gt;
+callback is called after the test run. Here are the hooks:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;beforeEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&amp;lt;table id=&amp;quot;zebra-table&amp;quot;&amp;gt;&amp;lt;&#x2F;table&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;appendTo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;body&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;i &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;&amp;lt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8c008a;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;i&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;++&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&amp;lt;tr&amp;gt;&amp;lt;&#x2F;tr&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&amp;lt;td&amp;gt;&amp;lt;&#x2F;td&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&amp;lt;td&amp;gt;&amp;lt;&#x2F;td&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;append&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;&amp;lt;td&amp;gt;&amp;lt;&#x2F;td&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;appendTo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;#zebra-table&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    };
+});
+
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;afterEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;#zebra-table&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;remove&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;beforeEach&lt;&#x2F;code&gt; callback uses jQuery to create a table with 10 rows and 3
+columns and add it to the DOM. In &lt;code&gt;afterEach&lt;&#x2F;code&gt; callback, we just remove that
+table using jQuery again. Okay, now the table exists, let’s go back to the
+test:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;it&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;should apply classes zebrafy-odd and zebrafy-even to each other table lines&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;#zebra-table&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;zebrafy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;expect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;toBeZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;In the second line, we call our plugin, that is not ready yet, so let’s forward
+to the next line, where we used the &lt;code&gt;expect&lt;&#x2F;code&gt; function. Jasmine provides this
+function, that receives an object and executes a &lt;em&gt;matcher&lt;&#x2F;em&gt; against it, there is
+a lot of built-in matchers on Jasmine, but &lt;code&gt;toBeZebrafyied&lt;&#x2F;code&gt; is not a built-in
+matcher. Here is where we know another Jasmine feature: the capability to write
+custom matchers, but how to do this? You can call the &lt;code&gt;beforeEach&lt;&#x2F;code&gt; again, and
+use the &lt;code&gt;addMatcher&lt;&#x2F;code&gt; method of Jasmine object:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;beforeEach&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addMatchers&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;({
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;toBeZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;;
+
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;actual&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:even&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;each&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;hasClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;zebrafy-odd&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;=== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;false &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;&amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;hasClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;zebrafy-even&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;;
+                };
+            });
+
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;actual&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:odd&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;each&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;hasClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;zebrafy-odd&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;&amp;amp;&amp;amp; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;tr&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;hasClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;zebrafy-even&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;=== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#333366;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;;
+                &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;!&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+                    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;;
+                };
+            });
+
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;isZebrafyied&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;;
+        }
+    });
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The method &lt;code&gt;addMatchers&lt;&#x2F;code&gt; receives an object where each property is a matcher.
+Your matcher can receive arguments if you want. The object being matched can be
+accessed using &lt;code&gt;this.actual&lt;&#x2F;code&gt;, so here is what the method above does: it takes
+all odd &lt;code&gt;&amp;lt;tr&amp;gt;&lt;&#x2F;code&gt; elements of the table (&lt;code&gt;this.actual&lt;&#x2F;code&gt;) and check if them have the
+CSS class &lt;code&gt;zebrafy-odd&lt;&#x2F;code&gt; and don’t have the CSS class &lt;code&gt;zebrafy-even&lt;&#x2F;code&gt;, then do
+the same checking with even &lt;code&gt;&amp;lt;tr&amp;gt;&lt;&#x2F;code&gt; lines.&lt;&#x2F;p&gt;
+&lt;p&gt;Now that we have wrote the test, it’s time to write the plugin. Here some
+jQuery code:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;zebrafy &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:even&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;zebrafy-even&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:odd&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;zebrafy-odd&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    };
+})(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;jQuery&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I’m not going to explain &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;docs.jquery.com&#x2F;Plugins&#x2F;Authoring&quot;&gt;how to implement a jQuery
+plugin&lt;&#x2F;a&gt; neither &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;benalman.com&#x2F;news&#x2F;2010&#x2F;11&#x2F;immediately-invoked-function-expression&#x2F;&quot;&gt;what are those
+brackets on
+function&lt;&#x2F;a&gt;,
+this post aims to show how to use Jasmine to test jQuery plugins.&lt;&#x2F;p&gt;
+&lt;p&gt;By convention, jQuery plugins are “chainable”, so let’s make sure the zebrafy
+plugin is chainable using a spec:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;it&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;zebrafy should be chainable&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;var &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;#zebra-table&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;zebrafy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;().&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;black-bg&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;expect&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;hasClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;#39;black-bg&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;)).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;toBeTruthy&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;();
+});
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;As you can see, we used the built-in matcher &lt;code&gt;toBeTruthy&lt;&#x2F;code&gt;, which asserts that
+an object or expression is &lt;code&gt;true&lt;&#x2F;code&gt;. All we need to do is return the jQuery
+object in the plugin and the test will pass:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#ffffff;&quot;&gt;
+&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;zebrafy &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;() {
+        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#016692;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;this&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;each&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#877611;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;) {
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:even&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;zebrafy-even&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+            &lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;table&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#7a7025;&quot;&gt;find&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;tr:odd&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;).&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a15001;&quot;&gt;addClass&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#009f78;&quot;&gt;&amp;quot;zebrafy-odd&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+        });
+    };
+})(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#696989;&quot;&gt;jQuery&lt;&#x2F;span&gt;&lt;span style=&quot;color:#010101;&quot;&gt;);
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So, the plugin is tested and ready to release! :) You can check the entire code
+and test with more spec in a &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;jquery-testing-jasmine&quot;&gt;GitHub
+repository&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="en">
 		<title>Splinter: Python tool for acceptance tests on web applications</title>
 		<published>2011-05-14T00:00:00+00:00</published>
 		<updated>2011-05-14T00:00:00+00:00</updated>
