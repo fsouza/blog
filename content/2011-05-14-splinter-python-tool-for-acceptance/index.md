@@ -1,5 +1,6 @@
 +++
 title = "Splinter: Python tool for acceptance tests on web applications"
+aliases = ["/2011/05/splinter-python-tool-for-acceptance.html"]
 
 [taxonomies]
 tags = ["django", "python", "selenium", "web-development"]

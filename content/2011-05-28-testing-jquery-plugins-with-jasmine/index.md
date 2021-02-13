@@ -1,5 +1,6 @@
 +++
 title = "Testing jQuery plugins with Jasmine"
+aliases = ["/2011/05/testing-jquery-plugins-with-jasmine.html"]
 
 [taxonomies]
 tags = ["bdd", "jasmine", "javascript", "jquery"]
