@@ -1,6 +1,5 @@
 +++
 title = "Making format-on-save fast with prettierd"
-draft = true
 
 [taxonomies]
 tags = ["javascript", "neovim", "prettier", "typescript"]
