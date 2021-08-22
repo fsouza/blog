@@ -1,5 +1,5 @@
 +++
-title = "Implementing functional streams with generics in Go for fun"
+title = "Implementing functional streams with generics in Go (for fun)"
 
 draft = true
 
