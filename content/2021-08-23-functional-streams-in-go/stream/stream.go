@@ -3,7 +3,7 @@ package main
 type Stream[T any] func() (T, func() Stream[T])
 
 func Take[T any](stream Stream[T], n uint) Stream[T] {
-	if n == 0 {
+	if n == 0 || stream == nil {
 		return nil
 	}
 	return Stream[T](func() (T, func() Stream[T]) {
