@@ -22,6 +22,33 @@ func Map[T, U any](stream Stream[T], f func(T) U) Stream[U] {
 	})
 }
 
+func Filter[T any](stream Stream[T], f func(T) bool) Stream[T] {
+	if stream == nil {
+		return nil
+	}
+	return Stream[T](func() (T, func() Stream[T]) {
+		for {
+			v, tl := stream()
+			if f(v) {
+				return v, func() Stream[T] { return Filter(tl(), f) }
+			}
+			stream = tl()
+			if stream == nil
+				return v, func() Stream[T] { return nil }
+			}
+		}
+	})
+}
+
+func TakeWhile[T any](stream Stream[T], f func(T) bool) Stream[T] {
+}
+
+func TakeUntil[T any](stream Stream[T], f func(T) bool) Stream[T] {
+	return TakeWhile(stream, func(v T) bool {
+		return !f(v)
+	})
+}
+
 func ToSlice[T any](stream Stream[T]) []T {
 	var result []T
 	for stream != nil {
@@ -43,6 +70,14 @@ func fromSlice[T any](items []T, index int) Stream[T] {
 	return Stream[T](func() (T, func() Stream[T]) {
 		return items[index], func() Stream[T] {
 			return fromSlice(items, index+1)
+		}
+	})
+}
+
+func nat(start int) Stream[int] {
+	return Stream[int](func() (int, func() Stream[int]) {
+		return start, func() Stream[int] {
+			return nat(start + 1)
 		}
 	})
 }

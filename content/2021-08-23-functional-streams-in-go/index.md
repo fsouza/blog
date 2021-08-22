@@ -7,6 +7,10 @@ draft = true
 tags = ["golang", "go", "generics"]
 +++
 
+> **Note:** this is an experiment with an upcoming change in Go's type system.
+> If you need something like what's described in the post in the real world,
+> use channels.
+
 Go 1.18 will likely support generics, and I decided I would give it a shot.
 I've been playing with the idea of [representing streams with
 channels](https://github.com/fsouza/channels) and higher order functions that
@@ -42,6 +46,11 @@ type Stream[T any] struct {
 }
 ```
 
+It looks like a linked-list, but since we want to be able to represent a
+potentially infinite linked list, instead of making `Next` a pointer to Stream,
+we make it a function that returns the pointer, and lazily execute that
+function as needed.
+
 Alternatively, since Go supports returning multiple values from a function, we
 could represent a stream as a function that returns the value and the function
 to calculate the next value:
@@ -51,8 +60,59 @@ type Stream[T any] func() (T, func() Stream[T])
 ```
 
 Here, an empty stream is also represented as nil (no explicit pointers needed
-though). Let's explore both options in this article!
+though). Let's go crazy on the thought experiment and use only the function
+based representation, instead of the linked list look-a-like.
 
 ## Creating streams
+
+Let's do something probably non-sense: given a slice of some type `T`, how
+would we generate a stream? Let's call that function `FromSlice`.
+
+Here's what the code looks like:
+
+```go
+func FromSlice[T any](items []T) Stream[T] {
+	return fromSlice(items, 0)
+}
+
+func fromSlice[T any](items []T, index int) Stream[T] {
+	if index >= len(items) {
+		return nil
+	}
+	return Stream[T](func() (T, func() Stream[T]) {
+		return items[index], func() Stream[T] {
+			return fromSlice(items, index+1)
+		}
+	})
+}
+```
+
+To keep the context around of where we are in the slice as the stream is
+consumed, we introduce a helper function that takes the index that we want to
+consume in the slice, and `FromSlice` invokes that helper function starting at
+index 0. The stream becomes nil as soon as the index grows too large,
+indicating that we finished iterating over the slice.
+
+### Infinite streams
+
+Using a slice is no fun, we probably want to be able to implement potentially
+infinite streams. For example, a stream of natural numbers could be represented
+as follows:
+
+```go
+func nat(start int) Stream[int] {
+	return Stream[int](func() (int, func() Stream[int]) {
+		return start, func() Stream[int] {
+			return nat(start + 1)
+		}
+	})
+}
+```
+
+Here is where the limitation with Go's type inference starts to show: since it
+can't infer return types, we have to manually specify `Stream[int]` in multiple
+places.
+
+Note how we never return
 
 ## Working with streams
