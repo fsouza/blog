@@ -23,3 +23,35 @@ and a function to generate the next value.
 I started with a question: with generics, is the Go type-system expressive
 enough to represent such streams. And how bad would it look without Ocaml's or
 Haskell's type inference capabilities?
+
+## The basic type definition
+
+First, let's start with the type definition. Like mentioned above, we want to
+represent a stream of T as a pair of some value T and a function that produces
+the next value of the stream T, and that function may returns a pointer, which
+will be `nil` to represent the end of the stream (the function itself should
+never be `nil` in this case). Stream values are pointers so the empty stream
+can be represented as `nil`. Go doesn't directly support pairs, so we're going
+to use a struct here:
+
+```go
+type Stream[T any] struct {
+	Value T
+	Next  func() *Stream[T]
+}
+```
+
+Alternatively, since Go supports returning multiple values from a function, we
+could represent a stream as a function that returns the value and the function
+to calculate the next value:
+
+```go
+type Stream[T any] func() (T, func() Stream[T])
+```
+
+Here, an empty stream is also represented as nil (no explicit pointers needed
+though). Let's explore both options in this article!
+
+## Creating streams
+
+## Working with streams
