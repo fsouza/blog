@@ -11,9 +11,9 @@
       <title>Making format-on-save fast with prettierd | Francisco Souza</title>
 
       <!-- CSS -->
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;print.css" media="print">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;poole.css">
-      <link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;hyde.css">
+      <link rel="stylesheet" href="https://blog.fsouza.dev/print.css" media="print">
+      <link rel="stylesheet" href="https://blog.fsouza.dev/poole.css">
+      <link rel="stylesheet" href="https://blog.fsouza.dev/hyde.css">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
 
       
@@ -23,7 +23,7 @@
       
 
 <!-- prettier ignore -->
-<link rel="stylesheet" href="https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;custom-style.css?h=ba0519df2c42bed2580586a8dd75e921efcb39764b8cdb2d703798a2c92873a0" />
+<link rel="stylesheet" href="https://blog.fsouza.dev/custom-style.css?h=ba0519df2c42bed2580586a8dd75e921efcb39764b8cdb2d703798a2c92873a0" />
 
 <!-- prettier ignore -->
 
@@ -115,39 +115,37 @@ the issue before, so what's the  problem here? Is Neovim making prettier
 slower? Is coc-prettier doing some magic shit?</p>
 <p>Before we start looking into this, let's see how prettier behaves when
 formatting a somewhat large TypeScript file:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ wc -l sample.ts
-     586 sample.ts
-％ time npx prettier -w sample.ts
-sample.ts 332ms
-        0.85 real         0.91 user         0.11 sys
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ wc -l sample.ts
+</span><span>     586 sample.ts
+</span><span>％ time npx prettier -w sample.ts
+</span><span>sample.ts 332ms
+</span><span>        0.85 real         0.91 user         0.11 sys
 </span></code></pre>
 <p>It's interesting that prettier reports that it took 332ms to format the file,
 but <code>time</code> reports that the whole process took 850ms. Who's lying?</p>
 <p>Let's take a look at multiple files:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ wc -l sample*.ts
-     330 sample1.ts
-     718 sample2.ts
-     655 sample3.ts
-    2511 sample4.ts
-     601 sample5.ts
-    4815 total
-％ time npx prettier -w sample1.ts
-sample1.ts 290ms
-        0.93 real         0.88 user         0.11 sys
-％ time npx prettier -w sample2.ts
-sample2.ts 358ms
-        1.02 real         1.04 user         0.12 sys
-％ time npx prettier -w sample3.ts
-sample3.ts 330ms
-        0.97 real         0.95 user         0.13 sys
-％ time npx prettier -w sample4.ts
-sample4.ts 648ms
-        1.27 real         1.48 user         0.13 sys
-％ time npx prettier -w sample5.ts
-sample5.ts 375ms
-        1.00 real         1.00 user         0.12 sys
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ wc -l sample*.ts
+</span><span>     330 sample1.ts
+</span><span>     718 sample2.ts
+</span><span>     655 sample3.ts
+</span><span>    2511 sample4.ts
+</span><span>     601 sample5.ts
+</span><span>    4815 total
+</span><span>％ time npx prettier -w sample1.ts
+</span><span>sample1.ts 290ms
+</span><span>        0.93 real         0.88 user         0.11 sys
+</span><span>％ time npx prettier -w sample2.ts
+</span><span>sample2.ts 358ms
+</span><span>        1.02 real         1.04 user         0.12 sys
+</span><span>％ time npx prettier -w sample3.ts
+</span><span>sample3.ts 330ms
+</span><span>        0.97 real         0.95 user         0.13 sys
+</span><span>％ time npx prettier -w sample4.ts
+</span><span>sample4.ts 648ms
+</span><span>        1.27 real         1.48 user         0.13 sys
+</span><span>％ time npx prettier -w sample5.ts
+</span><span>sample5.ts 375ms
+</span><span>        1.00 real         1.00 user         0.12 sys
 </span></code></pre>
 <p>Notice how formatting <code>sample2.ts</code> and <code>sample4.ts</code> takes more than 1 second in
 total! Also interesting is the fact that even though <code>sample1.ts</code> is less the
@@ -159,8 +157,7 @@ my files? I could run it on a git hook or something like that and not even
 notice.</p>
 <p>As I mentioned before, I was running format-on-save in Neovim, with a simple
 setup, not very fancy:</p>
-<pre style="background-color:#ffffff;">
-<code class="language-vimscript" data-lang="vimscript"><span style="color:#010101;">autocmd BufWritePre *.ts execute &quot;silent %!npx prettier --stdin-filepath &#39;&quot; . expand(&#39;%:p&#39;) . &quot;&#39;&quot;
+<pre data-lang="vimscript" style="background-color:#ffffff;color:#010101;" class="language-vimscript "><code class="language-vimscript" data-lang="vimscript"><span>autocmd BufWritePre *.ts execute &quot;silent %!npx prettier --stdin-filepath &#39;&quot; . expand(&#39;%:p&#39;) . &quot;&#39;&quot;
 </span></code></pre>
 <p><a rel="noopener" target="_blank" href="https://github.com/fsouza/dotfiles/blob/0b6d3daaa844796f916b3f056a66af0e25a76c3c/autoload/fsouza/prettier.vim#L19-L30">(it was a bit fancier than that, but not by much)</a></p>
 <p>So, imagine you're using Neovim and every time you save the file you have to
@@ -169,14 +166,13 @@ wait 1 second. You'd be mad, right?! There must be a better way...</p>
 <p>To be fair, coc-prettier was pretty fast too. How is that even possible?</p>
 <p>Let's go back to our sample files, but this time let's see what prettier does
 if we pass all 5 files to it instead of invoking it 5 times:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ time npx prettier -w *.ts
-sample1.ts 248ms
-sample2.ts 205ms
-sample3.ts 110ms
-sample4.ts 327ms
-sample5.ts 79ms
-        1.61 real         2.09 user         0.15 sys
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ time npx prettier -w *.ts
+</span><span>sample1.ts 248ms
+</span><span>sample2.ts 205ms
+</span><span>sample3.ts 110ms
+</span><span>sample4.ts 327ms
+</span><span>sample5.ts 79ms
+</span><span>        1.61 real         2.09 user         0.15 sys
 </span></code></pre>
 <p>This time <code>sample2.ts</code> is faster than <code>sample1.ts</code>, even though it's twice as
 large! What's going on? Turns out <a rel="noopener" target="_blank" href="https://github.com/prettier/prettier/issues/3386">prettier is slow to
@@ -206,32 +202,27 @@ receives a &quot;request&quot;. The two important things to know about are:</p>
 <ol>
 <li>You can install it with npm and start it with <code>prettierd start</code>:</li>
 </ol>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ npm install -g @fsouza/prettierd
-％ prettierd start
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ npm install -g @fsouza/prettierd
+</span><span>％ prettierd start
 </span></code></pre>
 <p>Alternatively you can do both things with <code>npx</code>:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ npx -p @fsouza/prettierd prettierd start
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ npx -p @fsouza/prettierd prettierd start
 </span></code></pre>
 <ol start="2">
 <li>When it starts, prettierd writes a file with its port number and token</li>
 </ol>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ cat ~/.prettierd
-53561 cb2ad753df0aca85
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ cat ~/.prettierd
+</span><span>53561 cb2ad753df0aca85
 </span></code></pre>
 <p>This means that prettierd is running on port 53561 and we can use the token
 <code>cb2ad753df0aca85</code> in our requests to format our source code.</p>
 <p>core_d's protocol is pretty simple:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">&lt;token&gt; &lt;working-dir&gt; &lt;file-name&gt;\n
-&lt;file-content&gt;
+<pre style="background-color:#ffffff;color:#010101;"><code><span>&lt;token&gt; &lt;working-dir&gt; &lt;file-name&gt;\n
+</span><span>&lt;file-content&gt;
 </span></code></pre>
 <p>For example, we can use netcat:</p>
-<pre style="background-color:#ffffff;">
-<code><span style="color:#010101;">％ echo &quot;cb2ad753df0aca85 $PWD sample2.ts&quot; | cat - sample2.ts | /usr/bin/time nc localhost 53561 &gt;sample2-formatted.ts
-        0.14 real         0.00 user         0.00 sys
+<pre style="background-color:#ffffff;color:#010101;"><code><span>％ echo &quot;cb2ad753df0aca85 $PWD sample2.ts&quot; | cat - sample2.ts | /usr/bin/time nc localhost 53561 &gt;sample2-formatted.ts
+</span><span>        0.14 real         0.00 user         0.00 sys
 </span></code></pre>
 <p>Remember how formatting <code>sample2.ts</code> took over 1 second? Not anymore. :)</p>
 <h2 id="integrating-neovim-with-prettierd">Integrating Neovim with prettierd</h2>
@@ -248,24 +239,22 @@ Neovim</a>, go check it out if you're curious :)</p>
 <p>Among the utilities provided by libuv, there's a tcp module which includes both
 a TCP client and a TCP server! In our case we want to use a client, so we
 invoke the <code>tcp_connect</code> function:</p>
-<pre style="background-color:#ffffff;">
-<code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#696989;">callback </span><span style="color:#016692;">= </span><span style="color:#333366;">...
+<pre data-lang="lua" style="background-color:#ffffff;color:#010101;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#696989;">callback </span><span style="color:#016692;">= </span><span style="color:#333366;">...
 </span><span style="color:#014a69;">local </span><span style="color:#696989;">port </span><span style="color:#016692;">= </span><span style="color:#8c008a;">53561
 </span><span style="color:#014a69;">local </span><span style="color:#696989;">token </span><span style="color:#016692;">= </span><span style="color:#009f78;">&#39;cb2ad753df0aca85&#39;
-</span><span style="color:#014a69;">local </span><span style="color:#696989;">client </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">new_tcp</span><span style="color:#010101;">()
-</span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">tcp_connect</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;127.0.0.1&#39;</span><span style="color:#010101;">, </span><span style="color:#696989;">port</span><span style="color:#010101;">, </span><span style="color:#696989;">callback</span><span style="color:#010101;">)
+</span><span style="color:#014a69;">local </span><span style="color:#696989;">client </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">new_tcp</span><span>()
+</span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">tcp_connect</span><span>(</span><span style="color:#696989;">client</span><span>, </span><span style="color:#009f78;">&#39;127.0.0.1&#39;</span><span>, </span><span style="color:#696989;">port</span><span>, </span><span style="color:#696989;">callback</span><span>)
 </span></code></pre>
 <p>Since this is async world, we need to pass a callback that gets executed
 whenever the connection happens (or in case something goes wrong). So the first
 thing we do in our callback is check for errors, which looks familiar for Go
 developers:</p>
-<pre style="background-color:#ffffff;">
-<code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#a15001;">callback </span><span style="color:#016692;">= </span><span style="color:#877611;">function</span><span style="color:#010101;">(</span><span style="color:#696989;">err</span><span style="color:#010101;">)
-  </span><span style="color:#016692;">if </span><span style="color:#696989;">err </span><span style="color:#016692;">then
-    </span><span style="color:#7a7025;">error</span><span style="color:#010101;">(</span><span style="color:#696989;">err</span><span style="color:#010101;">)
-  </span><span style="color:#016692;">end
-
-  </span><span style="color:#333366;">...
+<pre data-lang="lua" style="background-color:#ffffff;color:#010101;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#a15001;">callback </span><span style="color:#016692;">= </span><span style="color:#877611;">function</span><span>(</span><span style="color:#696989;">err</span><span>)
+</span><span>  </span><span style="color:#016692;">if </span><span style="color:#696989;">err </span><span style="color:#016692;">then
+</span><span>    </span><span style="color:#7a7025;">error</span><span>(</span><span style="color:#696989;">err</span><span>)
+</span><span>  </span><span style="color:#016692;">end
+</span><span>
+</span><span>  </span><span style="color:#333366;">...
 </span><span style="color:#016692;">end
 </span></code></pre>
 <p>If there are no errors, it means we can send the contents of our file to the
@@ -274,60 +263,58 @@ the buffer. So let's grab the contents of the current buffer and send that to
 the server, then read back the response and write it back to the buffer! This
 time I'll include the entire implementation of the callback, with some inline
 comments:</p>
-<pre style="background-color:#ffffff;">
-<code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#a15001;">callback </span><span style="color:#016692;">= </span><span style="color:#877611;">function</span><span style="color:#010101;">(</span><span style="color:#696989;">err</span><span style="color:#010101;">)
-  </span><span style="color:#016692;">if </span><span style="color:#696989;">err </span><span style="color:#016692;">then
-    </span><span style="color:#7a7025;">error</span><span style="color:#010101;">(</span><span style="color:#696989;">err</span><span style="color:#010101;">)
-  </span><span style="color:#016692;">end
-
-  </span><span style="color:#898989;">-- grab the contents of the buffer and add first row to match core_d&#39;s protocol
-  </span><span style="color:#014a69;">local </span><span style="color:#696989;">bufnr </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span style="color:#010101;">.api.</span><span style="color:#696989;">nvim_get_current_buf</span><span style="color:#010101;">()
-  </span><span style="color:#014a69;">local </span><span style="color:#696989;">first_line </span><span style="color:#016692;">= </span><span style="color:#582b00;">string</span><span style="color:#010101;">.</span><span style="color:#7a7025;">format</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;%s %s %s&#39;</span><span style="color:#010101;">, </span><span style="color:#696989;">token</span><span style="color:#010101;">, </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">cwd</span><span style="color:#010101;">(), </span><span style="color:#009f78;">&#39;sample2.js&#39;</span><span style="color:#010101;">)
-  </span><span style="color:#014a69;">local </span><span style="color:#696989;">lines </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span style="color:#010101;">.api.</span><span style="color:#696989;">nvim_buf_get_lines</span><span style="color:#010101;">(</span><span style="color:#696989;">bufnr</span><span style="color:#010101;">, </span><span style="color:#8c008a;">0</span><span style="color:#010101;">, </span><span style="color:#016692;">-</span><span style="color:#8c008a;">1</span><span style="color:#010101;">, </span><span style="color:#333366;">true</span><span style="color:#010101;">)
-  </span><span style="color:#582b00;">table</span><span style="color:#010101;">.</span><span style="color:#7a7025;">insert</span><span style="color:#010101;">(</span><span style="color:#696989;">lines</span><span style="color:#010101;">, </span><span style="color:#8c008a;">1</span><span style="color:#010101;">, </span><span style="color:#696989;">first_line</span><span style="color:#010101;">)
-
-  </span><span style="color:#898989;">-- start reading the response
-  </span><span style="color:#014a69;">local </span><span style="color:#696989;">response </span><span style="color:#016692;">= </span><span style="color:#009f78;">&#39;&#39;
-  </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">read_start</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">, </span><span style="color:#877611;">function</span><span style="color:#010101;">(</span><span style="color:#696989;">read_err</span><span style="color:#010101;">, </span><span style="color:#696989;">chunk</span><span style="color:#010101;">)
-    </span><span style="color:#898989;">-- check if there was any error reading data back, if so, close the
-    -- connection and report the error.
-    </span><span style="color:#016692;">if </span><span style="color:#696989;">read_err </span><span style="color:#016692;">then
-      </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">close</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">)
-      </span><span style="color:#7a7025;">error</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;failed to read data from prettierd: &#39; </span><span style="color:#016692;">.. </span><span style="color:#696989;">read_err</span><span style="color:#010101;">)
-    </span><span style="color:#016692;">end
-
-    </span><span style="color:#898989;">-- libuv will call this callback with no data and no error when it&#39;s done,
-    -- so if there&#39;s data, concatenate it into the final response. Otherwise it
-    -- means we&#39;re done, so invoke the `write_to_buf` to write the data back.
-    </span><span style="color:#016692;">if </span><span style="color:#696989;">chunk </span><span style="color:#016692;">then
-      </span><span style="color:#696989;">response </span><span style="color:#016692;">= </span><span style="color:#696989;">response </span><span style="color:#016692;">.. </span><span style="color:#696989;">chunk
-    </span><span style="color:#016692;">else
-      </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">close</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">)
-      </span><span style="color:#696989;">write_to_buf</span><span style="color:#010101;">(</span><span style="color:#696989;">response</span><span style="color:#010101;">, </span><span style="color:#696989;">bufnr</span><span style="color:#010101;">)
-    </span><span style="color:#016692;">end
-  end</span><span style="color:#010101;">)
-
-  </span><span style="color:#898989;">-- write the request
-  </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">write</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">, </span><span style="color:#582b00;">table</span><span style="color:#010101;">.</span><span style="color:#7a7025;">concat</span><span style="color:#010101;">(</span><span style="color:#696989;">lines</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&#39;</span><span style="color:#010101;">))
-
-  </span><span style="color:#898989;">-- signal to the server that we&#39;re done writing the request
-  </span><span style="color:#696989;">vim</span><span style="color:#010101;">.loop.</span><span style="color:#696989;">shutdown</span><span style="color:#010101;">(</span><span style="color:#696989;">client</span><span style="color:#010101;">)
+<pre data-lang="lua" style="background-color:#ffffff;color:#010101;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#a15001;">callback </span><span style="color:#016692;">= </span><span style="color:#877611;">function</span><span>(</span><span style="color:#696989;">err</span><span>)
+</span><span>  </span><span style="color:#016692;">if </span><span style="color:#696989;">err </span><span style="color:#016692;">then
+</span><span>    </span><span style="color:#7a7025;">error</span><span>(</span><span style="color:#696989;">err</span><span>)
+</span><span>  </span><span style="color:#016692;">end
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- grab the contents of the buffer and add first row to match core_d&#39;s protocol
+</span><span>  </span><span style="color:#014a69;">local </span><span style="color:#696989;">bufnr </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span>.api.</span><span style="color:#696989;">nvim_get_current_buf</span><span>()
+</span><span>  </span><span style="color:#014a69;">local </span><span style="color:#696989;">first_line </span><span style="color:#016692;">= </span><span style="color:#582b00;">string</span><span>.</span><span style="color:#7a7025;">format</span><span>(</span><span style="color:#009f78;">&#39;%s %s %s&#39;</span><span>, </span><span style="color:#696989;">token</span><span>, </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">cwd</span><span>(), </span><span style="color:#009f78;">&#39;sample2.js&#39;</span><span>)
+</span><span>  </span><span style="color:#014a69;">local </span><span style="color:#696989;">lines </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span>.api.</span><span style="color:#696989;">nvim_buf_get_lines</span><span>(</span><span style="color:#696989;">bufnr</span><span>, </span><span style="color:#8c008a;">0</span><span>, </span><span style="color:#016692;">-</span><span style="color:#8c008a;">1</span><span>, </span><span style="color:#333366;">true</span><span>)
+</span><span>  </span><span style="color:#582b00;">table</span><span>.</span><span style="color:#7a7025;">insert</span><span>(</span><span style="color:#696989;">lines</span><span>, </span><span style="color:#8c008a;">1</span><span>, </span><span style="color:#696989;">first_line</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- start reading the response
+</span><span>  </span><span style="color:#014a69;">local </span><span style="color:#696989;">response </span><span style="color:#016692;">= </span><span style="color:#009f78;">&#39;&#39;
+</span><span>  </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">read_start</span><span>(</span><span style="color:#696989;">client</span><span>, </span><span style="color:#877611;">function</span><span>(</span><span style="color:#696989;">read_err</span><span>, </span><span style="color:#696989;">chunk</span><span>)
+</span><span>    </span><span style="color:#898989;">-- check if there was any error reading data back, if so, close the
+</span><span>    </span><span style="color:#898989;">-- connection and report the error.
+</span><span>    </span><span style="color:#016692;">if </span><span style="color:#696989;">read_err </span><span style="color:#016692;">then
+</span><span>      </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">close</span><span>(</span><span style="color:#696989;">client</span><span>)
+</span><span>      </span><span style="color:#7a7025;">error</span><span>(</span><span style="color:#009f78;">&#39;failed to read data from prettierd: &#39; </span><span style="color:#016692;">.. </span><span style="color:#696989;">read_err</span><span>)
+</span><span>    </span><span style="color:#016692;">end
+</span><span>
+</span><span>    </span><span style="color:#898989;">-- libuv will call this callback with no data and no error when it&#39;s done,
+</span><span>    </span><span style="color:#898989;">-- so if there&#39;s data, concatenate it into the final response. Otherwise it
+</span><span>    </span><span style="color:#898989;">-- means we&#39;re done, so invoke the `write_to_buf` to write the data back.
+</span><span>    </span><span style="color:#016692;">if </span><span style="color:#696989;">chunk </span><span style="color:#016692;">then
+</span><span>      </span><span style="color:#696989;">response </span><span style="color:#016692;">= </span><span style="color:#696989;">response </span><span style="color:#016692;">.. </span><span style="color:#696989;">chunk
+</span><span>    </span><span style="color:#016692;">else
+</span><span>      </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">close</span><span>(</span><span style="color:#696989;">client</span><span>)
+</span><span>      </span><span style="color:#696989;">write_to_buf</span><span>(</span><span style="color:#696989;">response</span><span>, </span><span style="color:#696989;">bufnr</span><span>)
+</span><span>    </span><span style="color:#016692;">end
+</span><span>  </span><span style="color:#016692;">end</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- write the request
+</span><span>  </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">write</span><span>(</span><span style="color:#696989;">client</span><span>, </span><span style="color:#582b00;">table</span><span>.</span><span style="color:#7a7025;">concat</span><span>(</span><span style="color:#696989;">lines</span><span>, </span><span style="color:#009f78;">&#39;</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&#39;</span><span>))
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- signal to the server that we&#39;re done writing the request
+</span><span>  </span><span style="color:#696989;">vim</span><span>.loop.</span><span style="color:#696989;">shutdown</span><span>(</span><span style="color:#696989;">client</span><span>)
 </span><span style="color:#016692;">end
 </span></code></pre>
 <p>And here's a simple implementation of <code>write_to_buf</code>. The trickiest bit is
 error handling: the way errors are reported isn't great, but it's acceptable:
 if prettier fails, the last line contains a message in the format <code># exit &lt;code&gt; ...</code>.</p>
-<pre style="background-color:#ffffff;">
-<code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#877611;">function </span><span style="color:#a15001;">write_to_buf</span><span style="color:#010101;">(</span><span style="color:#696989;">data</span><span style="color:#010101;">, </span><span style="color:#696989;">bufnr</span><span style="color:#010101;">)
-  </span><span style="color:#014a69;">local </span><span style="color:#696989;">new_lines </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span style="color:#010101;">.</span><span style="color:#696989;">split</span><span style="color:#010101;">(</span><span style="color:#696989;">data</span><span style="color:#010101;">, </span><span style="color:#009f78;">&#39;</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&#39;</span><span style="color:#010101;">)
-
-  </span><span style="color:#898989;">-- check for errors
-  </span><span style="color:#016692;">if </span><span style="color:#582b00;">string</span><span style="color:#010101;">.</span><span style="color:#7a7025;">find</span><span style="color:#010101;">(</span><span style="color:#696989;">new_lines</span><span style="color:#010101;">[</span><span style="color:#016692;">#</span><span style="color:#696989;">new_lines</span><span style="color:#010101;">], </span><span style="color:#009f78;">&#39;^# exit %d+&#39;</span><span style="color:#010101;">) </span><span style="color:#016692;">then
-    </span><span style="color:#7a7025;">error</span><span style="color:#010101;">(</span><span style="color:#582b00;">string</span><span style="color:#010101;">.</span><span style="color:#7a7025;">format</span><span style="color:#010101;">(</span><span style="color:#009f78;">&#39;failed to format with prettier: %s&#39;</span><span style="color:#010101;">, </span><span style="color:#696989;">data</span><span style="color:#010101;">))
-  </span><span style="color:#016692;">end
-
-  </span><span style="color:#898989;">-- write contents
-  </span><span style="color:#696989;">vim</span><span style="color:#010101;">.api.</span><span style="color:#696989;">nvim_buf_set_lines</span><span style="color:#010101;">(</span><span style="color:#696989;">bufnr</span><span style="color:#010101;">, </span><span style="color:#8c008a;">0</span><span style="color:#010101;">, </span><span style="color:#016692;">-</span><span style="color:#8c008a;">1</span><span style="color:#010101;">, </span><span style="color:#333366;">false</span><span style="color:#010101;">, </span><span style="color:#696989;">new_lines</span><span style="color:#010101;">)
+<pre data-lang="lua" style="background-color:#ffffff;color:#010101;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#014a69;">local </span><span style="color:#877611;">function </span><span style="color:#a15001;">write_to_buf</span><span>(</span><span style="color:#696989;">data</span><span>, </span><span style="color:#696989;">bufnr</span><span>)
+</span><span>  </span><span style="color:#014a69;">local </span><span style="color:#696989;">new_lines </span><span style="color:#016692;">= </span><span style="color:#696989;">vim</span><span>.</span><span style="color:#696989;">split</span><span>(</span><span style="color:#696989;">data</span><span>, </span><span style="color:#009f78;">&#39;</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&#39;</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- check for errors
+</span><span>  </span><span style="color:#016692;">if </span><span style="color:#582b00;">string</span><span>.</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#696989;">new_lines</span><span>[</span><span style="color:#016692;">#</span><span style="color:#696989;">new_lines</span><span>], </span><span style="color:#009f78;">&#39;^# exit %d+&#39;</span><span>) </span><span style="color:#016692;">then
+</span><span>    </span><span style="color:#7a7025;">error</span><span>(</span><span style="color:#582b00;">string</span><span>.</span><span style="color:#7a7025;">format</span><span>(</span><span style="color:#009f78;">&#39;failed to format with prettier: %s&#39;</span><span>, </span><span style="color:#696989;">data</span><span>))
+</span><span>  </span><span style="color:#016692;">end
+</span><span>
+</span><span>  </span><span style="color:#898989;">-- write contents
+</span><span>  </span><span style="color:#696989;">vim</span><span>.api.</span><span style="color:#696989;">nvim_buf_set_lines</span><span>(</span><span style="color:#696989;">bufnr</span><span>, </span><span style="color:#8c008a;">0</span><span>, </span><span style="color:#016692;">-</span><span style="color:#8c008a;">1</span><span>, </span><span style="color:#333366;">false</span><span>, </span><span style="color:#696989;">new_lines</span><span>)
 </span><span style="color:#016692;">end
 </span></code></pre>
 <p>Now you can throw all of that in a <code>format()</code> function and invoke it on write!</p>
