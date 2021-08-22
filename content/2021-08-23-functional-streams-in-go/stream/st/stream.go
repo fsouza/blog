@@ -38,5 +38,21 @@ func ToSlice[T any](stream *Stream[T]) []T {
 	return result
 }
 
+func FromSlice[T any](items []T) *Stream[T] {
+	return fromSlice(items, 0)
+}
+
+func fromSlice[T any](items []T, index int) *Stream[T] {
+	if index >= len(items) {
+		return nil
+	}
+	return &Stream[T]{
+		Value: items[index],
+		Next: func() *Stream[T] {
+			return fromSlice(items, index+1)
+		},
+	}
+}
+
 func main() {
 }
