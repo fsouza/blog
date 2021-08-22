@@ -17,7 +17,7 @@ taxonomies = [
 
 [markdown]
 highlight_code = true
-highlight_theme = "ir-white"
+highlight_theme = "inspired-github"
 external_links_target_blank = true
 
 [extra]
