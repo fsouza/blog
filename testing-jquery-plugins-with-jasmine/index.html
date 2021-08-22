@@ -107,20 +107,20 @@ something like this? Do I really need the browser on this test? You don’t
 using a real browser. Let’s delete some files and lines from <em>SpecRunner.html</em>
 file, so we adapt it for our plugin. This is how the structure is going to look
 like:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>.
-</span><span>├── SpecRunner.html
-</span><span>├── lib
-</span><span>│   ├── jasmine-1.0.2
-</span><span>│   │   ├── MIT.LICENSE
-</span><span>│   │   ├── jasmine-html.js
-</span><span>│   │   ├── jasmine.css
-</span><span>│   │   └── jasmine.js
-</span><span>│   └── jquery-1.6.1.min.js
-</span><span>├── spec
-</span><span>│   └── ZebrafySpec.js
-</span><span>└── src
-</span><span>    └── jquery.zebrafy.js
-</span></code></pre>
+<pre><code>.
+├── SpecRunner.html
+├── lib
+│   ├── jasmine-1.0.2
+│   │   ├── MIT.LICENSE
+│   │   ├── jasmine-html.js
+│   │   ├── jasmine.css
+│   │   └── jasmine.js
+│   └── jquery-1.6.1.min.js
+├── spec
+│   └── ZebrafySpec.js
+└── src
+    └── jquery.zebrafy.js
+</code></pre>
 <p>You can create the files <code>jquery.zebrafy.js</code> and <code>ZebrafySpec.js</code>, but
 remember: it is BDD, we need to describe
 the behavior first, then write the code. So let’s start writing the specs in
@@ -134,21 +134,21 @@ function “on demmand”, when we need something, we learn how to use it! ;)</p
 function (a callback). The string describes the test suite and the function is
 a callback that delimites the scope of the test suite. Here is the <code>Zebrafy</code>
 suite:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">describe</span><span>(</span><span style="color:#009f78;">&#39;Zebrafy&#39;</span><span>, </span><span style="color:#877611;">function </span><span>() {
-</span><span>
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">describe('Zebrafy', function () {
+
+});
+</code></pre>
 <p>Let’s start describing the behavior we want to get from the plugin. The most
 basic is: we want different CSS classes for odd an even lines in a table.
 Jasmine provides the <code>it</code> function for writing the tests. It also receives a
 string and a callback: the string is a description for the test and the
 callback is the function executed as test. Here is the very first test:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">it</span><span>(</span><span style="color:#009f78;">&#39;should apply classes zebrafy-odd and zebrafy-even to each other table lines&#39;</span><span>, </span><span style="color:#877611;">function </span><span>() {
-</span><span>    </span><span style="color:#877611;">var </span><span style="color:#696989;">table </span><span style="color:#016692;">= </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&quot;#zebra-table&quot;</span><span>);
-</span><span>    </span><span style="color:#696989;">table</span><span>.</span><span style="color:#a15001;">zebrafy</span><span>();
-</span><span>    </span><span style="color:#a15001;">expect</span><span>(</span><span style="color:#696989;">table</span><span>).</span><span style="color:#a15001;">toBeZebrafyied</span><span>();
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">it('should apply classes zebrafy-odd and zebrafy-even to each other table lines', function () {
+    var table = $("#zebra-table");
+    table.zebrafy();
+    expect(table).toBeZebrafyied();
+});
+</code></pre>
 <p>Okay, here we go: in the first line of the callback, we are using jQuery to
 select a table using the <code>#zebra-table</code> selector, which will look up for a
 table with the ID attribute equals to <em>“zebra-table”</em>, but we don’t have this
@@ -158,27 +158,27 @@ test? Jasmine provide two functions: <code>beforeEach</code> and <code>afterEach
 functions receive a callback function to be executed and, as the names suggest,
 the <code>beforeEach</code> callback is called before each test run, and the <code>afterEach</code>
 callback is called after the test run. Here are the hooks:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">beforeEach</span><span>(</span><span style="color:#877611;">function </span><span>() {
-</span><span>    </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&#39;&lt;table id=&quot;zebra-table&quot;&gt;&lt;/table&gt;&#39;</span><span>).</span><span style="color:#a15001;">appendTo</span><span>(</span><span style="color:#009f78;">&#39;body&#39;</span><span>);
-</span><span>    </span><span style="color:#016692;">for </span><span>(</span><span style="color:#877611;">var </span><span style="color:#696989;">i</span><span style="color:#016692;">=</span><span style="color:#8c008a;">0</span><span>; </span><span style="color:#696989;">i </span><span style="color:#016692;">&lt; </span><span style="color:#8c008a;">10</span><span>; </span><span style="color:#696989;">i</span><span style="color:#016692;">++</span><span>) {
-</span><span>        </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&#39;&lt;tr&gt;&lt;/tr&gt;&#39;</span><span>).</span><span style="color:#7a7025;">append</span><span>(</span><span style="color:#009f78;">&#39;&lt;td&gt;&lt;/td&gt;&#39;</span><span>).</span><span style="color:#7a7025;">append</span><span>(</span><span style="color:#009f78;">&#39;&lt;td&gt;&lt;/td&gt;&#39;</span><span>).</span><span style="color:#7a7025;">append</span><span>(</span><span style="color:#009f78;">&#39;&lt;td&gt;&lt;/td&gt;&#39;</span><span>).</span><span style="color:#a15001;">appendTo</span><span>(</span><span style="color:#009f78;">&#39;#zebra-table&#39;</span><span>);
-</span><span>    };
-</span><span>});
-</span><span>
-</span><span style="color:#a15001;">afterEach</span><span>(</span><span style="color:#877611;">function </span><span>() {
-</span><span>    </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&quot;#zebra-table&quot;</span><span>).</span><span style="color:#7a7025;">remove</span><span>();
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">beforeEach(function () {
+    $('<table id="zebra-table"></table>').appendTo('body');
+    for (var i=0; i < 10; i++) {
+        $('<tr></tr>').append('<td></td>').append('<td></td>').append('<td></td>').appendTo('#zebra-table');
+    };
+});
+
+afterEach(function () {
+    $("#zebra-table").remove();
+});
+</code></pre>
 <p>The <code>beforeEach</code> callback uses jQuery to create a table with 10 rows and 3
 columns and add it to the DOM. In <code>afterEach</code> callback, we just remove that
 table using jQuery again. Okay, now the table exists, let’s go back to the
 test:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">it</span><span>(</span><span style="color:#009f78;">&#39;should apply classes zebrafy-odd and zebrafy-even to each other table lines&#39;</span><span>, </span><span style="color:#877611;">function </span><span>() {
-</span><span>    </span><span style="color:#877611;">var </span><span style="color:#696989;">table </span><span style="color:#016692;">= </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&quot;#zebra-table&quot;</span><span>);
-</span><span>    </span><span style="color:#696989;">table</span><span>.</span><span style="color:#a15001;">zebrafy</span><span>();
-</span><span>    </span><span style="color:#a15001;">expect</span><span>(</span><span style="color:#696989;">table</span><span>).</span><span style="color:#a15001;">toBeZebrafyied</span><span>();
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">it('should apply classes zebrafy-odd and zebrafy-even to each other table lines', function () {
+    var table = $("#zebra-table");
+    table.zebrafy();
+    expect(table).toBeZebrafyied();
+});
+</code></pre>
 <p>In the second line, we call our plugin, that is not ready yet, so let’s forward
 to the next line, where we used the <code>expect</code> function. Jasmine provides this
 function, that receives an object and executes a <em>matcher</em> against it, there is
@@ -186,30 +186,30 @@ a lot of built-in matchers on Jasmine, but <code>toBeZebrafyied</code> is not a 
 matcher. Here is where we know another Jasmine feature: the capability to write
 custom matchers, but how to do this? You can call the <code>beforeEach</code> again, and
 use the <code>addMatcher</code> method of Jasmine object:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">beforeEach</span><span>(</span><span style="color:#877611;">function </span><span>() {
-</span><span>    </span><span style="color:#696989;">this</span><span>.</span><span style="color:#a15001;">addMatchers</span><span>({
-</span><span>        </span><span style="color:#a15001;">toBeZebrafyied</span><span>: </span><span style="color:#877611;">function</span><span>() {
-</span><span>            </span><span style="color:#877611;">var </span><span style="color:#696989;">isZebrafyied </span><span style="color:#016692;">= </span><span style="color:#333366;">true</span><span>;
-</span><span>
-</span><span>            </span><span style="color:#696989;">this</span><span>.</span><span style="color:#696989;">actual</span><span>.</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:even&quot;</span><span>).</span><span style="color:#a15001;">each</span><span>(</span><span style="color:#877611;">function </span><span>(</span><span style="color:#696989;">index</span><span>, </span><span style="color:#696989;">tr</span><span>) {
-</span><span>                </span><span style="color:#696989;">isZebrafyied </span><span style="color:#016692;">= </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">tr</span><span>).</span><span style="color:#a15001;">hasClass</span><span>(</span><span style="color:#009f78;">&#39;zebrafy-odd&#39;</span><span>) </span><span style="color:#016692;">=== </span><span style="color:#333366;">false </span><span style="color:#016692;">&amp;&amp; </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">tr</span><span>).</span><span style="color:#a15001;">hasClass</span><span>(</span><span style="color:#009f78;">&#39;zebrafy-even&#39;</span><span>);
-</span><span>                </span><span style="color:#016692;">if </span><span>(</span><span style="color:#016692;">!</span><span style="color:#696989;">isZebrafyied</span><span>) {
-</span><span>                    </span><span style="color:#016692;">return</span><span>;
-</span><span>                };
-</span><span>            });
-</span><span>
-</span><span>            </span><span style="color:#696989;">this</span><span>.</span><span style="color:#696989;">actual</span><span>.</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:odd&quot;</span><span>).</span><span style="color:#a15001;">each</span><span>(</span><span style="color:#877611;">function </span><span>(</span><span style="color:#696989;">index</span><span>, </span><span style="color:#696989;">tr</span><span>) {
-</span><span>                </span><span style="color:#696989;">isZebrafyied </span><span style="color:#016692;">= </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">tr</span><span>).</span><span style="color:#a15001;">hasClass</span><span>(</span><span style="color:#009f78;">&#39;zebrafy-odd&#39;</span><span>) </span><span style="color:#016692;">&amp;&amp; </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">tr</span><span>).</span><span style="color:#a15001;">hasClass</span><span>(</span><span style="color:#009f78;">&#39;zebrafy-even&#39;</span><span>) </span><span style="color:#016692;">=== </span><span style="color:#333366;">false</span><span>;
-</span><span>                </span><span style="color:#016692;">if </span><span>(</span><span style="color:#016692;">!</span><span style="color:#696989;">isZebrafyied</span><span>) {
-</span><span>                    </span><span style="color:#016692;">return</span><span>;
-</span><span>                };
-</span><span>            });
-</span><span>
-</span><span>            </span><span style="color:#016692;">return </span><span style="color:#696989;">isZebrafyied</span><span>;
-</span><span>        }
-</span><span>    });
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">beforeEach(function () {
+    this.addMatchers({
+        toBeZebrafyied: function() {
+            var isZebrafyied = true;
+
+            this.actual.find("tr:even").each(function (index, tr) {
+                isZebrafyied = $(tr).hasClass('zebrafy-odd') === false && $(tr).hasClass('zebrafy-even');
+                if (!isZebrafyied) {
+                    return;
+                };
+            });
+
+            this.actual.find("tr:odd").each(function (index, tr) {
+                isZebrafyied = $(tr).hasClass('zebrafy-odd') && $(tr).hasClass('zebrafy-even') === false;
+                if (!isZebrafyied) {
+                    return;
+                };
+            });
+
+            return isZebrafyied;
+        }
+    });
+});
+</code></pre>
 <p>The method <code>addMatchers</code> receives an object where each property is a matcher.
 Your matcher can receive arguments if you want. The object being matched can be
 accessed using <code>this.actual</code>, so here is what the method above does: it takes
@@ -218,13 +218,13 @@ CSS class <code>zebrafy-odd</code> and don’t have the CSS class <code>zebrafy-
 the same checking with even <code>&lt;tr&gt;</code> lines.</p>
 <p>Now that we have wrote the test, it’s time to write the plugin. Here some
 jQuery code:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>(</span><span style="color:#877611;">function </span><span>(</span><span style="color:#696989;">$</span><span>) {
-</span><span>    </span><span style="color:#696989;">$</span><span>.</span><span style="color:#696989;">fn</span><span>.</span><span style="color:#a15001;">zebrafy </span><span style="color:#016692;">= </span><span style="color:#877611;">function </span><span>() {
-</span><span>        </span><span style="color:#696989;">this</span><span>.</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:even&quot;</span><span>).</span><span style="color:#a15001;">addClass</span><span>(</span><span style="color:#009f78;">&quot;zebrafy-even&quot;</span><span>);
-</span><span>        </span><span style="color:#696989;">this</span><span>.</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:odd&quot;</span><span>).</span><span style="color:#a15001;">addClass</span><span>(</span><span style="color:#009f78;">&quot;zebrafy-odd&quot;</span><span>);
-</span><span>    };
-</span><span>})(</span><span style="color:#696989;">jQuery</span><span>);
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">(function ($) {
+    $.fn.zebrafy = function () {
+        this.find("tr:even").addClass("zebrafy-even");
+        this.find("tr:odd").addClass("zebrafy-odd");
+    };
+})(jQuery);
+</code></pre>
 <p>I’m not going to explain <a rel="noopener" target="_blank" href="http://docs.jquery.com/Plugins/Authoring">how to implement a jQuery
 plugin</a> neither <a rel="noopener" target="_blank" href="http://benalman.com/news/2010/11/immediately-invoked-function-expression/">what are those
 brackets on
@@ -232,24 +232,24 @@ function</a>,
 this post aims to show how to use Jasmine to test jQuery plugins.</p>
 <p>By convention, jQuery plugins are “chainable”, so let’s make sure the zebrafy
 plugin is chainable using a spec:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#a15001;">it</span><span>(</span><span style="color:#009f78;">&#39;zebrafy should be chainable&#39;</span><span>, </span><span style="color:#877611;">function</span><span>() {
-</span><span>    </span><span style="color:#877611;">var </span><span style="color:#696989;">table </span><span style="color:#016692;">= </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#009f78;">&quot;#zebra-table&quot;</span><span>);
-</span><span>    </span><span style="color:#696989;">table</span><span>.</span><span style="color:#a15001;">zebrafy</span><span>().</span><span style="color:#a15001;">addClass</span><span>(</span><span style="color:#009f78;">&#39;black-bg&#39;</span><span>);
-</span><span>    </span><span style="color:#a15001;">expect</span><span>(</span><span style="color:#696989;">table</span><span>.</span><span style="color:#a15001;">hasClass</span><span>(</span><span style="color:#009f78;">&#39;black-bg&#39;</span><span>)).</span><span style="color:#a15001;">toBeTruthy</span><span>();
-</span><span>});
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">it('zebrafy should be chainable', function() {
+    var table = $("#zebra-table");
+    table.zebrafy().addClass('black-bg');
+    expect(table.hasClass('black-bg')).toBeTruthy();
+});
+</code></pre>
 <p>As you can see, we used the built-in matcher <code>toBeTruthy</code>, which asserts that
 an object or expression is <code>true</code>. All we need to do is return the jQuery
 object in the plugin and the test will pass:</p>
-<pre data-lang="javascript" style="background-color:#ffffff;color:#010101;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span>(</span><span style="color:#877611;">function </span><span>(</span><span style="color:#696989;">$</span><span>) {
-</span><span>    </span><span style="color:#696989;">$</span><span>.</span><span style="color:#696989;">fn</span><span>.</span><span style="color:#a15001;">zebrafy </span><span style="color:#016692;">= </span><span style="color:#877611;">function </span><span>() {
-</span><span>        </span><span style="color:#016692;">return </span><span style="color:#696989;">this</span><span>.</span><span style="color:#a15001;">each</span><span>(</span><span style="color:#877611;">function </span><span>(</span><span style="color:#696989;">index</span><span>, </span><span style="color:#696989;">table</span><span>) {
-</span><span>            </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">table</span><span>).</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:even&quot;</span><span>).</span><span style="color:#a15001;">addClass</span><span>(</span><span style="color:#009f78;">&quot;zebrafy-even&quot;</span><span>);
-</span><span>            </span><span style="color:#a15001;">$</span><span>(</span><span style="color:#696989;">table</span><span>).</span><span style="color:#7a7025;">find</span><span>(</span><span style="color:#009f78;">&quot;tr:odd&quot;</span><span>).</span><span style="color:#a15001;">addClass</span><span>(</span><span style="color:#009f78;">&quot;zebrafy-odd&quot;</span><span>);
-</span><span>        });
-</span><span>    };
-</span><span>})(</span><span style="color:#696989;">jQuery</span><span>);
-</span></code></pre>
+<pre data-lang="javascript" class="language-javascript "><code class="language-javascript" data-lang="javascript">(function ($) {
+    $.fn.zebrafy = function () {
+        return this.each(function (index, table) {
+            $(table).find("tr:even").addClass("zebrafy-even");
+            $(table).find("tr:odd").addClass("zebrafy-odd");
+        });
+    };
+})(jQuery);
+</code></pre>
 <p>So, the plugin is tested and ready to release! :) You can check the entire code
 and test with more spec in a <a rel="noopener" target="_blank" href="https://github.com/fsouza/jquery-testing-jasmine">GitHub
 repository</a>.</p>

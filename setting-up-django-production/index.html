@@ -99,22 +99,22 @@ download it from the official site and build with some simple options. In our
 setup, we’re going to install nginx under <code>/opt/nginx</code>, and use it with the
 nginx system user. So, let’s download and extract the latest stable version
 (1.0.9) from nginx website:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>% curl -O http://nginx.org/download/nginx-1.0.9.tar.gz
-</span><span>% tar -xzf nginx-1.0.9.tar.gz
-</span></code></pre>
+<pre><code>% curl -O http://nginx.org/download/nginx-1.0.9.tar.gz
+% tar -xzf nginx-1.0.9.tar.gz
+</code></pre>
 <p>Once you have extracted it, just configure, compile and install:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>% ./configure --prefix=/opt/nginx --user=nginx --group=nginx
-</span><span>% make
-</span><span>% [sudo] make install
-</span></code></pre>
+<pre><code>% ./configure --prefix=/opt/nginx --user=nginx --group=nginx
+% make
+% [sudo] make install
+</code></pre>
 <p>As you can see, we provided the <code>/opt/nginx</code> to configure, make sure the <code>/opt</code>
 directory exists. Also, make sure that there is a user and a group called
 <em>nginx</em>, if they don’t exist, add them:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
-</span></code></pre>
+<pre><code>% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
+</code></pre>
 <p>After that, you can start nginx using the command line below:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>% [sudo] /opt/nginx/sbin/nginx
-</span></code></pre>
+<pre><code>% [sudo] /opt/nginx/sbin/nginx
+</code></pre>
 <blockquote>
 <p>Linode provides an <a rel="noopener" target="_blank" href="https://library.linode.com/assets/634-init-deb.sh">init
 script</a> that uses
@@ -134,31 +134,31 @@ versioned with the entire code, so it must be included in the <code>nginx.conf</
 file (assume that the <code>library</code> project is in the directory <code>/opt/projects</code>).</li>
 </ul>
 <p>So here is the <code>nginx.conf</code> for the requirements above:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>user  nginx;
-</span><span>worker_processes  2;
-</span><span>
-</span><span>pid logs/nginx.pid;
-</span><span>
-</span><span>events {
-</span><span>    worker_connections  1024;
-</span><span>}
-</span><span>
-</span><span>http {
-</span><span>    include       mime.types;
-</span><span>    default_type  application/octet-stream;
-</span><span>
-</span><span>    log_format  main  &#39;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#39;
-</span><span>                     &#39;$status $body_bytes_sent &quot;$http_referer&quot; &#39;
-</span><span>                     &#39;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#39;;
-</span><span>
-</span><span>    access_log  logs/access.log  main;
-</span><span>
-</span><span>    sendfile           on;
-</span><span>    keepalive_timeout  65;
-</span><span>
-</span><span>    include /opt/projects/showcase/nginx.conf;
-</span><span>}
-</span></code></pre>
+<pre><code>user  nginx;
+worker_processes  2;
+
+pid logs/nginx.pid;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                     '$status $body_bytes_sent "$http_referer" '
+                     '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  logs/access.log  main;
+
+    sendfile           on;
+    keepalive_timeout  65;
+
+    include /opt/projects/showcase/nginx.conf;
+}
+</code></pre>
 <p>Now we just need to write the configuration for our Django project. I’m using
 an old sample project written while I was working at
 <a rel="noopener" target="_blank" href="http://www.giran.com.br">Giran</a>: the name is <em>lojas giranianas</em>, a nonsense
@@ -167,26 +167,26 @@ products, it’s like an e-commerce project, but it can’t sell, so it’s just
 product catalog. The code is available at
 <a rel="noopener" target="_blank" href="https://github.com/fsouza/fast-track-django">Github</a>. The <code>nginx.conf</code> file
 for the repository is here:</p>
-<pre style="background-color:#ffffff;color:#010101;"><code><span>server {
-</span><span>    listen 80;
-</span><span>    server_name localhost;
-</span><span>
-</span><span>    charset utf-8;
-</span><span>
-</span><span>    location / {
-</span><span>        proxy_set_header    X-Real-IP   $remote_addr;
-</span><span>        proxy_set_header    Host        $http_host;
-</span><span>        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
-</span><span>
-</span><span>        proxy_pass http://localhost:8000;
-</span><span>    }
-</span><span>
-</span><span>    location /static {
-</span><span>        root /opt/projects/showcase/;
-</span><span>        expires 1d;
-</span><span>    }
-</span><span>}
-</span></code></pre>
+<pre><code>server {
+    listen 80;
+    server_name localhost;
+
+    charset utf-8;
+
+    location / {
+        proxy_set_header    X-Real-IP   $remote_addr;
+        proxy_set_header    Host        $http_host;
+        proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_pass http://localhost:8000;
+    }
+
+    location /static {
+        root /opt/projects/showcase/;
+        expires 1d;
+    }
+}
+</code></pre>
 <p>The server listens on port <code>80</code>, responds for the <code>localhost</code> hostname (<a rel="noopener" target="_blank" href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html">read
 more about the Host
 header</a>). The

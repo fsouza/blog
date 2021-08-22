@@ -102,118 +102,118 @@ big bowl of spaghetti.</p>
 <li>It must be possible for more than one philosopher to eat at the same time</li>
 </ul>
 <p>No more talk, here is my solution for the problem:</p>
-<pre data-lang="go" style="background-color:#ffffff;color:#010101;" class="language-go "><code class="language-go" data-lang="go"><span style="color:#016692;">package </span><span style="color:#696989;">main
-</span><span>
-</span><span style="color:#016692;">import </span><span>(
-</span><span>	</span><span style="color:#009f78;">&quot;fmt&quot;
-</span><span>	</span><span style="color:#009f78;">&quot;sync&quot;
-</span><span>	</span><span style="color:#009f78;">&quot;time&quot;
-</span><span>)
-</span><span>
-</span><span style="color:#877611;">type </span><span style="text-decoration:underline;color:#646409;">Fork </span><span style="color:#877611;">struct </span><span>{
-</span><span>	</span><span style="color:#696989;">sync</span><span>.</span><span style="font-style:italic;color:#d19264;">Mutex
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">type </span><span style="text-decoration:underline;color:#646409;">Table </span><span style="color:#877611;">struct </span><span>{
-</span><span>	</span><span style="color:#696989;">philosophers </span><span style="color:#877611;">chan Philosopher
-</span><span>	</span><span style="color:#696989;">forks </span><span>[]</span><span style="color:#016692;">*</span><span style="color:#877611;">Fork
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span style="color:#a15001;">NewTable</span><span>(</span><span style="color:#696989;">forks </span><span style="color:#646409;">int</span><span>) </span><span style="color:#016692;">*</span><span style="color:#877611;">Table </span><span>{
-</span><span>	</span><span style="color:#696989;">t </span><span style="color:#016692;">:= </span><span style="color:#7a7025;">new</span><span>(</span><span style="color:#877611;">Table</span><span>)
-</span><span>	</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">philosophers </span><span style="color:#016692;">= </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan Philosopher</span><span>, </span><span style="color:#696989;">forks </span><span style="color:#016692;">- </span><span style="color:#8c008a;">1</span><span>)
-</span><span>	</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">forks </span><span style="color:#016692;">= </span><span style="color:#7a7025;">make</span><span>([]</span><span style="color:#016692;">*</span><span style="color:#877611;">Fork</span><span>, </span><span style="color:#696989;">forks</span><span>)
-</span><span>	</span><span style="color:#016692;">for </span><span style="color:#696989;">i </span><span style="color:#016692;">:= </span><span style="color:#8c008a;">0</span><span>; </span><span style="color:#696989;">i </span><span style="color:#016692;">&lt; </span><span style="color:#696989;">forks</span><span>; </span><span style="color:#696989;">i</span><span style="color:#016692;">++ </span><span>{
-</span><span>		</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">forks</span><span>[</span><span style="color:#696989;">i</span><span>] </span><span style="color:#016692;">= </span><span style="color:#7a7025;">new</span><span>(</span><span style="color:#877611;">Fork</span><span>)
-</span><span>	}
-</span><span>	</span><span style="color:#016692;">return </span><span style="color:#696989;">t
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">t </span><span style="color:#016692;">*</span><span style="color:#877611;">Table</span><span>) </span><span style="color:#a15001;">PushPhilosopher</span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>) {
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table </span><span style="color:#016692;">= </span><span style="color:#696989;">t
-</span><span>	</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">philosophers </span><span style="color:#016692;">&lt;- </span><span style="color:#696989;">p
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">t </span><span style="color:#016692;">*</span><span style="color:#877611;">Table</span><span>) </span><span style="color:#a15001;">PopPhilosopher</span><span>() </span><span style="color:#877611;">Philosopher </span><span>{
-</span><span>	</span><span style="color:#696989;">p </span><span style="color:#016692;">:= &lt;-</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">philosophers
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table </span><span style="color:#016692;">= </span><span style="color:#333366;">nil
-</span><span>	</span><span style="color:#016692;">return </span><span style="color:#696989;">p
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">t </span><span style="color:#016692;">*</span><span style="color:#877611;">Table</span><span>) </span><span style="color:#a15001;">RightFork</span><span>(</span><span style="color:#696989;">philosopherIndex </span><span style="color:#646409;">int</span><span>) </span><span style="color:#016692;">*</span><span style="color:#877611;">Fork </span><span>{
-</span><span>	</span><span style="color:#696989;">f </span><span style="color:#016692;">:= </span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">forks</span><span>[</span><span style="color:#696989;">philosopherIndex</span><span>]
-</span><span>	</span><span style="color:#016692;">return </span><span style="color:#696989;">f
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">t </span><span style="color:#016692;">*</span><span style="color:#877611;">Table</span><span>) </span><span style="color:#a15001;">LeftFork</span><span>(</span><span style="color:#696989;">philosopherIndex </span><span style="color:#646409;">int</span><span>) </span><span style="color:#016692;">*</span><span style="color:#877611;">Fork </span><span>{
-</span><span>	</span><span style="color:#696989;">f </span><span style="color:#016692;">:= </span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">forks</span><span>[(</span><span style="color:#696989;">philosopherIndex </span><span style="color:#016692;">+ </span><span style="color:#8c008a;">1</span><span>) </span><span style="color:#016692;">% </span><span style="color:#7a7025;">len</span><span>(</span><span style="color:#696989;">t</span><span>.</span><span style="color:#696989;">forks</span><span>)]
-</span><span>	</span><span style="color:#016692;">return </span><span style="color:#696989;">f
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">type </span><span style="text-decoration:underline;color:#646409;">Philosopher </span><span style="color:#877611;">struct </span><span>{
-</span><span>	</span><span style="color:#696989;">name </span><span style="color:#646409;">string
-</span><span>	</span><span style="color:#696989;">index </span><span style="color:#646409;">int
-</span><span>	</span><span style="color:#696989;">table </span><span style="color:#016692;">*</span><span style="color:#877611;">Table
-</span><span>	</span><span style="color:#696989;">fed </span><span style="color:#877611;">chan </span><span style="color:#646409;">int
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>) </span><span style="color:#a15001;">Think</span><span>() {
-</span><span>	</span><span style="color:#696989;">fmt</span><span>.</span><span style="color:#696989;">Printf</span><span>(</span><span style="color:#009f78;">&quot;</span><span style="color:#00ff00;">%s</span><span style="color:#009f78;"> is thinking...</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&quot;</span><span>, </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">name</span><span>)
-</span><span>	</span><span style="color:#696989;">time</span><span>.</span><span style="color:#696989;">Sleep</span><span>(</span><span style="color:#8c008a;">3e9</span><span>)
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">PushPhilosopher</span><span>(</span><span style="color:#696989;">p</span><span>)
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>) </span><span style="color:#a15001;">Eat</span><span>() {
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">GetForks</span><span>()
-</span><span>	</span><span style="color:#696989;">fmt</span><span>.</span><span style="color:#696989;">Printf</span><span>(</span><span style="color:#009f78;">&quot;</span><span style="color:#00ff00;">%s</span><span style="color:#009f78;"> is eating...</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&quot;</span><span>, </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">name</span><span>)
-</span><span>	</span><span style="color:#696989;">time</span><span>.</span><span style="color:#696989;">Sleep</span><span>(</span><span style="color:#8c008a;">3e9</span><span>)
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">PutForks</span><span>()
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">PopPhilosopher</span><span>()
-</span><span>	</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">fed </span><span style="color:#016692;">&lt;- </span><span style="color:#8c008a;">1
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>) </span><span style="color:#a15001;">GetForks</span><span>() {
-</span><span>	</span><span style="color:#696989;">rightFork </span><span style="color:#016692;">:= </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">RightFork</span><span>(</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">index</span><span>)
-</span><span>	</span><span style="color:#696989;">rightFork</span><span>.</span><span style="color:#696989;">Lock</span><span>()
-</span><span>
-</span><span>	</span><span style="color:#696989;">leftFork </span><span style="color:#016692;">:= </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">LeftFork</span><span>(</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">index</span><span>)
-</span><span>	</span><span style="color:#696989;">leftFork</span><span>.</span><span style="color:#696989;">Lock</span><span>()
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>) </span><span style="color:#a15001;">PutForks</span><span>() {
-</span><span>	</span><span style="color:#696989;">rightFork </span><span style="color:#016692;">:= </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">RightFork</span><span>(</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">index</span><span>)
-</span><span>	</span><span style="color:#696989;">rightFork</span><span>.</span><span style="color:#696989;">Unlock</span><span>()
-</span><span>
-</span><span>	</span><span style="color:#696989;">leftFork </span><span style="color:#016692;">:= </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">table</span><span>.</span><span style="color:#696989;">LeftFork</span><span>(</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">index</span><span>)
-</span><span>	</span><span style="color:#696989;">leftFork</span><span>.</span><span style="color:#696989;">Unlock</span><span>()
-</span><span>}
-</span><span>
-</span><span style="color:#877611;">func </span><span style="color:#a15001;">main</span><span>() {
-</span><span>	</span><span style="color:#696989;">table </span><span style="color:#016692;">:= </span><span style="color:#696989;">NewTable</span><span>(</span><span style="color:#8c008a;">5</span><span>)
-</span><span>	</span><span style="color:#696989;">philosophers </span><span style="color:#016692;">:= </span><span>[]</span><span style="color:#877611;">Philosopher</span><span>{
-</span><span>		</span><span style="color:#696989;">Philosopher</span><span>{</span><span style="color:#009f78;">&quot;Thomas Nagel&quot;</span><span>, </span><span style="color:#8c008a;">0</span><span>, </span><span style="color:#696989;">table</span><span>, </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan </span><span style="color:#646409;">int</span><span>)},
-</span><span>		</span><span style="color:#696989;">Philosopher</span><span>{</span><span style="color:#009f78;">&quot;Elizabeth Anscombe&quot;</span><span>, </span><span style="color:#8c008a;">1</span><span>, </span><span style="color:#696989;">table</span><span>, </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan </span><span style="color:#646409;">int</span><span>)},
-</span><span>		</span><span style="color:#696989;">Philosopher</span><span>{</span><span style="color:#009f78;">&quot;Martin Heidegger&quot;</span><span>, </span><span style="color:#8c008a;">2</span><span>, </span><span style="color:#696989;">table</span><span>, </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan </span><span style="color:#646409;">int</span><span>)},
-</span><span>		</span><span style="color:#696989;">Philosopher</span><span>{</span><span style="color:#009f78;">&quot;Peter Lombard&quot;</span><span>, </span><span style="color:#8c008a;">3</span><span>, </span><span style="color:#696989;">table</span><span>, </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan </span><span style="color:#646409;">int</span><span>)},
-</span><span>		</span><span style="color:#696989;">Philosopher</span><span>{</span><span style="color:#009f78;">&quot;Gottfried Leibniz&quot;</span><span>, </span><span style="color:#8c008a;">4</span><span>, </span><span style="color:#696989;">table</span><span>, </span><span style="color:#7a7025;">make</span><span>(</span><span style="color:#877611;">chan </span><span style="color:#646409;">int</span><span>)},
-</span><span>	}
-</span><span>
-</span><span>	</span><span style="color:#016692;">for </span><span>{
-</span><span>		</span><span style="color:#016692;">for </span><span style="color:#696989;">_</span><span>, </span><span style="color:#696989;">p </span><span style="color:#016692;">:= range </span><span style="color:#696989;">philosophers </span><span>{
-</span><span>			</span><span style="color:#016692;">go </span><span style="color:#877611;">func</span><span>(</span><span style="color:#696989;">p </span><span style="color:#877611;">Philosopher</span><span>){
-</span><span>				</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">Think</span><span>()
-</span><span>				</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">Eat</span><span>()
-</span><span>			}(</span><span style="color:#696989;">p</span><span>)
-</span><span>		}
-</span><span>
-</span><span>		</span><span style="color:#016692;">for </span><span style="color:#696989;">_</span><span>, </span><span style="color:#696989;">p </span><span style="color:#016692;">:= range </span><span style="color:#696989;">philosophers </span><span>{
-</span><span>			</span><span style="color:#016692;">&lt;-</span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">fed
-</span><span>			</span><span style="color:#696989;">fmt</span><span>.</span><span style="color:#696989;">Printf</span><span>(</span><span style="color:#009f78;">&quot;</span><span style="color:#00ff00;">%s</span><span style="color:#009f78;"> was fed.</span><span style="color:#00ff00;">\n</span><span style="color:#009f78;">&quot;</span><span>, </span><span style="color:#696989;">p</span><span>.</span><span style="color:#696989;">name</span><span>)
-</span><span>		}
-</span><span>	}
-</span><span>
-</span><span>}
-</span></code></pre>
+<pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+type Fork struct {
+	sync.Mutex
+}
+
+type Table struct {
+	philosophers chan Philosopher
+	forks []*Fork
+}
+
+func NewTable(forks int) *Table {
+	t := new(Table)
+	t.philosophers = make(chan Philosopher, forks - 1)
+	t.forks = make([]*Fork, forks)
+	for i := 0; i < forks; i++ {
+		t.forks[i] = new(Fork)
+	}
+	return t
+}
+
+func (t *Table) PushPhilosopher(p Philosopher) {
+	p.table = t
+	t.philosophers <- p
+}
+
+func (t *Table) PopPhilosopher() Philosopher {
+	p := <-t.philosophers
+	p.table = nil
+	return p
+}
+
+func (t *Table) RightFork(philosopherIndex int) *Fork {
+	f := t.forks[philosopherIndex]
+	return f
+}
+
+func (t *Table) LeftFork(philosopherIndex int) *Fork {
+	f := t.forks[(philosopherIndex + 1) % len(t.forks)]
+	return f
+}
+
+type Philosopher struct {
+	name string
+	index int
+	table *Table
+	fed chan int
+}
+
+func (p Philosopher) Think() {
+	fmt.Printf("%s is thinking...\n", p.name)
+	time.Sleep(3e9)
+	p.table.PushPhilosopher(p)
+}
+
+func (p Philosopher) Eat() {
+	p.GetForks()
+	fmt.Printf("%s is eating...\n", p.name)
+	time.Sleep(3e9)
+	p.PutForks()
+	p.table.PopPhilosopher()
+	p.fed <- 1
+}
+
+func (p Philosopher) GetForks() {
+	rightFork := p.table.RightFork(p.index)
+	rightFork.Lock()
+
+	leftFork := p.table.LeftFork(p.index)
+	leftFork.Lock()
+}
+
+func (p Philosopher) PutForks() {
+	rightFork := p.table.RightFork(p.index)
+	rightFork.Unlock()
+
+	leftFork := p.table.LeftFork(p.index)
+	leftFork.Unlock()
+}
+
+func main() {
+	table := NewTable(5)
+	philosophers := []Philosopher{
+		Philosopher{"Thomas Nagel", 0, table, make(chan int)},
+		Philosopher{"Elizabeth Anscombe", 1, table, make(chan int)},
+		Philosopher{"Martin Heidegger", 2, table, make(chan int)},
+		Philosopher{"Peter Lombard", 3, table, make(chan int)},
+		Philosopher{"Gottfried Leibniz", 4, table, make(chan int)},
+	}
+
+	for {
+		for _, p := range philosophers {
+			go func(p Philosopher){
+				p.Think()
+				p.Eat()
+			}(p)
+		}
+
+		for _, p := range philosophers {
+			<-p.fed
+			fmt.Printf("%s was fed.\n", p.name)
+		}
+	}
+
+}
+</code></pre>
 
 </div>
 

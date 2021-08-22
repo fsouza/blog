@@ -117,8 +117,8 @@ let’s do it…</p>
 <a rel="noopener" target="_blank" href="https://splinter.readthedocs.io/en/latest/api/driver-and-element-api.html#module-splinter.browser">Browser</a>
 instance, which will provide method for interactions with browser (where the
 browser is: Firefox, Chrome, etc.). The code we need for it is very simple:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser </span><span style="color:#016692;">= </span><span style="color:#696989;">Browser</span><span>(</span><span style="color:#009f78;">&quot;firefox&quot;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser = Browser("firefox")
+</code></pre>
 <p><code>Browser</code> is a class and its constructor receives the driver to be used with
 that instance. Nowadays, there are three drivers for Splinter: <code>firefox</code>,
 <code>chrome</code> and <code>zope.testbrowser</code>. We are using Firefox, and you can easily use
@@ -129,21 +129,21 @@ another blog post here.</p>
 the object used for Firefox interactions. Let's start a new event on Facebook,
 the Splinter Sprint. First of all, we need to <em>visit</em> the Facebook homepage.
 There is a <code>visit</code> method on Browser class, so we can use it:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">visit</span><span>(</span><span style="color:#009f78;">&quot;https://www.facebook.com&quot;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.visit("https://www.facebook.com")
+</code></pre>
 <p><code>visit</code> is a blocking operation: it waits for page to load, then we can
 navigate, click on links, fill forms, etc. Now we have Facebook homepage opened
 on browser, and you probably know that we need to login on Facebook page, but
 what if we are already logged in? So, let's create a method that login on
 Facebook with provided authentication data only the user is not logged in
 (imagine we are on a <code>Test</code>Case class):</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#016692;">def </span><span style="color:#a15001;">do_login_if_need</span><span>(</span><span style="color:#696989;">self</span><span>, </span><span style="color:#696989;">username</span><span>, </span><span style="color:#696989;">password</span><span>):
-</span><span>    </span><span style="color:#016692;">if </span><span style="color:#696989;">self</span><span>.browser.</span><span style="color:#696989;">is_element_present_by_css</span><span>(</span><span style="color:#009f78;">&#39;div.menu_login_container&#39;</span><span>):
-</span><span>        </span><span style="color:#696989;">self</span><span>.browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;email&#39;</span><span>, username)
-</span><span>        </span><span style="color:#696989;">self</span><span>.browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;pass&#39;</span><span>, password)
-</span><span>        </span><span style="color:#696989;">self</span><span>.browser.</span><span style="color:#696989;">find_by_css</span><span>(</span><span style="color:#009f78;">&#39;div.menu_login_container input[type=&quot;submit&quot;]&#39;</span><span>).first.</span><span style="color:#696989;">click</span><span>()
-</span><span>        </span><span style="color:#016692;">assert </span><span style="color:#696989;">self</span><span>.browser.</span><span style="color:#696989;">is_element_present_by_css</span><span>(</span><span style="color:#009f78;">&#39;li#navAccount&#39;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">def do_login_if_need(self, username, password):
+    if self.browser.is_element_present_by_css('div.menu_login_container'):
+        self.browser.fill('email', username)
+        self.browser.fill('pass', password)
+        self.browser.find_by_css('div.menu_login_container input[type="submit"]').first.click()
+        assert self.browser.is_element_present_by_css('li#navAccount')
+</code></pre>
 <p>What was made here? First of all, the method checks if there is an element
 present on the page, using a CSS selector. It checks for a <code>div</code> that contains
 the <em>username</em> and <em>password</em> fields. If that div is present, we tell the
@@ -175,8 +175,8 @@ will just be a public event and we don’t need to invite anybody. There are som
 boring AJAX requests on Facebook that we need to deal, so there is not only
 Splinter code for those steps above. First step is click on “Events” link. All
 we need to do is <code>find</code> the link and <code>click</code> on it:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">find_by_css</span><span>(</span><span style="color:#009f78;">&#39;li#navItem_events a&#39;</span><span>).first.</span><span style="color:#696989;">click</span><span>()
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.find_by_css('li#navItem_events a').first.click()
+</code></pre>
 <p>The <code>find_by_css</code> method takes a CSS selector and returns an
 <a rel="noopener" target="_blank" href="http://splinter.rtfd.org/en/latest/api/element-list.html#splinter.element_list.ElementList">ElementList</a>.
 So, we get the first element of the list (even when the selector returns only
@@ -184,12 +184,12 @@ an element, the return type is still a <em>list</em>) and click on it. Like <cod
 method, <code>click</code> is a blocking operation: the driver will only listen for new
 actions when the request is finished (the page is loaded).</p>
 <p>We’re finally on &quot;new event&quot; page, and there is a form on screen waiting for data of the <em>Splinter Sprint</em>. Let’s fill the form. Here is the code for it:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;event_startIntlDisplay&#39;</span><span>, </span><span style="color:#009f78;">&#39;5/21/2011&#39;</span><span>)
-</span><span>browser.</span><span style="color:#696989;">select</span><span>(</span><span style="color:#009f78;">&#39;start_time_min&#39;</span><span>, </span><span style="color:#009f78;">&#39;480&#39;</span><span>)
-</span><span>browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;name&#39;</span><span>, </span><span style="color:#009f78;">&#39;Splinter sprint&#39;</span><span>)
-</span><span>browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;location&#39;</span><span>, </span><span style="color:#009f78;">&#39;Rio de Janeiro, Brazil&#39;</span><span>)
-</span><span>browser.</span><span style="color:#696989;">fill</span><span>(</span><span style="color:#009f78;">&#39;desc&#39;</span><span>, </span><span style="color:#009f78;">&#39;For more info, check out the #cobratem channel on freenode!&#39;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.fill('event_startIntlDisplay', '5/21/2011')
+browser.select('start_time_min', '480')
+browser.fill('name', 'Splinter sprint')
+browser.fill('location', 'Rio de Janeiro, Brazil')
+browser.fill('desc', 'For more info, check out the #cobratem channel on freenode!')
+</code></pre>
 <p>That is it: the event is going to happen on May 21th 2011, at 8:00 in the
 morning (480 minutes). As we know, the event name is <em>Splinter sprint</em>, and we
 are going to join some guys down here in Brazil. We filled out the form using
@@ -201,22 +201,22 @@ select an option in a select element (a “combo box”). It also receives two
 string parameters: the first is the <em>name</em> of the select element, and the
 second is the <em>value</em> of the option being selected.</p>
 <p>Imagine you have the following select element:</p>
-<pre data-lang="html" style="background-color:#ffffff;color:#010101;" class="language-html "><code class="language-html" data-lang="html"><span style="color:#00528b;">&lt;select </span><span style="color:#bc4d00;">name</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;gender&quot;</span><span style="color:#00528b;">&gt;
-</span><span>    </span><span style="color:#00528b;">&lt;option </span><span style="color:#bc4d00;">value</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;m&quot;</span><span style="color:#00528b;">&gt;</span><span>Male</span><span style="color:#00528b;">&lt;/option&gt;
-</span><span>    </span><span style="color:#00528b;">&lt;option </span><span style="color:#bc4d00;">value</span><span style="color:#00528b;">=</span><span style="color:#009f78;">&quot;f&quot;</span><span style="color:#00528b;">&gt;</span><span>Female</span><span style="color:#00528b;">&lt;/option&gt;
-</span><span style="color:#00528b;">&lt;/select&gt;
-</span></code></pre>
+<pre data-lang="html" class="language-html "><code class="language-html" data-lang="html"><select name="gender">
+    <option value="m">Male</option>
+    <option value="f">Female</option>
+</select>
+</code></pre>
 <p>To select “Male”, you would call the select method this way:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">select</span><span>(</span><span style="color:#009f78;">&quot;gender&quot;</span><span>, </span><span style="color:#009f78;">&quot;m&quot;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.select("gender", "m")
+</code></pre>
 <p>The last action before click on “Create Event” button is upload a picture for
 the event. On new event page, Facebook loads the file field for picture
 uploading inside an <code>iframe</code>, so we need to switch to this frame and interact
 with the form present inside the frame. To show the frame, we need to click on
 “Add Event Photo” button and then switch to it, we already know how click on a
 link:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">find_by_css</span><span>(</span><span style="color:#009f78;">&#39;div.eventEditUpload a.uiButton&#39;</span><span>).first.</span><span style="color:#696989;">click</span><span>()
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.find_by_css('div.eventEditUpload a.uiButton').first.click()
+</code></pre>
 <p>When we click this link, Facebook makes an asynchronous request, which means
 the driver does not stay blocked waiting the end of the request, so if we try
 to interact with the frame BEFORE it appears, we will get an
@@ -225,9 +225,9 @@ method that receives an argument called <code>wait_time</code>, which is the tim
 will wait for the element to appear on the screen. If the element does not
 appear on screen, we can’t go on, so we can assume the test failed (remember we
 are testing a Facebook feature):</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#016692;">if not </span><span>browser.</span><span style="color:#696989;">is_element_present_by_css</span><span>(</span><span style="color:#009f78;">&#39;iframe#upload_pic_frame&#39;</span><span>, </span><span style="color:#696989;">wait_time</span><span style="color:#016692;">=</span><span style="color:#8c008a;">10</span><span>):
-</span><span>    </span><span style="color:#696989;">fail</span><span>(</span><span style="color:#009f78;">&quot;The upload pic iframe did&#39;n&#39;t appear :(&quot;</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">if not browser.is_element_present_by_css('iframe#upload_pic_frame', wait_time=10):
+    fail("The upload pic iframe did'n't appear :(")
+</code></pre>
 <p>The <code>is_element_present_by_css</code> method takes a CSS selector and tries to find
 an element using it. It also receives a <code>wait_time</code> parameter that indicates a
 time out for the search of the element. So, if the <code>iframe</code> element with
@@ -245,10 +245,10 @@ Github).</p>
 picture. Imagine we have a variable that contains the path of the picture (and
 not a file object, <code>StringIO</code>, or something like this), and this variable name
 is <code>picture_path</code>, this is the code we need:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span style="color:#016692;">with </span><span>browser.</span><span style="color:#696989;">get_iframe</span><span>(</span><span style="color:#009f78;">&#39;upload_pic_frame&#39;</span><span>) </span><span style="color:#016692;">as </span><span>frame:
-</span><span>    frame.</span><span style="color:#696989;">attach_file</span><span>(</span><span style="color:#009f78;">&#39;pic&#39;</span><span>, picture_path)
-</span><span>    time.</span><span style="color:#696989;">sleep</span><span>(</span><span style="color:#8c008a;">10</span><span>)
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">with browser.get_iframe('upload_pic_frame') as frame:
+    frame.attach_file('pic', picture_path)
+    time.sleep(10)
+</code></pre>
 <p>Splinter provides the <code>get_iframe</code> method that changes the context and returns
 another objet to interact with the content of the frame. So we call the
 <code>attach_file</code> method, who also receives two strings: the first is the <em>name</em> of
@@ -258,10 +258,10 @@ some element to appear on screen, so I just put Python to sleep 10 seconds on
 last line.</p>
 <p>After finish all these steps, we can finally click on “Create Event” button and
 asserts that Facebook created it:</p>
-<pre data-lang="python" style="background-color:#ffffff;color:#010101;" class="language-python "><code class="language-python" data-lang="python"><span>browser.</span><span style="color:#696989;">find_by_css</span><span>(</span><span style="color:#009f78;">&#39;label.uiButton input[type=&quot;submit&quot;]&#39;</span><span>).first.</span><span style="color:#696989;">click</span><span>()
-</span><span>title </span><span style="color:#016692;">= </span><span>browser.</span><span style="color:#696989;">find_by_css</span><span>(</span><span style="color:#009f78;">&#39;h1 span&#39;</span><span>).first.text
-</span><span style="color:#016692;">assert </span><span>title </span><span style="color:#016692;">== </span><span style="color:#009f78;">&#39;Splinter sprint&#39;
-</span></code></pre>
+<pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.find_by_css('label.uiButton input[type="submit"]').first.click()
+title = browser.find_by_css('h1 span').first.text
+assert title == 'Splinter sprint'
+</code></pre>
 <p>After create an event, Facebook redirects the browser to the event page, so we
 can check if it really happened by asserting the header of the page. That’s
 what the code above does: in the new event page, it click on submit button, and
