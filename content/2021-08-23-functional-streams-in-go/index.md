@@ -22,7 +22,8 @@ and a function to generate the next value.
 
 I started with a question: with generics, is the Go type-system expressive
 enough to represent such streams. And how bad would it look without Ocaml's or
-Haskell's type inference capabilities?
+Haskell's type inference capabilities? Turns out we _can_ represent streams,
+and the limited type-inference makes it a bit annoying, but it isn't too bad!
 
 ## The basic type definition
 
