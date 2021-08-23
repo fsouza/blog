@@ -61,24 +61,11 @@ func Append[T any](stream1 *Stream[T], stream2 *Stream[T]) *Stream[T] {
 }
 
 func FlatMap[T, U any](stream *Stream[T], f func(T) *Stream[U]) *Stream[U] {
-	return flatMap(stream, nil, f)
-}
-
-func flatMap[T, U any](input *Stream[T], output *Stream[U], f func(T) *Stream[U]) *Stream[U] {
-	if output != nil {
-		return &Stream[U]{
-			Value: output.Value,
-			Next: func() *Stream[U] {
-				return flatMap(input, output.Next(), f)
-			},
-		}
-	}
-
-	if input == nil {
+	if stream == nil {
 		return nil
 	}
 
-	return flatMap(input.Next(), f(input.Value), f)
+	return Append(f(stream.Value), FlatMap(stream.Next(), f))
 }
 
 func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
