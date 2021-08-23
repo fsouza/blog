@@ -141,7 +141,7 @@ func Iter[T any](stream *Stream[T], f func(T)) {
 }
 ```
 
-And here's `ToSlice`, which is built on top of `Iter`:
+And here's `ToSlice`, built on top of `Iter`:
 
 ```go
 func ToSlice[T any](stream *Stream[T]) []T {
@@ -166,3 +166,11 @@ func main() {
 	})
 }
 ```
+
+## Higher-order functions
+
+TODO: describe the basic operations.
+
+## Putting it all together in a real-ish example
+
+TODO: write example using the higher-order functions, wrap up the post.
