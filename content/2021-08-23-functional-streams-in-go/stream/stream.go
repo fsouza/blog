@@ -5,10 +5,6 @@ type Stream[T any] struct {
 	Next  func() *Stream[T]
 }
 
-func End[T any]() *Stream[T] {
-	return nil
-}
-
 func Take[T any](stream *Stream[T], n uint) *Stream[T] {
 	if n == 0 || stream == nil {
 		return nil
@@ -87,6 +83,26 @@ func fromSlice[T any](items []T, index int) *Stream[T] {
 		Value: items[index],
 		Next: func() *Stream[T] {
 			return fromSlice(items, index+1)
+		},
+	}
+}
+
+func Empty[T any]() *Stream[T] {
+	return nil
+}
+
+func Singleton[T any](element T) *Stream[T] {
+	return &Stream[T]{
+		Value: element,
+		Next:  Empty[T],
+	}
+}
+
+func nat(start int) *Stream[int] {
+	return &Stream[int]{
+		Value: start,
+		Next: func() *Stream[int] {
+			return nat(start + 1)
 		},
 	}
 }
