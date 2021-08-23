@@ -32,12 +32,11 @@ and the limited type-inference makes it a bit annoying, but it isn't too bad!
 ## The basic type definition
 
 First, let's start with the type definition. Like mentioned above, we want to
-represent a stream of T as a pair of some value T and a function that produces
-the next value of the stream T, and that function may returns a pointer, which
-will be `nil` to represent the end of the stream (the function itself should
-never be `nil` in this case). Stream values are pointers so the empty stream
-can be represented as `nil`. Go doesn't directly support pairs, so we're going
-to use a struct here:
+represent a stream of T as a nullable pair of some value T and a function that
+produces the next value of the stream T. A `nil` stream represents an empty
+stream.
+
+Go doesn't directly support pairs, so we're going to use a struct here:
 
 ```go
 type Stream[T any] struct {
@@ -46,44 +45,51 @@ type Stream[T any] struct {
 }
 ```
 
+And we'll represent streams as pointers to that struct, which takes care of the
+`nullable` part.
+
 It looks like a linked-list, but since we want to be able to represent a
 potentially infinite linked list, instead of making `Next` a pointer to Stream,
 we make it a function that returns the pointer, and lazily execute that
 function as needed.
 
-Alternatively, since Go supports returning multiple values from a function, we
-could represent a stream as a function that returns the value and the function
-to calculate the next value:
-
-```go
-type Stream[T any] func() (T, func() Stream[T])
-```
-
-Here, an empty stream is also represented as nil (no explicit pointers needed
-though). Let's go crazy on the thought experiment and use only the function
-based representation, instead of the linked list look-a-like.
-
 ## Creating streams
 
-Let's do something probably non-sense: given a slice of some type `T`, how
-would we generate a stream? Let's call that function `FromSlice`.
-
-Here's what the code looks like:
+First, let's start with some very basic streams: an empty stream, and a
+singleton stream (that contains a single element). We'll use helper functions
+to implement those:
 
 ```go
-func FromSlice[T any](items []T) Stream[T] {
+func Empty[T any]() *Stream[T] {
+	return nil
+}
+
+func Singleton[T any](element T) *Stream[T] {
+	return &Stream[T]{
+		Value: element,
+		Next:  Empty[T],
+	}
+}
+```
+
+A more interesting helper function is a function that takes a slice and returns
+a stream with the elements of that slice:
+
+```go
+func FromSlice[T any](items []T) *Stream[T] {
 	return fromSlice(items, 0)
 }
 
-func fromSlice[T any](items []T, index int) Stream[T] {
+func fromSlice[T any](items []T, index int) *Stream[T] {
 	if index >= len(items) {
 		return nil
 	}
-	return Stream[T](func() (T, func() Stream[T]) {
-		return items[index], func() Stream[T] {
+	return &Stream[T]{
+		Value: items[index],
+		Next: func() *Stream[T] {
 			return fromSlice(items, index+1)
-		}
-	})
+		},
+	}
 }
 ```
 
@@ -95,17 +101,18 @@ indicating that we finished iterating over the slice.
 
 ### Infinite streams
 
-Using a slice is no fun, we probably want to be able to implement potentially
-infinite streams. For example, a stream of natural numbers could be represented
-as follows:
+Using a slice is no fun, we probably want to be able to implement streams that
+are potentially infinite. For example, a stream of natural numbers could be
+represented as follows:
 
 ```go
-func nat(start int) Stream[int] {
-	return Stream[int](func() (int, func() Stream[int]) {
-		return start, func() Stream[int] {
+func nat(start int) *Stream[int] {
+	return &Stream[int]{
+		Value: start,
+		Next: func() *Stream[int] {
 			return nat(start + 1)
-		}
-	})
+		},
+	}
 }
 ```
 
@@ -113,6 +120,49 @@ Here is where the limitation with Go's type inference starts to show: since it
 can't infer return types, we have to manually specify `Stream[int]` in multiple
 places.
 
-Note how we never return
+Note how we never return `nil` in the function above, indicating that this
+stream doesn't really end.
 
-## Working with streams
+## Manipulating streams
+
+Now that we know how to create them, we need to understand how to manipulate
+them to accomplish something useful. Two useful helper functions, useful for
+debugging and what not, are `Iter` and `ToSlice`: `Iter` takes a stream and a
+function, and iterates over the stream, invoking the function for each element,
+while `ToSlice` converts a stream to a slice.
+
+Here's `Iter`:
+
+```go
+func Iter[T any](stream *Stream[T], f func(T)) {
+	for ; stream != nil; stream = stream.Next() {
+		f(stream.Value)
+	}
+}
+```
+
+And here's `ToSlice`, which is built on top of `Iter`:
+
+```go
+func ToSlice[T any](stream *Stream[T]) []T {
+	var result []T
+	Iter(stream, func(value T) {
+		result = append(result, value)
+	})
+	return result
+}
+```
+
+(folks who are paying attention will probably suggest that we use something
+like `Fold` instead of `Iter` to implement `ToSlice`, we'll get there).
+
+And now that we have `Iter` and an infinite stream, we should try to use it
+maybe? :)
+
+```go
+func main() {
+	Iter(nat(0), func(v int) {
+		fmt.Println(v)
+	})
+}
+```

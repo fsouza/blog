@@ -121,5 +121,7 @@ func nat(start int) *Stream[int] {
 }
 
 func main() {
-	fmt.Println(ToSlice(FromSlice([]int{1, 2, 3, 4, 5, 6})))
+	Iter(nat(0), func(v int) {
+		fmt.Println(v)
+	})
 }
