@@ -42,6 +42,39 @@ func ToSlice[T any](stream *Stream[T]) []T {
 	return result
 }
 
+func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	for ; stream != nil; stream = stream.Next() {
+		if f(stream.Value) {
+			return &Stream[T]{
+				Value: stream.Value,
+				Next: func() *Stream[T] {
+					return Filter(stream.Next(), f)
+				},
+			}
+		}
+	}
+	return stream
+}
+
+func TakeWhile[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	if stream == nil {
+		return nil
+	}
+	if f(stream.Value) {
+		return &Stream[T]{
+			Value: stream.Value,
+			Next: func() *Stream[T] {
+				return TakeWhile(stream.Next(), f)
+			},
+		}
+	}
+	return nil
+}
+
+func TakeUntil[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	return TakeWhile(stream, func(v T) bool { return !f(v) })
+}
+
 func FromSlice[T any](items []T) *Stream[T] {
 	return fromSlice(items, 0)
 }
