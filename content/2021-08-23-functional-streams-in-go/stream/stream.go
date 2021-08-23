@@ -114,6 +114,15 @@ func Singleton[T any](element T) *Stream[T] {
 	}
 }
 
+func Repeat[T any](element T) *Stream[T] {
+	return &Stream[T]{
+		Value: element,
+		Next: func() *Stream[T] {
+			return Repeat(element)
+		},
+	}
+}
+
 func nat(start int) *Stream[int] {
 	return &Stream[int]{
 		Value: start,
