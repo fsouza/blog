@@ -1,8 +1,24 @@
 package main
 
+import "fmt"
+
 type Stream[T any] struct {
 	Value T
 	Next  func() *Stream[T]
+}
+
+func Iter[T any](stream *Stream[T], f func(T)) {
+	for ; stream != nil; stream = stream.Next() {
+		f(stream.Value)
+	}
+}
+
+func Fold[T, U any](stream *Stream[T], init U, f func(U, T) U) U {
+	acc := init
+	for ; stream != nil; stream = stream.Next() {
+		acc = f(acc, stream.Value)
+	}
+	return acc
 }
 
 func Take[T any](stream *Stream[T], n uint) *Stream[T] {
@@ -27,15 +43,6 @@ func Map[T, U any](stream *Stream[T], f func(T) U) *Stream[U] {
 			return Map(stream.Next(), f)
 		},
 	}
-}
-
-func ToSlice[T any](stream *Stream[T]) []T {
-	var result []T
-	for stream != nil {
-		result = append(result, stream.Value)
-		stream = stream.Next()
-	}
-	return result
 }
 
 func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
@@ -69,6 +76,12 @@ func TakeWhile[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
 
 func TakeUntil[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
 	return TakeWhile(stream, func(v T) bool { return !f(v) })
+}
+
+func ToSlice[T any](stream *Stream[T]) []T {
+	return Fold(stream, []T{}, func(acc []T, elm T) []T {
+		return append(acc, elm)
+	})
 }
 
 func FromSlice[T any](items []T) *Stream[T] {
@@ -108,4 +121,5 @@ func nat(start int) *Stream[int] {
 }
 
 func main() {
+	fmt.Println(ToSlice(FromSlice([]int{1, 2, 3, 4, 5, 6})))
 }
