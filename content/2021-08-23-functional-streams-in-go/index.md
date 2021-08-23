@@ -77,17 +77,13 @@ a stream with the elements of that slice:
 
 ```go
 func FromSlice[T any](items []T) *Stream[T] {
-	return fromSlice(items, 0)
-}
-
-func fromSlice[T any](items []T, index int) *Stream[T] {
-	if index >= len(items) {
+	if len(items) == 0 {
 		return nil
 	}
 	return &Stream[T]{
-		Value: items[index],
+		Value: items[0],
 		Next: func() *Stream[T] {
-			return fromSlice(items, index+1)
+			return FromSlice(items[1:])
 		},
 	}
 }
