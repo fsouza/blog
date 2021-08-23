@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 )
 
 type Stream[T any] struct {
@@ -46,6 +45,40 @@ func Map[T, U any](stream *Stream[T], f func(T) U) *Stream[U] {
 			return Map(stream.Next(), f)
 		},
 	}
+}
+
+func Append[T any](stream1 *Stream[T], stream2 *Stream[T]) *Stream[T] {
+	if stream1 == nil {
+		return stream2
+	}
+
+	return &Stream[T]{
+		Value: stream1.Value,
+		Next: func() *Stream[T] {
+			return Append(stream1.Next(), stream2)
+		},
+	}
+}
+
+func FlatMap[T, U any](stream *Stream[T], f func(T) *Stream[U]) *Stream[U] {
+	return flatMap(stream, nil, f)
+}
+
+func flatMap[T, U any](input *Stream[T], output *Stream[U], f func(T) *Stream[U]) *Stream[U] {
+	if output != nil {
+		return &Stream[U]{
+			Value: output.Value,
+			Next: func() *Stream[U] {
+				return flatMap(input, output.Next(), f)
+			},
+		}
+	}
+
+	if input == nil {
+		return nil
+	}
+
+	return flatMap(input.Next(), f(input.Value), f)
 }
 
 func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
@@ -133,10 +166,10 @@ func nat(start int) *Stream[int] {
 }
 
 func main() {
-	evenNat := Filter(nat(0), func(v int) bool { return v%2 == 0 })
-	Iter(Map(TakeWhile(evenNat, func(v int) bool {
-		return v < 100000
-	}), strconv.Itoa), func(v string) {
-		fmt.Println(v)
+	first10 := Take(Map(nat(0), func(v int) int { return v + 1 }), 100)
+	repeated := FlatMap(first10, func(n int) *Stream[int] {
+		return Take(Repeat(n), uint(n))
 	})
+
+	Iter(repeated, func(v int) { fmt.Println(v) })
 }
