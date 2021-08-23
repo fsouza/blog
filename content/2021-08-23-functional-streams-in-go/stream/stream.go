@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Stream[T any] struct {
 	Value T
@@ -121,7 +124,10 @@ func nat(start int) *Stream[int] {
 }
 
 func main() {
-	Iter(nat(0), func(v int) {
+	evenNat := Filter(nat(0), func(v int) bool { return v%2 == 0 })
+	Iter(Map(TakeWhile(evenNat, func(v int) bool {
+		return v < 100000
+	}), strconv.Itoa), func(v string) {
 		fmt.Println(v)
 	})
 }
