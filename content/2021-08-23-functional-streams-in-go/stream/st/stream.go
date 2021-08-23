@@ -5,6 +5,10 @@ type Stream[T any] struct {
 	Next  func() *Stream[T]
 }
 
+func End[T any]() *Stream[T] {
+	return nil
+}
+
 func Take[T any](stream *Stream[T], n uint) *Stream[T] {
 	if n == 0 || stream == nil {
 		return nil

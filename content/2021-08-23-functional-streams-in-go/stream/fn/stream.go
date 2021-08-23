@@ -2,6 +2,10 @@ package main
 
 type Stream[T any] func() (T, func() Stream[T])
 
+func End[T any]() Stream[T] {
+	return nil
+}
+
 func Take[T any](stream Stream[T], n uint) Stream[T] {
 	if n == 0 || stream == nil {
 		return nil
@@ -22,25 +26,16 @@ func Map[T, U any](stream Stream[T], f func(T) U) Stream[U] {
 	})
 }
 
-func Filter[T any](stream Stream[T], f func(T) bool) Stream[T] {
+func TakeWhile[T any](stream Stream[T], f func(T) bool) Stream[T] {
 	if stream == nil {
 		return nil
 	}
 	return Stream[T](func() (T, func() Stream[T]) {
-		for {
-			v, tl := stream()
-			if f(v) {
-				return v, func() Stream[T] { return Filter(tl(), f) }
-			}
-			stream = tl()
-			if stream == nil
-				return v, func() Stream[T] { return nil }
-			}
+		v, tl := stream()
+		if f(v) {
+			return v, func() Stream[T] { return TakeWhile(tl(), f) }
 		}
 	})
-}
-
-func TakeWhile[T any](stream Stream[T], f func(T) bool) Stream[T] {
 }
 
 func TakeUntil[T any](stream Stream[T], f func(T) bool) Stream[T] {
@@ -57,6 +52,12 @@ func ToSlice[T any](stream Stream[T]) []T {
 		stream = tl()
 	}
 	return result
+}
+
+func Singleton[T any](v T) Stream[T] {
+	return Stream[T](func() (T, func() Stream[T]) {
+		return v, End[T]
+	})
 }
 
 func FromSlice[T any](items []T) Stream[T] {
