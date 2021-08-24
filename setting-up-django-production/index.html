@@ -99,11 +99,11 @@ download it from the official site and build with some simple options. In our
 setup, we’re going to install nginx under <code>/opt/nginx</code>, and use it with the
 nginx system user. So, let’s download and extract the latest stable version
 (1.0.9) from nginx website:</p>
-<pre><code>% curl -O http://nginx.org/download/nginx-1.0.9.tar.gz
+<pre><code>% curl -O http:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.0.9.tar.gz
 % tar -xzf nginx-1.0.9.tar.gz
 </code></pre>
 <p>Once you have extracted it, just configure, compile and install:</p>
-<pre><code>% ./configure --prefix=/opt/nginx --user=nginx --group=nginx
+<pre><code>% .&#x2F;configure --prefix=&#x2F;opt&#x2F;nginx --user=nginx --group=nginx
 % make
 % [sudo] make install
 </code></pre>
@@ -113,7 +113,7 @@ directory exists. Also, make sure that there is a user and a group called
 <pre><code>% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
 </code></pre>
 <p>After that, you can start nginx using the command line below:</p>
-<pre><code>% [sudo] /opt/nginx/sbin/nginx
+<pre><code>% [sudo] &#x2F;opt&#x2F;nginx&#x2F;sbin&#x2F;nginx
 </code></pre>
 <blockquote>
 <p>Linode provides an <a rel="noopener" target="_blank" href="https://library.linode.com/assets/634-init-deb.sh">init
@@ -137,7 +137,7 @@ file (assume that the <code>library</code> project is in the directory <code>/op
 <pre><code>user  nginx;
 worker_processes  2;
 
-pid logs/nginx.pid;
+pid logs&#x2F;nginx.pid;
 
 events {
     worker_connections  1024;
@@ -145,18 +145,18 @@ events {
 
 http {
     include       mime.types;
-    default_type  application/octet-stream;
+    default_type  application&#x2F;octet-stream;
 
-    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
-                     '$status $body_bytes_sent "$http_referer" '
-                     '"$http_user_agent" "$http_x_forwarded_for"';
+    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;
+                     &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;
+                     &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;
 
-    access_log  logs/access.log  main;
+    access_log  logs&#x2F;access.log  main;
 
     sendfile           on;
     keepalive_timeout  65;
 
-    include /opt/projects/showcase/nginx.conf;
+    include &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;nginx.conf;
 }
 </code></pre>
 <p>Now we just need to write the configuration for our Django project. I’m using
@@ -173,16 +173,16 @@ for the repository is here:</p>
 
     charset utf-8;
 
-    location / {
+    location &#x2F; {
         proxy_set_header    X-Real-IP   $remote_addr;
         proxy_set_header    Host        $http_host;
         proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        proxy_pass http://localhost:8000;
+        proxy_pass http:&#x2F;&#x2F;localhost:8000;
     }
 
-    location /static {
-        root /opt/projects/showcase/;
+    location &#x2F;static {
+        root &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;;
         expires 1d;
     }
 }

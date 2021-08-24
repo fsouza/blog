@@ -129,18 +129,18 @@ from cloudinit import CloudConfig, util
 frequency = CloudConfig.per_instance
 
 def yum_install(packages):
-    cmd = ["yum", "--quiet", "--assumeyes", "install"]
+    cmd = [&quot;yum&quot;, &quot;--quiet&quot;, &quot;--assumeyes&quot;, &quot;install&quot;]
     cmd.extend(packages)
     subprocess.check_call(cmd)
 
 def handle(_name, cfg, _cloud, log, args):
-    pkglist = util.get_cfg_option_list_or_str(cfg, "packages", [])
+    pkglist = util.get_cfg_option_list_or_str(cfg, &quot;packages&quot;, [])
 
     if pkglist:
         try:
             yum_install(pkglist)
         except subprocess.CalledProcessError:
-            log.warn("Failed to install yum packages: %s" % pkglist)
+            log.warn(&quot;Failed to install yum packages: %s&quot; % pkglist)
             log.debug(traceback.format_exc())
             raise
 
@@ -153,8 +153,8 @@ modules:
 packages: [emacs-nox]
 </code></pre>
 <p><code>cloud-init</code> already works on Fedora, with Python 2.7, but to work on CentOS 6, with Python 2.6, it needs a patch:</p>
-<pre><code>--- cloudinit/util.py 2012-05-22 12:18:21.000000000 -0300
-+++ cloudinit/util.py 2012-05-31 12:44:24.000000000 -0300
+<pre><code>--- cloudinit&#x2F;util.py 2012-05-22 12:18:21.000000000 -0300
++++ cloudinit&#x2F;util.py 2012-05-31 12:44:24.000000000 -0300
 @@ -227,7 +227,7 @@
          stderr=subprocess.PIPE, stdin=subprocess.PIPE)
      out, err = sp.communicate(input_)
@@ -173,34 +173,34 @@ YAML file used by cloud-init. We can extend it and change only two methods:
 <code>_collect_packages</code>, that returns the list of packages that will be installed
 in the machine after it is spawned; and <code>render</code> that returns the file itself.
 Here is our <code>CentOSCloudInit</code> class (within the patch):</p>
-<pre><code>diff -u juju-0.5-bzr531.orig/juju/providers/common/cloudinit.py juju-0.5-bzr531/juju/providers/common/cloudinit.py
---- juju-0.5-bzr531.orig/juju/providers/common/cloudinit.py 2012-05-31 15:42:17.480769486 -0300
-+++ juju-0.5-bzr531/juju/providers/common/cloudinit.py 2012-05-31 15:55:13.342884919 -0300
+<pre><code>diff -u juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py
+--- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:55:13.342884919 -0300
 @@ -324,3 +324,32 @@
-             "machine-id": self._machine_id,
-             "juju-provider-type": self._provider_type,
-             "juju-zookeeper-hosts": self._join_zookeeper_hosts()}
+             &quot;machine-id&quot;: self._machine_id,
+             &quot;juju-provider-type&quot;: self._provider_type,
+             &quot;juju-zookeeper-hosts&quot;: self._join_zookeeper_hosts()}
 +
 +
 +class CentOSCloudInit(CloudInit):
 +
 +    def _collect_packages(self):
 +        packages = [
-+            "bzr", "byobu", "tmux", "python-setuptools", "python-twisted",
-+            "python-txaws", "python-zookeeper", "python-devel", "juju"]
++            &quot;bzr&quot;, &quot;byobu&quot;, &quot;tmux&quot;, &quot;python-setuptools&quot;, &quot;python-twisted&quot;,
++            &quot;python-txaws&quot;, &quot;python-zookeeper&quot;, &quot;python-devel&quot;, &quot;juju&quot;]
 +        if self._zookeeper:
 +            packages.extend([
-+                "zookeeper", "libzookeeper", "libzookeeper-devel"])
++                &quot;zookeeper&quot;, &quot;libzookeeper&quot;, &quot;libzookeeper-devel&quot;])
 +        return packages
 +
 +    def render(self):
-+        """Get content for a cloud-init file with appropriate specifications.
++        &quot;&quot;&quot;Get content for a cloud-init file with appropriate specifications.
 +
 +        :rtype: str
 +
-+        :raises: :exc:`juju.errors.CloudInitError` if there isn't enough
++        :raises: :exc:`juju.errors.CloudInitError` if there isn&#x27;t enough
 +            information to create a useful cloud-init.
-+        """
++        &quot;&quot;&quot;
 +        self._validate()
 +        return format_cloud_init(
 +            self._ssh_keys,
@@ -208,42 +208,42 @@ Here is our <code>CentOSCloudInit</code> class (within the patch):</p>
 +            repositories=self._collect_repositories(),
 +            scripts=self._collect_scripts(),
 +            data=self._collect_machine_data(),
-+            modules=["ssh", "yum_packages", "runcmd"])
++            modules=[&quot;ssh&quot;, &quot;yum_packages&quot;, &quot;runcmd&quot;])
 </code></pre>
 <p>The other change we need is in the <code>format_cloud_init</code> function, in order to
 make it recognize the <code>modules</code> parameter that we used above, and tell
 cloud-init to not run <code>apt-get</code> (update nor upgrade). Here is the patch:</p>
-<pre><code>diff -ur juju-0.5-bzr531.orig/juju/providers/common/utils.py juju-0.5-bzr531/juju/providers/common/utils.py
---- juju-0.5-bzr531.orig/juju/providers/common/utils.py 2012-05-31 15:42:17.480769486 -0300
-+++ juju-0.5-bzr531/juju/providers/common/utils.py 2012-05-31 15:44:06.605014021 -0300
+<pre><code>diff -ur juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py
+--- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:44:06.605014021 -0300
 @@ -85,7 +85,7 @@
 
  def format_cloud_init(
 -    authorized_keys, packages=(), repositories=None, scripts=None, data=None):
 +    authorized_keys, packages=(), repositories=None, scripts=None, data=None, modules=None):
-     """Format a user-data cloud-init file.
+     &quot;&quot;&quot;Format a user-data cloud-init file.
 
      This will enable package installation, and ssh access, and script
 @@ -117,8 +117,8 @@
          structure.
-     """
+     &quot;&quot;&quot;
      cloud_config = {
--        "apt-update": True,
--        "apt-upgrade": True,
-+        "apt-update": False,
-+        "apt-upgrade": False,
-         "ssh_authorized_keys": authorized_keys,
-         "packages": [],
-         "output": {"all": "| tee -a /var/log/cloud-init-output.log"}}
+-        &quot;apt-update&quot;: True,
+-        &quot;apt-upgrade&quot;: True,
++        &quot;apt-update&quot;: False,
++        &quot;apt-upgrade&quot;: False,
+         &quot;ssh_authorized_keys&quot;: authorized_keys,
+         &quot;packages&quot;: [],
+         &quot;output&quot;: {&quot;all&quot;: &quot;| tee -a &#x2F;var&#x2F;log&#x2F;cloud-init-output.log&quot;}}
 @@ -136,6 +136,11 @@
      if scripts:
-         cloud_config["runcmd"] = scripts
+         cloud_config[&quot;runcmd&quot;] = scripts
 
 +    if modules:
-+        cloud_config["modules"] = modules
++        cloud_config[&quot;modules&quot;] = modules
 +
      output = safe_dump(cloud_config)
-     output = "#cloud-config\n%s" % (output)
+     output = &quot;#cloud-config\n%s&quot; % (output)
      return output
 </code></pre>
 <p>This patch is also packed up within

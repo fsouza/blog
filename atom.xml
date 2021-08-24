@@ -79,7 +79,7 @@ my files? I could run it on a git hook or something like that and not even
 notice.&lt;&#x2F;p&gt;
 &lt;p&gt;As I mentioned before, I was running format-on-save in Neovim, with a simple
 setup, not very fancy:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;vimscript&quot; class=&quot;language-vimscript &quot;&gt;&lt;code class=&quot;language-vimscript&quot; data-lang=&quot;vimscript&quot;&gt;autocmd BufWritePre *.ts execute &quot;silent %!npx prettier --stdin-filepath &#x27;&quot; . expand(&#x27;%:p&#x27;) . &quot;&#x27;&quot;
+&lt;pre data-lang=&quot;vimscript&quot; class=&quot;language-vimscript &quot;&gt;&lt;code class=&quot;language-vimscript&quot; data-lang=&quot;vimscript&quot;&gt;autocmd BufWritePre *.ts execute &amp;quot;silent %!npx prettier --stdin-filepath &amp;#x27;&amp;quot; . expand(&amp;#x27;%:p&amp;#x27;) . &amp;quot;&amp;#x27;&amp;quot;
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;dotfiles&#x2F;blob&#x2F;0b6d3daaa844796f916b3f056a66af0e25a76c3c&#x2F;autoload&#x2F;fsouza&#x2F;prettier.vim#L19-L30&quot;&gt;(it was a bit fancier than that, but not by much)&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;So, imagine you&#x27;re using Neovim and every time you save the file you have to
@@ -124,26 +124,26 @@ receives a &amp;quot;request&amp;quot;. The two important things to know about a
 &lt;ol&gt;
 &lt;li&gt;You can install it with npm and start it with &lt;code&gt;prettierd start&lt;&#x2F;code&gt;:&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre&gt;&lt;code&gt;％ npm install -g @fsouza&#x2F;prettierd
+&lt;pre&gt;&lt;code&gt;％ npm install -g @fsouza&amp;#x2F;prettierd
 ％ prettierd start
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Alternatively you can do both things with &lt;code&gt;npx&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;％ npx -p @fsouza&#x2F;prettierd prettierd start
+&lt;pre&gt;&lt;code&gt;％ npx -p @fsouza&amp;#x2F;prettierd prettierd start
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;ol start=&quot;2&quot;&gt;
 &lt;li&gt;When it starts, prettierd writes a file with its port number and token&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;pre&gt;&lt;code&gt;％ cat ~&#x2F;.prettierd
+&lt;pre&gt;&lt;code&gt;％ cat ~&amp;#x2F;.prettierd
 53561 cb2ad753df0aca85
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This means that prettierd is running on port 53561 and we can use the token
 &lt;code&gt;cb2ad753df0aca85&lt;&#x2F;code&gt; in our requests to format our source code.&lt;&#x2F;p&gt;
 &lt;p&gt;core_d&#x27;s protocol is pretty simple:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;&lt;token&gt; &lt;working-dir&gt; &lt;file-name&gt;\n
-&lt;file-content&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;token&amp;gt; &amp;lt;working-dir&amp;gt; &amp;lt;file-name&amp;gt;\n
+&amp;lt;file-content&amp;gt;
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;For example, we can use netcat:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;％ echo &quot;cb2ad753df0aca85 $PWD sample2.ts&quot; | cat - sample2.ts | &#x2F;usr&#x2F;bin&#x2F;time nc localhost 53561 &gt;sample2-formatted.ts
+&lt;pre&gt;&lt;code&gt;％ echo &amp;quot;cb2ad753df0aca85 $PWD sample2.ts&amp;quot; | cat - sample2.ts | &amp;#x2F;usr&amp;#x2F;bin&amp;#x2F;time nc localhost 53561 &amp;gt;sample2-formatted.ts
         0.14 real         0.00 user         0.00 sys
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Remember how formatting &lt;code&gt;sample2.ts&lt;&#x2F;code&gt; took over 1 second? Not anymore. :)&lt;&#x2F;p&gt;
@@ -163,9 +163,9 @@ a TCP client and a TCP server! In our case we want to use a client, so we
 invoke the &lt;code&gt;tcp_connect&lt;&#x2F;code&gt; function:&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;lua&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;local callback = ...
 local port = 53561
-local token = &#x27;cb2ad753df0aca85&#x27;
+local token = &amp;#x27;cb2ad753df0aca85&amp;#x27;
 local client = vim.loop.new_tcp()
-vim.loop.tcp_connect(client, &#x27;127.0.0.1&#x27;, port, callback)
+vim.loop.tcp_connect(client, &amp;#x27;127.0.0.1&amp;#x27;, port, callback)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Since this is async world, we need to pass a callback that gets executed
 whenever the connection happens (or in case something goes wrong). So the first
@@ -190,25 +190,25 @@ comments:&lt;&#x2F;p&gt;
     error(err)
   end
 
-  -- grab the contents of the buffer and add first row to match core_d&#x27;s protocol
+  -- grab the contents of the buffer and add first row to match core_d&amp;#x27;s protocol
   local bufnr = vim.api.nvim_get_current_buf()
-  local first_line = string.format(&#x27;%s %s %s&#x27;, token, vim.loop.cwd(), &#x27;sample2.js&#x27;)
+  local first_line = string.format(&amp;#x27;%s %s %s&amp;#x27;, token, vim.loop.cwd(), &amp;#x27;sample2.js&amp;#x27;)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
   table.insert(lines, 1, first_line)
 
   -- start reading the response
-  local response = &#x27;&#x27;
+  local response = &amp;#x27;&amp;#x27;
   vim.loop.read_start(client, function(read_err, chunk)
     -- check if there was any error reading data back, if so, close the
     -- connection and report the error.
     if read_err then
       vim.loop.close(client)
-      error(&#x27;failed to read data from prettierd: &#x27; .. read_err)
+      error(&amp;#x27;failed to read data from prettierd: &amp;#x27; .. read_err)
     end
 
-    -- libuv will call this callback with no data and no error when it&#x27;s done,
-    -- so if there&#x27;s data, concatenate it into the final response. Otherwise it
-    -- means we&#x27;re done, so invoke the `write_to_buf` to write the data back.
+    -- libuv will call this callback with no data and no error when it&amp;#x27;s done,
+    -- so if there&amp;#x27;s data, concatenate it into the final response. Otherwise it
+    -- means we&amp;#x27;re done, so invoke the `write_to_buf` to write the data back.
     if chunk then
       response = response .. chunk
     else
@@ -218,9 +218,9 @@ comments:&lt;&#x2F;p&gt;
   end)
 
   -- write the request
-  vim.loop.write(client, table.concat(lines, &#x27;\n&#x27;))
+  vim.loop.write(client, table.concat(lines, &amp;#x27;\n&amp;#x27;))
 
-  -- signal to the server that we&#x27;re done writing the request
+  -- signal to the server that we&amp;#x27;re done writing the request
   vim.loop.shutdown(client)
 end
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
@@ -228,11 +228,11 @@ end
 error handling: the way errors are reported isn&#x27;t great, but it&#x27;s acceptable:
 if prettier fails, the last line contains a message in the format &lt;code&gt;# exit &amp;lt;code&amp;gt; ...&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;lua&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;local function write_to_buf(data, bufnr)
-  local new_lines = vim.split(data, &#x27;\n&#x27;)
+  local new_lines = vim.split(data, &amp;#x27;\n&amp;#x27;)
 
   -- check for errors
-  if string.find(new_lines[#new_lines], &#x27;^# exit %d+&#x27;) then
-    error(string.format(&#x27;failed to format with prettier: %s&#x27;, data))
+  if string.find(new_lines[#new_lines], &amp;#x27;^# exit %d+&amp;#x27;) then
+    error(string.format(&amp;#x27;failed to format with prettier: %s&amp;#x27;, data))
   end
 
   -- write contents
@@ -313,18 +313,18 @@ from cloudinit import CloudConfig, util
 frequency = CloudConfig.per_instance
 
 def yum_install(packages):
-    cmd = [&quot;yum&quot;, &quot;--quiet&quot;, &quot;--assumeyes&quot;, &quot;install&quot;]
+    cmd = [&amp;quot;yum&amp;quot;, &amp;quot;--quiet&amp;quot;, &amp;quot;--assumeyes&amp;quot;, &amp;quot;install&amp;quot;]
     cmd.extend(packages)
     subprocess.check_call(cmd)
 
 def handle(_name, cfg, _cloud, log, args):
-    pkglist = util.get_cfg_option_list_or_str(cfg, &quot;packages&quot;, [])
+    pkglist = util.get_cfg_option_list_or_str(cfg, &amp;quot;packages&amp;quot;, [])
 
     if pkglist:
         try:
             yum_install(pkglist)
         except subprocess.CalledProcessError:
-            log.warn(&quot;Failed to install yum packages: %s&quot; % pkglist)
+            log.warn(&amp;quot;Failed to install yum packages: %s&amp;quot; % pkglist)
             log.debug(traceback.format_exc())
             raise
 
@@ -337,8 +337,8 @@ modules:
 packages: [emacs-nox]
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;&lt;code&gt;cloud-init&lt;&#x2F;code&gt; already works on Fedora, with Python 2.7, but to work on CentOS 6, with Python 2.6, it needs a patch:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;--- cloudinit&#x2F;util.py 2012-05-22 12:18:21.000000000 -0300
-+++ cloudinit&#x2F;util.py 2012-05-31 12:44:24.000000000 -0300
+&lt;pre&gt;&lt;code&gt;--- cloudinit&amp;#x2F;util.py 2012-05-22 12:18:21.000000000 -0300
++++ cloudinit&amp;#x2F;util.py 2012-05-31 12:44:24.000000000 -0300
 @@ -227,7 +227,7 @@
          stderr=subprocess.PIPE, stdin=subprocess.PIPE)
      out, err = sp.communicate(input_)
@@ -357,34 +357,34 @@ YAML file used by cloud-init. We can extend it and change only two methods:
 &lt;code&gt;_collect_packages&lt;&#x2F;code&gt;, that returns the list of packages that will be installed
 in the machine after it is spawned; and &lt;code&gt;render&lt;&#x2F;code&gt; that returns the file itself.
 Here is our &lt;code&gt;CentOSCloudInit&lt;&#x2F;code&gt; class (within the patch):&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;diff -u juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py
---- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:42:17.480769486 -0300
-+++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;cloudinit.py 2012-05-31 15:55:13.342884919 -0300
+&lt;pre&gt;&lt;code&gt;diff -u juju-0.5-bzr531.orig&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;cloudinit.py juju-0.5-bzr531&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;cloudinit.py
+--- juju-0.5-bzr531.orig&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;cloudinit.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;cloudinit.py 2012-05-31 15:55:13.342884919 -0300
 @@ -324,3 +324,32 @@
-             &quot;machine-id&quot;: self._machine_id,
-             &quot;juju-provider-type&quot;: self._provider_type,
-             &quot;juju-zookeeper-hosts&quot;: self._join_zookeeper_hosts()}
+             &amp;quot;machine-id&amp;quot;: self._machine_id,
+             &amp;quot;juju-provider-type&amp;quot;: self._provider_type,
+             &amp;quot;juju-zookeeper-hosts&amp;quot;: self._join_zookeeper_hosts()}
 +
 +
 +class CentOSCloudInit(CloudInit):
 +
 +    def _collect_packages(self):
 +        packages = [
-+            &quot;bzr&quot;, &quot;byobu&quot;, &quot;tmux&quot;, &quot;python-setuptools&quot;, &quot;python-twisted&quot;,
-+            &quot;python-txaws&quot;, &quot;python-zookeeper&quot;, &quot;python-devel&quot;, &quot;juju&quot;]
++            &amp;quot;bzr&amp;quot;, &amp;quot;byobu&amp;quot;, &amp;quot;tmux&amp;quot;, &amp;quot;python-setuptools&amp;quot;, &amp;quot;python-twisted&amp;quot;,
++            &amp;quot;python-txaws&amp;quot;, &amp;quot;python-zookeeper&amp;quot;, &amp;quot;python-devel&amp;quot;, &amp;quot;juju&amp;quot;]
 +        if self._zookeeper:
 +            packages.extend([
-+                &quot;zookeeper&quot;, &quot;libzookeeper&quot;, &quot;libzookeeper-devel&quot;])
++                &amp;quot;zookeeper&amp;quot;, &amp;quot;libzookeeper&amp;quot;, &amp;quot;libzookeeper-devel&amp;quot;])
 +        return packages
 +
 +    def render(self):
-+        &quot;&quot;&quot;Get content for a cloud-init file with appropriate specifications.
++        &amp;quot;&amp;quot;&amp;quot;Get content for a cloud-init file with appropriate specifications.
 +
 +        :rtype: str
 +
-+        :raises: :exc:`juju.errors.CloudInitError` if there isn&#x27;t enough
++        :raises: :exc:`juju.errors.CloudInitError` if there isn&amp;#x27;t enough
 +            information to create a useful cloud-init.
-+        &quot;&quot;&quot;
++        &amp;quot;&amp;quot;&amp;quot;
 +        self._validate()
 +        return format_cloud_init(
 +            self._ssh_keys,
@@ -392,42 +392,42 @@ Here is our &lt;code&gt;CentOSCloudInit&lt;&#x2F;code&gt; class (within the patc
 +            repositories=self._collect_repositories(),
 +            scripts=self._collect_scripts(),
 +            data=self._collect_machine_data(),
-+            modules=[&quot;ssh&quot;, &quot;yum_packages&quot;, &quot;runcmd&quot;])
++            modules=[&amp;quot;ssh&amp;quot;, &amp;quot;yum_packages&amp;quot;, &amp;quot;runcmd&amp;quot;])
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The other change we need is in the &lt;code&gt;format_cloud_init&lt;&#x2F;code&gt; function, in order to
 make it recognize the &lt;code&gt;modules&lt;&#x2F;code&gt; parameter that we used above, and tell
 cloud-init to not run &lt;code&gt;apt-get&lt;&#x2F;code&gt; (update nor upgrade). Here is the patch:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;diff -ur juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py
---- juju-0.5-bzr531.orig&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:42:17.480769486 -0300
-+++ juju-0.5-bzr531&#x2F;juju&#x2F;providers&#x2F;common&#x2F;utils.py 2012-05-31 15:44:06.605014021 -0300
+&lt;pre&gt;&lt;code&gt;diff -ur juju-0.5-bzr531.orig&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;utils.py juju-0.5-bzr531&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;utils.py
+--- juju-0.5-bzr531.orig&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;utils.py 2012-05-31 15:42:17.480769486 -0300
++++ juju-0.5-bzr531&amp;#x2F;juju&amp;#x2F;providers&amp;#x2F;common&amp;#x2F;utils.py 2012-05-31 15:44:06.605014021 -0300
 @@ -85,7 +85,7 @@
 
  def format_cloud_init(
 -    authorized_keys, packages=(), repositories=None, scripts=None, data=None):
 +    authorized_keys, packages=(), repositories=None, scripts=None, data=None, modules=None):
-     &quot;&quot;&quot;Format a user-data cloud-init file.
+     &amp;quot;&amp;quot;&amp;quot;Format a user-data cloud-init file.
 
      This will enable package installation, and ssh access, and script
 @@ -117,8 +117,8 @@
          structure.
-     &quot;&quot;&quot;
+     &amp;quot;&amp;quot;&amp;quot;
      cloud_config = {
--        &quot;apt-update&quot;: True,
--        &quot;apt-upgrade&quot;: True,
-+        &quot;apt-update&quot;: False,
-+        &quot;apt-upgrade&quot;: False,
-         &quot;ssh_authorized_keys&quot;: authorized_keys,
-         &quot;packages&quot;: [],
-         &quot;output&quot;: {&quot;all&quot;: &quot;| tee -a &#x2F;var&#x2F;log&#x2F;cloud-init-output.log&quot;}}
+-        &amp;quot;apt-update&amp;quot;: True,
+-        &amp;quot;apt-upgrade&amp;quot;: True,
++        &amp;quot;apt-update&amp;quot;: False,
++        &amp;quot;apt-upgrade&amp;quot;: False,
+         &amp;quot;ssh_authorized_keys&amp;quot;: authorized_keys,
+         &amp;quot;packages&amp;quot;: [],
+         &amp;quot;output&amp;quot;: {&amp;quot;all&amp;quot;: &amp;quot;| tee -a &amp;#x2F;var&amp;#x2F;log&amp;#x2F;cloud-init-output.log&amp;quot;}}
 @@ -136,6 +136,11 @@
      if scripts:
-         cloud_config[&quot;runcmd&quot;] = scripts
+         cloud_config[&amp;quot;runcmd&amp;quot;] = scripts
 
 +    if modules:
-+        cloud_config[&quot;modules&quot;] = modules
++        cloud_config[&amp;quot;modules&amp;quot;] = modules
 +
      output = safe_dump(cloud_config)
-     output = &quot;#cloud-config\n%s&quot; % (output)
+     output = &amp;quot;#cloud-config\n%s&amp;quot; % (output)
      return output
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This patch is also packed up within
@@ -482,11 +482,11 @@ download it from the official site and build with some simple options. In our
 setup, we’re going to install nginx under &lt;code&gt;&#x2F;opt&#x2F;nginx&lt;&#x2F;code&gt;, and use it with the
 nginx system user. So, let’s download and extract the latest stable version
 (1.0.9) from nginx website:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;% curl -O http:&#x2F;&#x2F;nginx.org&#x2F;download&#x2F;nginx-1.0.9.tar.gz
+&lt;pre&gt;&lt;code&gt;% curl -O http:&amp;#x2F;&amp;#x2F;nginx.org&amp;#x2F;download&amp;#x2F;nginx-1.0.9.tar.gz
 % tar -xzf nginx-1.0.9.tar.gz
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Once you have extracted it, just configure, compile and install:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;% .&#x2F;configure --prefix=&#x2F;opt&#x2F;nginx --user=nginx --group=nginx
+&lt;pre&gt;&lt;code&gt;% .&amp;#x2F;configure --prefix=&amp;#x2F;opt&amp;#x2F;nginx --user=nginx --group=nginx
 % make
 % [sudo] make install
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
@@ -496,7 +496,7 @@ directory exists. Also, make sure that there is a user and a group called
 &lt;pre&gt;&lt;code&gt;% [sudo] adduser --system --no-create-home --disabled-login --disabled-password --group nginx
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;After that, you can start nginx using the command line below:&lt;&#x2F;p&gt;
-&lt;pre&gt;&lt;code&gt;% [sudo] &#x2F;opt&#x2F;nginx&#x2F;sbin&#x2F;nginx
+&lt;pre&gt;&lt;code&gt;% [sudo] &amp;#x2F;opt&amp;#x2F;nginx&amp;#x2F;sbin&amp;#x2F;nginx
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Linode provides an &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;library.linode.com&#x2F;assets&#x2F;634-init-deb.sh&quot;&gt;init
@@ -520,7 +520,7 @@ file (assume that the &lt;code&gt;library&lt;&#x2F;code&gt; project is in the di
 &lt;pre&gt;&lt;code&gt;user  nginx;
 worker_processes  2;
 
-pid logs&#x2F;nginx.pid;
+pid logs&amp;#x2F;nginx.pid;
 
 events {
     worker_connections  1024;
@@ -528,18 +528,18 @@ events {
 
 http {
     include       mime.types;
-    default_type  application&#x2F;octet-stream;
+    default_type  application&amp;#x2F;octet-stream;
 
-    log_format  main  &#x27;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &#x27;
-                     &#x27;$status $body_bytes_sent &quot;$http_referer&quot; &#x27;
-                     &#x27;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&#x27;;
+    log_format  main  &amp;#x27;$remote_addr - $remote_user [$time_local] &amp;quot;$request&amp;quot; &amp;#x27;
+                     &amp;#x27;$status $body_bytes_sent &amp;quot;$http_referer&amp;quot; &amp;#x27;
+                     &amp;#x27;&amp;quot;$http_user_agent&amp;quot; &amp;quot;$http_x_forwarded_for&amp;quot;&amp;#x27;;
 
-    access_log  logs&#x2F;access.log  main;
+    access_log  logs&amp;#x2F;access.log  main;
 
     sendfile           on;
     keepalive_timeout  65;
 
-    include &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;nginx.conf;
+    include &amp;#x2F;opt&amp;#x2F;projects&amp;#x2F;showcase&amp;#x2F;nginx.conf;
 }
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Now we just need to write the configuration for our Django project. I’m using
@@ -556,16 +556,16 @@ for the repository is here:&lt;&#x2F;p&gt;
 
     charset utf-8;
 
-    location &#x2F; {
+    location &amp;#x2F; {
         proxy_set_header    X-Real-IP   $remote_addr;
         proxy_set_header    Host        $http_host;
         proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        proxy_pass http:&#x2F;&#x2F;localhost:8000;
+        proxy_pass http:&amp;#x2F;&amp;#x2F;localhost:8000;
     }
 
-    location &#x2F;static {
-        root &#x2F;opt&#x2F;projects&#x2F;showcase&#x2F;;
+    location &amp;#x2F;static {
+        root &amp;#x2F;opt&amp;#x2F;projects&amp;#x2F;showcase&amp;#x2F;;
         expires 1d;
     }
 }
@@ -632,9 +632,9 @@ big bowl of spaghetti.&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;package main
 
 import (
-	&quot;fmt&quot;
-	&quot;sync&quot;
-	&quot;time&quot;
+	&amp;quot;fmt&amp;quot;
+	&amp;quot;sync&amp;quot;
+	&amp;quot;time&amp;quot;
 )
 
 type Fork struct {
@@ -650,7 +650,7 @@ func NewTable(forks int) *Table {
 	t := new(Table)
 	t.philosophers = make(chan Philosopher, forks - 1)
 	t.forks = make([]*Fork, forks)
-	for i := 0; i &lt; forks; i++ {
+	for i := 0; i &amp;lt; forks; i++ {
 		t.forks[i] = new(Fork)
 	}
 	return t
@@ -658,11 +658,11 @@ func NewTable(forks int) *Table {
 
 func (t *Table) PushPhilosopher(p Philosopher) {
 	p.table = t
-	t.philosophers &lt;- p
+	t.philosophers &amp;lt;- p
 }
 
 func (t *Table) PopPhilosopher() Philosopher {
-	p := &lt;-t.philosophers
+	p := &amp;lt;-t.philosophers
 	p.table = nil
 	return p
 }
@@ -685,18 +685,18 @@ type Philosopher struct {
 }
 
 func (p Philosopher) Think() {
-	fmt.Printf(&quot;%s is thinking...\n&quot;, p.name)
+	fmt.Printf(&amp;quot;%s is thinking...\n&amp;quot;, p.name)
 	time.Sleep(3e9)
 	p.table.PushPhilosopher(p)
 }
 
 func (p Philosopher) Eat() {
 	p.GetForks()
-	fmt.Printf(&quot;%s is eating...\n&quot;, p.name)
+	fmt.Printf(&amp;quot;%s is eating...\n&amp;quot;, p.name)
 	time.Sleep(3e9)
 	p.PutForks()
 	p.table.PopPhilosopher()
-	p.fed &lt;- 1
+	p.fed &amp;lt;- 1
 }
 
 func (p Philosopher) GetForks() {
@@ -718,11 +718,11 @@ func (p Philosopher) PutForks() {
 func main() {
 	table := NewTable(5)
 	philosophers := []Philosopher{
-		Philosopher{&quot;Thomas Nagel&quot;, 0, table, make(chan int)},
-		Philosopher{&quot;Elizabeth Anscombe&quot;, 1, table, make(chan int)},
-		Philosopher{&quot;Martin Heidegger&quot;, 2, table, make(chan int)},
-		Philosopher{&quot;Peter Lombard&quot;, 3, table, make(chan int)},
-		Philosopher{&quot;Gottfried Leibniz&quot;, 4, table, make(chan int)},
+		Philosopher{&amp;quot;Thomas Nagel&amp;quot;, 0, table, make(chan int)},
+		Philosopher{&amp;quot;Elizabeth Anscombe&amp;quot;, 1, table, make(chan int)},
+		Philosopher{&amp;quot;Martin Heidegger&amp;quot;, 2, table, make(chan int)},
+		Philosopher{&amp;quot;Peter Lombard&amp;quot;, 3, table, make(chan int)},
+		Philosopher{&amp;quot;Gottfried Leibniz&amp;quot;, 4, table, make(chan int)},
 	}
 
 	for {
@@ -734,8 +734,8 @@ func main() {
 		}
 
 		for _, p := range philosophers {
-			&lt;-p.fed
-			fmt.Printf(&quot;%s was fed.\n&quot;, p.name)
+			&amp;lt;-p.fed
+			fmt.Printf(&amp;quot;%s was fed.\n&amp;quot;, p.name)
 		}
 	}
 
@@ -793,7 +793,7 @@ function “on demmand”, when we need something, we learn how to use it! ;)&lt
 function (a callback). The string describes the test suite and the function is
 a callback that delimites the scope of the test suite. Here is the &lt;code&gt;Zebrafy&lt;&#x2F;code&gt;
 suite:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;describe(&#x27;Zebrafy&#x27;, function () {
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;describe(&amp;#x27;Zebrafy&amp;#x27;, function () {
 
 });
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
@@ -802,8 +802,8 @@ basic is: we want different CSS classes for odd an even lines in a table.
 Jasmine provides the &lt;code&gt;it&lt;&#x2F;code&gt; function for writing the tests. It also receives a
 string and a callback: the string is a description for the test and the
 callback is the function executed as test. Here is the very first test:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&#x27;should apply classes zebrafy-odd and zebrafy-even to each other table lines&#x27;, function () {
-    var table = $(&quot;#zebra-table&quot;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&amp;#x27;should apply classes zebrafy-odd and zebrafy-even to each other table lines&amp;#x27;, function () {
+    var table = $(&amp;quot;#zebra-table&amp;quot;);
     table.zebrafy();
     expect(table).toBeZebrafyied();
 });
@@ -818,22 +818,22 @@ functions receive a callback function to be executed and, as the names suggest,
 the &lt;code&gt;beforeEach&lt;&#x2F;code&gt; callback is called before each test run, and the &lt;code&gt;afterEach&lt;&#x2F;code&gt;
 callback is called after the test run. Here are the hooks:&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;beforeEach(function () {
-    $(&#x27;&lt;table id=&quot;zebra-table&quot;&gt;&lt;&#x2F;table&gt;&#x27;).appendTo(&#x27;body&#x27;);
-    for (var i=0; i &lt; 10; i++) {
-        $(&#x27;&lt;tr&gt;&lt;&#x2F;tr&gt;&#x27;).append(&#x27;&lt;td&gt;&lt;&#x2F;td&gt;&#x27;).append(&#x27;&lt;td&gt;&lt;&#x2F;td&gt;&#x27;).append(&#x27;&lt;td&gt;&lt;&#x2F;td&gt;&#x27;).appendTo(&#x27;#zebra-table&#x27;);
+    $(&amp;#x27;&amp;lt;table id=&amp;quot;zebra-table&amp;quot;&amp;gt;&amp;lt;&amp;#x2F;table&amp;gt;&amp;#x27;).appendTo(&amp;#x27;body&amp;#x27;);
+    for (var i=0; i &amp;lt; 10; i++) {
+        $(&amp;#x27;&amp;lt;tr&amp;gt;&amp;lt;&amp;#x2F;tr&amp;gt;&amp;#x27;).append(&amp;#x27;&amp;lt;td&amp;gt;&amp;lt;&amp;#x2F;td&amp;gt;&amp;#x27;).append(&amp;#x27;&amp;lt;td&amp;gt;&amp;lt;&amp;#x2F;td&amp;gt;&amp;#x27;).append(&amp;#x27;&amp;lt;td&amp;gt;&amp;lt;&amp;#x2F;td&amp;gt;&amp;#x27;).appendTo(&amp;#x27;#zebra-table&amp;#x27;);
     };
 });
 
 afterEach(function () {
-    $(&quot;#zebra-table&quot;).remove();
+    $(&amp;quot;#zebra-table&amp;quot;).remove();
 });
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The &lt;code&gt;beforeEach&lt;&#x2F;code&gt; callback uses jQuery to create a table with 10 rows and 3
 columns and add it to the DOM. In &lt;code&gt;afterEach&lt;&#x2F;code&gt; callback, we just remove that
 table using jQuery again. Okay, now the table exists, let’s go back to the
 test:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&#x27;should apply classes zebrafy-odd and zebrafy-even to each other table lines&#x27;, function () {
-    var table = $(&quot;#zebra-table&quot;);
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&amp;#x27;should apply classes zebrafy-odd and zebrafy-even to each other table lines&amp;#x27;, function () {
+    var table = $(&amp;quot;#zebra-table&amp;quot;);
     table.zebrafy();
     expect(table).toBeZebrafyied();
 });
@@ -850,15 +850,15 @@ use the &lt;code&gt;addMatcher&lt;&#x2F;code&gt; method of Jasmine object:&lt;&#
         toBeZebrafyied: function() {
             var isZebrafyied = true;
 
-            this.actual.find(&quot;tr:even&quot;).each(function (index, tr) {
-                isZebrafyied = $(tr).hasClass(&#x27;zebrafy-odd&#x27;) === false &amp;&amp; $(tr).hasClass(&#x27;zebrafy-even&#x27;);
+            this.actual.find(&amp;quot;tr:even&amp;quot;).each(function (index, tr) {
+                isZebrafyied = $(tr).hasClass(&amp;#x27;zebrafy-odd&amp;#x27;) === false &amp;amp;&amp;amp; $(tr).hasClass(&amp;#x27;zebrafy-even&amp;#x27;);
                 if (!isZebrafyied) {
                     return;
                 };
             });
 
-            this.actual.find(&quot;tr:odd&quot;).each(function (index, tr) {
-                isZebrafyied = $(tr).hasClass(&#x27;zebrafy-odd&#x27;) &amp;&amp; $(tr).hasClass(&#x27;zebrafy-even&#x27;) === false;
+            this.actual.find(&amp;quot;tr:odd&amp;quot;).each(function (index, tr) {
+                isZebrafyied = $(tr).hasClass(&amp;#x27;zebrafy-odd&amp;#x27;) &amp;amp;&amp;amp; $(tr).hasClass(&amp;#x27;zebrafy-even&amp;#x27;) === false;
                 if (!isZebrafyied) {
                     return;
                 };
@@ -879,8 +879,8 @@ the same checking with even &lt;code&gt;&amp;lt;tr&amp;gt;&lt;&#x2F;code&gt; lin
 jQuery code:&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;(function ($) {
     $.fn.zebrafy = function () {
-        this.find(&quot;tr:even&quot;).addClass(&quot;zebrafy-even&quot;);
-        this.find(&quot;tr:odd&quot;).addClass(&quot;zebrafy-odd&quot;);
+        this.find(&amp;quot;tr:even&amp;quot;).addClass(&amp;quot;zebrafy-even&amp;quot;);
+        this.find(&amp;quot;tr:odd&amp;quot;).addClass(&amp;quot;zebrafy-odd&amp;quot;);
     };
 })(jQuery);
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
@@ -891,10 +891,10 @@ function&lt;&#x2F;a&gt;,
 this post aims to show how to use Jasmine to test jQuery plugins.&lt;&#x2F;p&gt;
 &lt;p&gt;By convention, jQuery plugins are “chainable”, so let’s make sure the zebrafy
 plugin is chainable using a spec:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&#x27;zebrafy should be chainable&#x27;, function() {
-    var table = $(&quot;#zebra-table&quot;);
-    table.zebrafy().addClass(&#x27;black-bg&#x27;);
-    expect(table.hasClass(&#x27;black-bg&#x27;)).toBeTruthy();
+&lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;it(&amp;#x27;zebrafy should be chainable&amp;#x27;, function() {
+    var table = $(&amp;quot;#zebra-table&amp;quot;);
+    table.zebrafy().addClass(&amp;#x27;black-bg&amp;#x27;);
+    expect(table.hasClass(&amp;#x27;black-bg&amp;#x27;)).toBeTruthy();
 });
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;As you can see, we used the built-in matcher &lt;code&gt;toBeTruthy&lt;&#x2F;code&gt;, which asserts that
@@ -903,8 +903,8 @@ object in the plugin and the test will pass:&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;javascript&quot; class=&quot;language-javascript &quot;&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;(function ($) {
     $.fn.zebrafy = function () {
         return this.each(function (index, table) {
-            $(table).find(&quot;tr:even&quot;).addClass(&quot;zebrafy-even&quot;);
-            $(table).find(&quot;tr:odd&quot;).addClass(&quot;zebrafy-odd&quot;);
+            $(table).find(&amp;quot;tr:even&amp;quot;).addClass(&amp;quot;zebrafy-even&amp;quot;);
+            $(table).find(&amp;quot;tr:odd&amp;quot;).addClass(&amp;quot;zebrafy-odd&amp;quot;);
         });
     };
 })(jQuery);
@@ -947,7 +947,7 @@ let’s do it…&lt;&#x2F;p&gt;
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;splinter.readthedocs.io&#x2F;en&#x2F;latest&#x2F;api&#x2F;driver-and-element-api.html#module-splinter.browser&quot;&gt;Browser&lt;&#x2F;a&gt;
 instance, which will provide method for interactions with browser (where the
 browser is: Firefox, Chrome, etc.). The code we need for it is very simple:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser = Browser(&quot;firefox&quot;)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser = Browser(&amp;quot;firefox&amp;quot;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;&lt;code&gt;Browser&lt;&#x2F;code&gt; is a class and its constructor receives the driver to be used with
 that instance. Nowadays, there are three drivers for Splinter: &lt;code&gt;firefox&lt;&#x2F;code&gt;,
@@ -959,7 +959,7 @@ another blog post here.&lt;&#x2F;p&gt;
 the object used for Firefox interactions. Let&#x27;s start a new event on Facebook,
 the Splinter Sprint. First of all, we need to &lt;em&gt;visit&lt;&#x2F;em&gt; the Facebook homepage.
 There is a &lt;code&gt;visit&lt;&#x2F;code&gt; method on Browser class, so we can use it:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.visit(&quot;https:&#x2F;&#x2F;www.facebook.com&quot;)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.visit(&amp;quot;https:&amp;#x2F;&amp;#x2F;www.facebook.com&amp;quot;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;&lt;code&gt;visit&lt;&#x2F;code&gt; is a blocking operation: it waits for page to load, then we can
 navigate, click on links, fill forms, etc. Now we have Facebook homepage opened
@@ -968,11 +968,11 @@ what if we are already logged in? So, let&#x27;s create a method that login on
 Facebook with provided authentication data only the user is not logged in
 (imagine we are on a &lt;code&gt;Test&lt;&#x2F;code&gt;Case class):&lt;&#x2F;p&gt;
 &lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;def do_login_if_need(self, username, password):
-    if self.browser.is_element_present_by_css(&#x27;div.menu_login_container&#x27;):
-        self.browser.fill(&#x27;email&#x27;, username)
-        self.browser.fill(&#x27;pass&#x27;, password)
-        self.browser.find_by_css(&#x27;div.menu_login_container input[type=&quot;submit&quot;]&#x27;).first.click()
-        assert self.browser.is_element_present_by_css(&#x27;li#navAccount&#x27;)
+    if self.browser.is_element_present_by_css(&amp;#x27;div.menu_login_container&amp;#x27;):
+        self.browser.fill(&amp;#x27;email&amp;#x27;, username)
+        self.browser.fill(&amp;#x27;pass&amp;#x27;, password)
+        self.browser.find_by_css(&amp;#x27;div.menu_login_container input[type=&amp;quot;submit&amp;quot;]&amp;#x27;).first.click()
+        assert self.browser.is_element_present_by_css(&amp;#x27;li#navAccount&amp;#x27;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;What was made here? First of all, the method checks if there is an element
 present on the page, using a CSS selector. It checks for a &lt;code&gt;div&lt;&#x2F;code&gt; that contains
@@ -1005,7 +1005,7 @@ will just be a public event and we don’t need to invite anybody. There are som
 boring AJAX requests on Facebook that we need to deal, so there is not only
 Splinter code for those steps above. First step is click on “Events” link. All
 we need to do is &lt;code&gt;find&lt;&#x2F;code&gt; the link and &lt;code&gt;click&lt;&#x2F;code&gt; on it:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&#x27;li#navItem_events a&#x27;).first.click()
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&amp;#x27;li#navItem_events a&amp;#x27;).first.click()
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The &lt;code&gt;find_by_css&lt;&#x2F;code&gt; method takes a CSS selector and returns an
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;splinter.rtfd.org&#x2F;en&#x2F;latest&#x2F;api&#x2F;element-list.html#splinter.element_list.ElementList&quot;&gt;ElementList&lt;&#x2F;a&gt;.
@@ -1014,11 +1014,11 @@ an element, the return type is still a &lt;em&gt;list&lt;&#x2F;em&gt;) and click
 method, &lt;code&gt;click&lt;&#x2F;code&gt; is a blocking operation: the driver will only listen for new
 actions when the request is finished (the page is loaded).&lt;&#x2F;p&gt;
 &lt;p&gt;We’re finally on &amp;quot;new event&amp;quot; page, and there is a form on screen waiting for data of the &lt;em&gt;Splinter Sprint&lt;&#x2F;em&gt;. Let’s fill the form. Here is the code for it:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.fill(&#x27;event_startIntlDisplay&#x27;, &#x27;5&#x2F;21&#x2F;2011&#x27;)
-browser.select(&#x27;start_time_min&#x27;, &#x27;480&#x27;)
-browser.fill(&#x27;name&#x27;, &#x27;Splinter sprint&#x27;)
-browser.fill(&#x27;location&#x27;, &#x27;Rio de Janeiro, Brazil&#x27;)
-browser.fill(&#x27;desc&#x27;, &#x27;For more info, check out the #cobratem channel on freenode!&#x27;)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.fill(&amp;#x27;event_startIntlDisplay&amp;#x27;, &amp;#x27;5&amp;#x2F;21&amp;#x2F;2011&amp;#x27;)
+browser.select(&amp;#x27;start_time_min&amp;#x27;, &amp;#x27;480&amp;#x27;)
+browser.fill(&amp;#x27;name&amp;#x27;, &amp;#x27;Splinter sprint&amp;#x27;)
+browser.fill(&amp;#x27;location&amp;#x27;, &amp;#x27;Rio de Janeiro, Brazil&amp;#x27;)
+browser.fill(&amp;#x27;desc&amp;#x27;, &amp;#x27;For more info, check out the #cobratem channel on freenode!&amp;#x27;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;That is it: the event is going to happen on May 21th 2011, at 8:00 in the
 morning (480 minutes). As we know, the event name is &lt;em&gt;Splinter sprint&lt;&#x2F;em&gt;, and we
@@ -1031,13 +1031,13 @@ select an option in a select element (a “combo box”). It also receives two
 string parameters: the first is the &lt;em&gt;name&lt;&#x2F;em&gt; of the select element, and the
 second is the &lt;em&gt;value&lt;&#x2F;em&gt; of the option being selected.&lt;&#x2F;p&gt;
 &lt;p&gt;Imagine you have the following select element:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;html&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;select name=&quot;gender&quot;&gt;
-    &lt;option value=&quot;m&quot;&gt;Male&lt;&#x2F;option&gt;
-    &lt;option value=&quot;f&quot;&gt;Female&lt;&#x2F;option&gt;
-&lt;&#x2F;select&gt;
+&lt;pre data-lang=&quot;html&quot; class=&quot;language-html &quot;&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&amp;lt;select name=&amp;quot;gender&amp;quot;&amp;gt;
+    &amp;lt;option value=&amp;quot;m&amp;quot;&amp;gt;Male&amp;lt;&amp;#x2F;option&amp;gt;
+    &amp;lt;option value=&amp;quot;f&amp;quot;&amp;gt;Female&amp;lt;&amp;#x2F;option&amp;gt;
+&amp;lt;&amp;#x2F;select&amp;gt;
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;To select “Male”, you would call the select method this way:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.select(&quot;gender&quot;, &quot;m&quot;)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.select(&amp;quot;gender&amp;quot;, &amp;quot;m&amp;quot;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The last action before click on “Create Event” button is upload a picture for
 the event. On new event page, Facebook loads the file field for picture
@@ -1045,7 +1045,7 @@ uploading inside an &lt;code&gt;iframe&lt;&#x2F;code&gt;, so we need to switch t
 with the form present inside the frame. To show the frame, we need to click on
 “Add Event Photo” button and then switch to it, we already know how click on a
 link:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&#x27;div.eventEditUpload a.uiButton&#x27;).first.click()
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&amp;#x27;div.eventEditUpload a.uiButton&amp;#x27;).first.click()
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;When we click this link, Facebook makes an asynchronous request, which means
 the driver does not stay blocked waiting the end of the request, so if we try
@@ -1055,8 +1055,8 @@ method that receives an argument called &lt;code&gt;wait_time&lt;&#x2F;code&gt;,
 will wait for the element to appear on the screen. If the element does not
 appear on screen, we can’t go on, so we can assume the test failed (remember we
 are testing a Facebook feature):&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;if not browser.is_element_present_by_css(&#x27;iframe#upload_pic_frame&#x27;, wait_time=10):
-    fail(&quot;The upload pic iframe did&#x27;n&#x27;t appear :(&quot;)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;if not browser.is_element_present_by_css(&amp;#x27;iframe#upload_pic_frame&amp;#x27;, wait_time=10):
+    fail(&amp;quot;The upload pic iframe did&amp;#x27;n&amp;#x27;t appear :(&amp;quot;)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The &lt;code&gt;is_element_present_by_css&lt;&#x2F;code&gt; method takes a CSS selector and tries to find
 an element using it. It also receives a &lt;code&gt;wait_time&lt;&#x2F;code&gt; parameter that indicates a
@@ -1075,8 +1075,8 @@ Github).&lt;&#x2F;p&gt;
 picture. Imagine we have a variable that contains the path of the picture (and
 not a file object, &lt;code&gt;StringIO&lt;&#x2F;code&gt;, or something like this), and this variable name
 is &lt;code&gt;picture_path&lt;&#x2F;code&gt;, this is the code we need:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;with browser.get_iframe(&#x27;upload_pic_frame&#x27;) as frame:
-    frame.attach_file(&#x27;pic&#x27;, picture_path)
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;with browser.get_iframe(&amp;#x27;upload_pic_frame&amp;#x27;) as frame:
+    frame.attach_file(&amp;#x27;pic&amp;#x27;, picture_path)
     time.sleep(10)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Splinter provides the &lt;code&gt;get_iframe&lt;&#x2F;code&gt; method that changes the context and returns
@@ -1088,9 +1088,9 @@ some element to appear on screen, so I just put Python to sleep 10 seconds on
 last line.&lt;&#x2F;p&gt;
 &lt;p&gt;After finish all these steps, we can finally click on “Create Event” button and
 asserts that Facebook created it:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&#x27;label.uiButton input[type=&quot;submit&quot;]&#x27;).first.click()
-title = browser.find_by_css(&#x27;h1 span&#x27;).first.text
-assert title == &#x27;Splinter sprint&#x27;
+&lt;pre data-lang=&quot;python&quot; class=&quot;language-python &quot;&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;browser.find_by_css(&amp;#x27;label.uiButton input[type=&amp;quot;submit&amp;quot;]&amp;#x27;).first.click()
+title = browser.find_by_css(&amp;#x27;h1 span&amp;#x27;).first.text
+assert title == &amp;#x27;Splinter sprint&amp;#x27;
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;After create an event, Facebook redirects the browser to the event page, so we
 can check if it really happened by asserting the header of the page. That’s

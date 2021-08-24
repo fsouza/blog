@@ -105,9 +105,9 @@ big bowl of spaghetti.</p>
 <pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">package main
 
 import (
-	"fmt"
-	"sync"
-	"time"
+	&quot;fmt&quot;
+	&quot;sync&quot;
+	&quot;time&quot;
 )
 
 type Fork struct {
@@ -123,7 +123,7 @@ func NewTable(forks int) *Table {
 	t := new(Table)
 	t.philosophers = make(chan Philosopher, forks - 1)
 	t.forks = make([]*Fork, forks)
-	for i := 0; i < forks; i++ {
+	for i := 0; i &lt; forks; i++ {
 		t.forks[i] = new(Fork)
 	}
 	return t
@@ -131,11 +131,11 @@ func NewTable(forks int) *Table {
 
 func (t *Table) PushPhilosopher(p Philosopher) {
 	p.table = t
-	t.philosophers <- p
+	t.philosophers &lt;- p
 }
 
 func (t *Table) PopPhilosopher() Philosopher {
-	p := <-t.philosophers
+	p := &lt;-t.philosophers
 	p.table = nil
 	return p
 }
@@ -158,18 +158,18 @@ type Philosopher struct {
 }
 
 func (p Philosopher) Think() {
-	fmt.Printf("%s is thinking...\n", p.name)
+	fmt.Printf(&quot;%s is thinking...\n&quot;, p.name)
 	time.Sleep(3e9)
 	p.table.PushPhilosopher(p)
 }
 
 func (p Philosopher) Eat() {
 	p.GetForks()
-	fmt.Printf("%s is eating...\n", p.name)
+	fmt.Printf(&quot;%s is eating...\n&quot;, p.name)
 	time.Sleep(3e9)
 	p.PutForks()
 	p.table.PopPhilosopher()
-	p.fed <- 1
+	p.fed &lt;- 1
 }
 
 func (p Philosopher) GetForks() {
@@ -191,11 +191,11 @@ func (p Philosopher) PutForks() {
 func main() {
 	table := NewTable(5)
 	philosophers := []Philosopher{
-		Philosopher{"Thomas Nagel", 0, table, make(chan int)},
-		Philosopher{"Elizabeth Anscombe", 1, table, make(chan int)},
-		Philosopher{"Martin Heidegger", 2, table, make(chan int)},
-		Philosopher{"Peter Lombard", 3, table, make(chan int)},
-		Philosopher{"Gottfried Leibniz", 4, table, make(chan int)},
+		Philosopher{&quot;Thomas Nagel&quot;, 0, table, make(chan int)},
+		Philosopher{&quot;Elizabeth Anscombe&quot;, 1, table, make(chan int)},
+		Philosopher{&quot;Martin Heidegger&quot;, 2, table, make(chan int)},
+		Philosopher{&quot;Peter Lombard&quot;, 3, table, make(chan int)},
+		Philosopher{&quot;Gottfried Leibniz&quot;, 4, table, make(chan int)},
 	}
 
 	for {
@@ -207,8 +207,8 @@ func main() {
 		}
 
 		for _, p := range philosophers {
-			<-p.fed
-			fmt.Printf("%s was fed.\n", p.name)
+			&lt;-p.fed
+			fmt.Printf(&quot;%s was fed.\n&quot;, p.name)
 		}
 	}
 

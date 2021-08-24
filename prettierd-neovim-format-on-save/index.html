@@ -157,7 +157,7 @@ my files? I could run it on a git hook or something like that and not even
 notice.</p>
 <p>As I mentioned before, I was running format-on-save in Neovim, with a simple
 setup, not very fancy:</p>
-<pre data-lang="vimscript" class="language-vimscript "><code class="language-vimscript" data-lang="vimscript">autocmd BufWritePre *.ts execute "silent %!npx prettier --stdin-filepath '" . expand('%:p') . "'"
+<pre data-lang="vimscript" class="language-vimscript "><code class="language-vimscript" data-lang="vimscript">autocmd BufWritePre *.ts execute &quot;silent %!npx prettier --stdin-filepath &#x27;&quot; . expand(&#x27;%:p&#x27;) . &quot;&#x27;&quot;
 </code></pre>
 <p><a rel="noopener" target="_blank" href="https://github.com/fsouza/dotfiles/blob/0b6d3daaa844796f916b3f056a66af0e25a76c3c/autoload/fsouza/prettier.vim#L19-L30">(it was a bit fancier than that, but not by much)</a></p>
 <p>So, imagine you're using Neovim and every time you save the file you have to
@@ -202,26 +202,26 @@ receives a &quot;request&quot;. The two important things to know about are:</p>
 <ol>
 <li>You can install it with npm and start it with <code>prettierd start</code>:</li>
 </ol>
-<pre><code>％ npm install -g @fsouza/prettierd
+<pre><code>％ npm install -g @fsouza&#x2F;prettierd
 ％ prettierd start
 </code></pre>
 <p>Alternatively you can do both things with <code>npx</code>:</p>
-<pre><code>％ npx -p @fsouza/prettierd prettierd start
+<pre><code>％ npx -p @fsouza&#x2F;prettierd prettierd start
 </code></pre>
 <ol start="2">
 <li>When it starts, prettierd writes a file with its port number and token</li>
 </ol>
-<pre><code>％ cat ~/.prettierd
+<pre><code>％ cat ~&#x2F;.prettierd
 53561 cb2ad753df0aca85
 </code></pre>
 <p>This means that prettierd is running on port 53561 and we can use the token
 <code>cb2ad753df0aca85</code> in our requests to format our source code.</p>
 <p>core_d's protocol is pretty simple:</p>
-<pre><code><token> <working-dir> <file-name>\n
-<file-content>
+<pre><code>&lt;token&gt; &lt;working-dir&gt; &lt;file-name&gt;\n
+&lt;file-content&gt;
 </code></pre>
 <p>For example, we can use netcat:</p>
-<pre><code>％ echo "cb2ad753df0aca85 $PWD sample2.ts" | cat - sample2.ts | /usr/bin/time nc localhost 53561 >sample2-formatted.ts
+<pre><code>％ echo &quot;cb2ad753df0aca85 $PWD sample2.ts&quot; | cat - sample2.ts | &#x2F;usr&#x2F;bin&#x2F;time nc localhost 53561 &gt;sample2-formatted.ts
         0.14 real         0.00 user         0.00 sys
 </code></pre>
 <p>Remember how formatting <code>sample2.ts</code> took over 1 second? Not anymore. :)</p>
@@ -241,9 +241,9 @@ a TCP client and a TCP server! In our case we want to use a client, so we
 invoke the <code>tcp_connect</code> function:</p>
 <pre data-lang="lua" class="language-lua "><code class="language-lua" data-lang="lua">local callback = ...
 local port = 53561
-local token = 'cb2ad753df0aca85'
+local token = &#x27;cb2ad753df0aca85&#x27;
 local client = vim.loop.new_tcp()
-vim.loop.tcp_connect(client, '127.0.0.1', port, callback)
+vim.loop.tcp_connect(client, &#x27;127.0.0.1&#x27;, port, callback)
 </code></pre>
 <p>Since this is async world, we need to pass a callback that gets executed
 whenever the connection happens (or in case something goes wrong). So the first
@@ -268,25 +268,25 @@ comments:</p>
     error(err)
   end
 
-  -- grab the contents of the buffer and add first row to match core_d's protocol
+  -- grab the contents of the buffer and add first row to match core_d&#x27;s protocol
   local bufnr = vim.api.nvim_get_current_buf()
-  local first_line = string.format('%s %s %s', token, vim.loop.cwd(), 'sample2.js')
+  local first_line = string.format(&#x27;%s %s %s&#x27;, token, vim.loop.cwd(), &#x27;sample2.js&#x27;)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
   table.insert(lines, 1, first_line)
 
   -- start reading the response
-  local response = ''
+  local response = &#x27;&#x27;
   vim.loop.read_start(client, function(read_err, chunk)
     -- check if there was any error reading data back, if so, close the
     -- connection and report the error.
     if read_err then
       vim.loop.close(client)
-      error('failed to read data from prettierd: ' .. read_err)
+      error(&#x27;failed to read data from prettierd: &#x27; .. read_err)
     end
 
-    -- libuv will call this callback with no data and no error when it's done,
-    -- so if there's data, concatenate it into the final response. Otherwise it
-    -- means we're done, so invoke the `write_to_buf` to write the data back.
+    -- libuv will call this callback with no data and no error when it&#x27;s done,
+    -- so if there&#x27;s data, concatenate it into the final response. Otherwise it
+    -- means we&#x27;re done, so invoke the `write_to_buf` to write the data back.
     if chunk then
       response = response .. chunk
     else
@@ -296,9 +296,9 @@ comments:</p>
   end)
 
   -- write the request
-  vim.loop.write(client, table.concat(lines, '\n'))
+  vim.loop.write(client, table.concat(lines, &#x27;\n&#x27;))
 
-  -- signal to the server that we're done writing the request
+  -- signal to the server that we&#x27;re done writing the request
   vim.loop.shutdown(client)
 end
 </code></pre>
@@ -306,11 +306,11 @@ end
 error handling: the way errors are reported isn't great, but it's acceptable:
 if prettier fails, the last line contains a message in the format <code># exit &lt;code&gt; ...</code>.</p>
 <pre data-lang="lua" class="language-lua "><code class="language-lua" data-lang="lua">local function write_to_buf(data, bufnr)
-  local new_lines = vim.split(data, '\n')
+  local new_lines = vim.split(data, &#x27;\n&#x27;)
 
   -- check for errors
-  if string.find(new_lines[#new_lines], '^# exit %d+') then
-    error(string.format('failed to format with prettier: %s', data))
+  if string.find(new_lines[#new_lines], &#x27;^# exit %d+&#x27;) then
+    error(string.format(&#x27;failed to format with prettier: %s&#x27;, data))
   end
 
   -- write contents
