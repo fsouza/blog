@@ -15,7 +15,7 @@ jobs:
 
       - name: download zola
         run: |
-          curl -sLo /tmp/zola.tar.gz https://github.com/getzola/zola/releases/download/v0.14.0/zola-v0.14.0-x86_64-unknown-linux-gnu.tar.gz
+          curl -sLo /tmp/zola.tar.gz https://github.com/getzola/zola/releases/download/v0.14.1/zola-v0.14.1-x86_64-unknown-linux-gnu.tar.gz
           tar -xzf /tmp/zola.tar.gz
 
       - name: build
