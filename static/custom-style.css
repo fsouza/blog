@@ -75,3 +75,7 @@ h2.post-title {
 a.post > .tags {
     color: #515151;
 }
+
+ul {
+    margin-bottom: 0;
+}
