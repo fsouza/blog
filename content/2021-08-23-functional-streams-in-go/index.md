@@ -331,9 +331,9 @@ FlatMap(s, func(v string) *Stream[rune] {
 
 ## Combining and slicing streams
 
-On top of filtering and mapping, one may want to combine multiple streams, or
-get some elements of a stream, or drop some items from a stream. For that,
-let's look at how we'd implement some other helper functions:
+On top of filtering, mapping, appending and others, one may want to combine
+multiple streams, or get some elements of a stream, or drop some items from a
+stream. For that, let's look at how we'd implement some other helper functions:
 
 - `Take(s Stream[T], n int) Stream[T]`: given stream `s`, returns a new stream
   with at most `n` elements.
@@ -350,7 +350,77 @@ let's look at how we'd implement some other helper functions:
 - `DropUntil(s Stream[T], p func(T) bool) Stream[T]`: like `DropWhile`, but the
   output stream will skip elements from `s` until `p` returns `true`.
 
+### Take, TakeWhile and TakeUntil
+
+### Drop, DropWhile and DropUntil
+
 ## Putting it all together in a realistic example
+
+Let's do a very simple REPL style application: it has a shell where we can
+enter commands, and those commands will have some side-effect. Let's implement
+a poor man [memcached](https://memcached.org/) that operates via stdin, and
+supports three commands `set`, `get` and `del` (which will set a key-value
+pair, get the value of a key and delete a key, respectively). We want to be
+able to have two separate layers: one for parsing and another one for executing
+commands, and we want to be able to send commands from stdin to the execution
+layer.
+
+This is an extremely simple example that doesn't _really_ need generics (it's
+stringly-typed :D), but should give an idea of how functional streams can be
+used.
+
+First, let's introduce a helper function that allow us to generate a lines
+stream from an `io.Reader`:
+
+```go
+func FromReader(r io.Reader) *Stream[string] {
+	return fromReader(bufio.NewReader(r))
+}
+
+func fromReader(r *bufio.Reader) *Stream[string] {
+	line, isPrefix, err := r.ReadLine()
+	if err != nil {
+		return nil
+	}
+	parts := []string{string(line)}
+	for isPrefix {
+		line, isPrefix, err = r.ReadLine()
+		if err != nil {
+			return nil
+		}
+		parts = append(parts, string(line))
+	}
+	return &Stream[string]{
+		Value: strings.Join(parts, ""),
+		Next: func() *Stream[string] {
+			return fromReader(r)
+		},
+	}
+}
+```
+
+> **Note:** that we're eating errors here, just another demonstration that you
+> shouldn't do this in production, at least not the way it's described in this
+> blog post :)
+>
+> The code below will also not handle any errors. Don't do this at home.
+
+Now that we have that function, we can create our "database" instance, loop
+through the input and execute commands:
+
+```go
+func ProcessCommands(input io.Reader, output io.Writer) {
+	s := stream.FromReader(input)
+	stream.Fold(s, NewDB(output), func(db *DB, line string) *DB {
+		cmd := strings.Fields(line)
+		db.Execute(cmd[0], cmd[1:])
+		return db
+	})
+}
+```
+
+(for runnable code, checkout the [GitHub
+repository](https://github.com/fsouza/blog/blob/main/content/2021-08-23-functional-streams-in-go/stream/kvdb/kvdb.go))
 
 > **Note:** here's where a limitation with generics shows: in Go, methods can't
 > be generic, so we're using functions, and given that Go doesn't have the pipe
@@ -365,8 +435,6 @@ let's look at how we'd implement some other helper functions:
 > their name imply), but that's not really possible in Go, because the `Map`
 > method couldn't be implemented using the current features of Go 1.18. [This
 > may change in the future](https://github.com/golang/go/issues/43390).
-
-TODO: write example using the higher-order functions, wrap up the post.
 
 ## Why not methods?
 
