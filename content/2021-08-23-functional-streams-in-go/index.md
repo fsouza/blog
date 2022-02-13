@@ -422,26 +422,57 @@ func ProcessCommands(input io.Reader, output io.Writer) {
 (for runnable code, checkout the [GitHub
 repository](https://github.com/fsouza/blog/blob/main/content/2021-08-23-functional-streams-in-go/stream/kvdb/kvdb.go))
 
-> **Note:** here's where a limitation with generics shows: in Go, methods can't
-> be generic, so we're using functions, and given that Go doesn't have the pipe
-> operator, we end-up not being able to chain those helper functions very well.
-> In an ideal world, we'd be able to implement something like:
->
-> ```
-> nat(0).Filter(isEven).Take(100).Map(strconv.Itoa).Iter(printString)
-> ```
->
-> (assuming `isEven` and `printString` are functions that exist and do what
-> their name imply), but that's not really possible in Go, because the `Map`
-> method couldn't be implemented using the current features of Go 1.18. [This
-> may change in the future](https://github.com/golang/go/issues/43390).
+
+### Another more interesting example
+
+A less realistic, but interesting example is taking a stream of numbers from
+stdin, parse them, and sum all the prime numbers. This requires using the
+helper `FromReader`, `Map` to parse the number, `Filter` to discard non-prime
+numbers and `Fold` to sum the filtered values. Notice that this is stdin, so
+values are getting piped through as they are read from stdin.
+
+Here's what that "pipeline" looks like:
+
+```go
+func main() {
+	stdin := stream.FromReader(os.Stdin)
+	numbers := stream.Map(stdin, parseLine)
+	primes := stream.Filter(numbers, isPrime)
+	sum := stream.Fold(primes, 0, sum)
+	fmt.Println(sum)
+}
+```
+
+(again, for runnable code, checkout the GitHub repo)
 
 ## Why not methods?
 
 **TL;DR:** Go doesn't really support it. [It may in the
 future](https://github.com/golang/go/issues/43390).
 
-One thing one may notice from the example above is that using functions .
+One thing one may notice from the example above is that using functions makes
+the code quite verbose, we have to introduce variables for intermediary streams
+(or we could nest function calls).
 Functional languages get away with that by having some sort of function
 composition or using pipe operators / threading macros. But in more
-object-oriented languages, methods are used. Why can't we use methods in Go?
+object-oriented languages, methods are used, which is a better fit for Go. So the code below:
+
+```go
+stdin := stream.FromReader(os.Stdin)
+numbers := stream.Map(stdin, parseLine)
+primes := stream.Filter(numbers, isPrime)
+sum := stream.Fold(primes, 0, sum)
+```
+
+Could become something like:
+
+```go
+sum := stream.FromReader(os.Stdin).Map(parseLine).Filter(isPrime).Fold(0, sum)
+```
+
+Why can't we do that in Go? The problem is that methods can't really be generic
+in Go, it's not currently supported by the generics implementation, which mean
+the `Map` function in the pipeline below cannot be implemented. It's an issues
+with how methods are used for structural subtyping & interfaces, so it may be
+complicated to address or not happen at hall. See the [issue in the Go issue
+tracker for more details](https://github.com/golang/go/issues/43390)!
