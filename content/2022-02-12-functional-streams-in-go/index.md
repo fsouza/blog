@@ -1,8 +1,6 @@
 +++
 title = "Implementing functional streams with generics in Go"
 
-draft = true
-
 [taxonomies]
 tags = ["golang", "go", "generics"]
 +++
@@ -420,7 +418,7 @@ func ProcessCommands(input io.Reader, output io.Writer) {
 ```
 
 (for runnable code, checkout the [GitHub
-repository](https://github.com/fsouza/blog/blob/main/content/2021-08-23-functional-streams-in-go/stream/kvdb/kvdb.go))
+repository](https://github.com/fsouza/blog/blob/main/content/2022-02-12-functional-streams-in-go/stream/kvdb/kvdb.go))
 
 
 ### Another more interesting example
@@ -476,3 +474,11 @@ the `Map` function in the pipeline below cannot be implemented. It's an issues
 with how methods are used for structural subtyping & interfaces, so it may be
 complicated to address or not happen at hall. See the [issue in the Go issue
 tracker for more details](https://github.com/golang/go/issues/43390)!
+
+## Feedback
+
+Do you have any feedback? Questions? Concerns? Wanna fix a typo? Checkout the
+[source for this post in
+GitHub](https://github.com/fsouza/blog/blob/HEAD/content/2022-02-12-functional-streams-in-go/index.md)
+(feel free to send a PR), or the [discussion in the GitHub
+repo](https://github.com/fsouza/blog/discussions/12).
