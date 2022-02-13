@@ -1,6 +1,10 @@
-package main
+package stream
 
-import "fmt"
+import (
+	"bufio"
+	"io"
+	"strings"
+)
 
 type Stream[T any] struct {
 	Value T
@@ -115,6 +119,31 @@ func FromSlice[T any](items []T) *Stream[T] {
 	}
 }
 
+func FromReader(r io.Reader) *Stream[string] {
+	return fromReader(bufio.NewReader(r))
+}
+
+func fromReader(r *bufio.Reader) *Stream[string] {
+	line, isPrefix, err := r.ReadLine()
+	if err != nil {
+		return nil
+	}
+	parts := []string{string(line)}
+	for isPrefix {
+		line, isPrefix, err = r.ReadLine()
+		if err != nil {
+			return nil
+		}
+		parts = append(parts, string(line))
+	}
+	return &Stream[string]{
+		Value: strings.Join(parts, ""),
+		Next: func() *Stream[string] {
+			return fromReader(r)
+		},
+	}
+}
+
 func Empty[T any]() *Stream[T] {
 	return nil
 }
@@ -147,14 +176,5 @@ func nat(start int) *Stream[int] {
 func fromStrings(s *Stream[string]) *Stream[rune] {
 	return FlatMap(s, func(v string) *Stream[rune] {
 		return FromSlice([]rune(v))
-	})
-}
-
-func main() {
-	evens := Filter(nat(0), func(v int) bool {
-		return v%2 == 0
-	})
-	Iter(evens, func(v int) {
-		fmt.Println(v)
 	})
 }
