@@ -1,5 +1,5 @@
 +++
-title = "Implementing functional streams with generics in Go (for fun)"
+title = "Implementing functional streams with generics in Go"
 
 draft = true
 
@@ -7,12 +7,17 @@ draft = true
 tags = ["golang", "go", "generics"]
 +++
 
-> **Note:** this is an experiment with an upcoming change in Go's type system.
+> **Note 1:** this is an experiment with an upcoming change in Go's type system.
 > If you need something like what's described in the post in the real world,
-> use channels.
+> use channels, or something like RxGo.
+>
+> **Note 2:** I originally started this post in August and almost abandoned it,
+> but figured it's still a useful exploration of an important upcoming feature
+> use channels, or something like RxGo.
 
-Go 1.18 will likely support generics, and I decided I would give it a shot.
-I've been playing with the idea of [representing streams with
+
+Go 1.18 will support generics, and I decided I would give it a shot. I've been
+playing with the idea of [representing streams with
 channels](https://github.com/fsouza/channels) and higher order functions that
 operate on those channels, allowing processes to execute on streams of data
 somewhat-lazily. This is 100% a toy project and a production-ready version of
@@ -119,6 +124,8 @@ places.
 Note how we never return `nil` in the function above, indicating that this
 stream doesn't really end.
 
+One potentially
+
 ## Manipulating streams
 
 Now that we know how to create them, we need to understand how to manipulate
@@ -163,10 +170,210 @@ func main() {
 }
 ```
 
+This is a very fancy way of making an infinite loop :)
+
 ## Higher-order functions
 
-TODO: describe the basic operations.
+Higher-order functions make streams more interesting. There are many possible
+high-order functions, but we'll explore some common names here: `Map`, `Filter`
+and `Fold` (`Fold` may also be called `Reduce` in other contexts). Then we'll
+do a fun one with `FlatMap`.
 
-## Putting it all together in a real-ish example
+> **Note:** different from actual lists/arrays, with streams one can't
+> implement `Map` or `Filter` using `Fold`, as `Fold` always consumes the
+> stream.
+
+The interesting thing with streams is that functions such as `Filter` and `Map`
+don't do any computation unless needed: streams are lazy by nature, and actual
+computations only happen when they're consumed.
+
+### Map
+
+`Map` takes a stream of type `T` and a function from `T` to `U` and returns a
+stream of `U`. Here's the implementation of `Map`:
+
+```go
+func Map[T, U any](stream *Stream[T], f func(T) U) *Stream[U] {
+	if stream == nil {
+		return nil
+	}
+	return &Stream[U]{
+		Value: f(stream.Value),
+		Next: func() *Stream[U] {
+			return Map(stream.Next(), f)
+		},
+	}
+}
+```
+
+How can we use `Map`? A simple/stupid example would be to double all numbers
+from the `nat` stream to get a stream of even numbers:
+
+```go
+func main() {
+	evens := Map(nat(0), func(v int) int {
+		return v * 2
+	})
+	Iter(evens, func(v int) {
+		fmt.Println(v)
+	})
+}
+```
+
+### Filter
+
+`Filter` takes a stream of type `T` and a predicate function from `T` to `bool`
+and returns a new stream of `T`, containing only the elements of the original
+stream for which the given predicate returns `true`. Here's the implementation
+of `filter`:
+
+```go
+func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	for ; stream != nil; stream = stream.Next() {
+		if f(stream.Value) {
+			return &Stream[T]{
+				Value: stream.Value,
+				Next: func() *Stream[T] {
+					return Filter(stream.Next(), f)
+				},
+			}
+		}
+	}
+	return stream
+}
+```
+
+Since a non-nil Stream is required to have a valid element, `Filter` isn't
+totally lazy, as it has to consume the source stream until the predicate `p`
+returns `true`. Here's how we can get a stream of even numbers using `Filter`
+instead of `Map`:
+
+```go
+func main() {
+	evens := Filter(nat(0), func(v int) bool {
+		return v%2 == 0
+	})
+	Iter(evens, func(v int) {
+		fmt.Println(v)
+	})
+}
+```
+
+### Fold
+
+`Fold` can be used to eagerly fold the elements of a stream into some other
+value. For example, if you have a finite stream of integers, you could use
+`Fold` to find the largest, the smallest or the sum of all elements in the
+stream.
+
+Since `Fold` is eager, it can't really operate on infinite streams, as that
+would loop forever. Let's look at the implementation of `Fold`:
+
+```go
+func Fold[T, U any](stream *Stream[T], init U, f func(U, T) U) U {
+	acc := init
+	for ; stream != nil; stream = stream.Next() {
+		acc = f(acc, stream.Value)
+	}
+	return acc
+}
+```
+
+And here's an implementation of `ToSlice` that uses `Fold` instead of `Iter`:
+
+```go
+func ToSlice[T any](stream *Stream[T]) []T {
+	return Fold(stream, []T{}, func(acc []T, elm T) []T {
+		return append(acc, elm)
+	})
+}
+```
+
+### FlatMap
+
+`FlatMap` works like `Map`, but instead of taking a function from `T` to `U`,
+it takes a function from `T` to `Stream[U]`. In order to implement `FlatMap`,
+we'll first implement another useful function: `Append`, which takes two
+streams `s1` and `s2` and returns a stream that will have all elements from
+`s1`, then all elements from `s2`. Here's the code for both `Append` and
+`FlatMap`:
+
+```go
+func Append[T any](stream1 *Stream[T], stream2 *Stream[T]) *Stream[T] {
+	if stream1 == nil {
+		return stream2
+	}
+	return &Stream[T]{
+		Value: stream1.Value,
+		Next: func() *Stream[T] {
+			return Append(stream1.Next(), stream2)
+		},
+	}
+}
+
+func FlatMap[T, U any](stream *Stream[T], f func(T) *Stream[U]) *Stream[U] {
+	if stream == nil {
+		return nil
+	}
+	return Append(f(stream.Value), FlatMap(stream.Next(), f))
+}
+```
+
+One simple-ish example is taking a stream of strings and turning that into a
+stream of runes:
+
+```go
+var s *Stream[string] = ...
+FlatMap(s, func(v string) *Stream[rune] {
+	return FromSlice([]rune(v))
+})
+```
+
+## Combining and slicing streams
+
+On top of filtering and mapping, one may want to combine multiple streams, or
+get some elements of a stream, or drop some items from a stream. For that,
+let's look at how we'd implement some other helper functions:
+
+- `Take(s Stream[T], n int) Stream[T]`: given stream `s`, returns a new stream
+  with at most `n` elements.
+- `TakeWhile(s Stream[T], p func(T) bool) Stream[T]`: given stream `s` and a
+  predicate `p`, returns a new stream that will have elements from `s` as long
+  as `p` returns `true`
+- `TakeUntil(s Stream[T], p func(T) bool) Stream[T]`: like `TakeWhile`, but the
+  output stream will have elements from `s` until `p` returns `true`.
+- `Drop(s Stream[T], n int) Stream[T]`: given stream `s`, returns a new stream
+  that doesn't include the first `n` elements of `s`.
+- `DropWhile(s Stream[T], p func(T) bool) Stream[T]`: given stream `s` and a
+  predicate `p`, returns a new stream that will skip elements from `s` as long
+  as `p` returns `true`
+- `DropUntil(s Stream[T], p func(T) bool) Stream[T]`: like `DropWhile`, but the
+  output stream will skip elements from `s` until `p` returns `true`.
+
+## Putting it all together in a realistic example
+
+> **Note:** here's where a limitation with generics shows: in Go, methods can't
+> be generic, so we're using functions, and given that Go doesn't have the pipe
+> operator, we end-up not being able to chain those helper functions very well.
+> In an ideal world, we'd be able to implement something like:
+>
+> ```
+> nat(0).Filter(isEven).Take(100).Map(strconv.Itoa).Iter(printString)
+> ```
+>
+> (assuming `isEven` and `printString` are functions that exist and do what
+> their name imply), but that's not really possible in Go, because the `Map`
+> method couldn't be implemented using the current features of Go 1.18. [This
+> may change in the future](https://github.com/golang/go/issues/43390).
 
 TODO: write example using the higher-order functions, wrap up the post.
+
+## Why not methods?
+
+**TL;DR:** Go doesn't really support it. [It may in the
+future](https://github.com/golang/go/issues/43390).
+
+One thing one may notice from the example above is that using functions .
+Functional languages get away with that by having some sort of function
+composition or using pipe operators / threading macros. But in more
+object-oriented languages, methods are used. Why can't we use methods in Go?

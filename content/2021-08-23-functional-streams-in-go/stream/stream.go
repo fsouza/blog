@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Stream[T any] struct {
 	Value T
@@ -51,7 +49,6 @@ func Append[T any](stream1 *Stream[T], stream2 *Stream[T]) *Stream[T] {
 	if stream1 == nil {
 		return stream2
 	}
-
 	return &Stream[T]{
 		Value: stream1.Value,
 		Next: func() *Stream[T] {
@@ -64,7 +61,6 @@ func FlatMap[T, U any](stream *Stream[T], f func(T) *Stream[U]) *Stream[U] {
 	if stream == nil {
 		return nil
 	}
-
 	return Append(f(stream.Value), FlatMap(stream.Next(), f))
 }
 
@@ -148,11 +144,17 @@ func nat(start int) *Stream[int] {
 	}
 }
 
-func main() {
-	first10 := Take(Map(nat(0), func(v int) int { return v + 1 }), 100)
-	repeated := FlatMap(first10, func(n int) *Stream[int] {
-		return Take(Repeat(n), uint(n))
+func fromStrings(s *Stream[string]) *Stream[rune] {
+	return FlatMap(s, func(v string) *Stream[rune] {
+		return FromSlice([]rune(v))
 	})
+}
 
-	Iter(repeated, func(v int) { fmt.Println(v) })
+func main() {
+	evens := Filter(nat(0), func(v int) bool {
+		return v%2 == 0
+	})
+	Iter(evens, func(v int) {
+		fmt.Println(v)
+	})
 }
