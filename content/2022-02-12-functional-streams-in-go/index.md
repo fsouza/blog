@@ -18,9 +18,7 @@ tags = ["golang", "go", "generics"]
   - [Filter](#filter)
   - [Fold](#fold)
   - [FlatMap](#flatmap)
-- [Combining and slicing streams](#combining-and-slicing-streams)
-  - [Take, TakeWhile and TakeUntil](#take-takewhile-and-takeuntil)
-  - [Drop, DropWhile and DropUntil](#drop-dropwhile-and-dropuntil)
+- [Slicing streams](#slicing-streams)
 - [Putting it all together in a realistic example](#putting-it-all-together-in-a-realistic-example)
   - [Another more interesting example](#another-more-interesting-example)
 - [Why not methods?](#why-not-methods)
@@ -350,11 +348,12 @@ FlatMap(s, func(v string) *Stream[rune] {
 })
 ```
 
-## Combining and slicing streams
+## Slicing streams
 
 On top of filtering, mapping, appending and others, one may want to combine
-multiple streams, or get some elements of a stream, or drop some items from a
-stream. For that, let's look at how we'd implement some other helper functions:
+multiple streams (using `Append` declared above), or get some elements of a
+stream, or drop some items from a stream. For that, let's look at how we'd
+implement some other helper functions:
 
 - `Take(s Stream[T], n int) Stream[T]`: given stream `s`, returns a new stream
   with at most `n` elements.
@@ -363,17 +362,57 @@ stream. For that, let's look at how we'd implement some other helper functions:
   as `p` returns `true`
 - `TakeUntil(s Stream[T], p func(T) bool) Stream[T]`: like `TakeWhile`, but the
   output stream will have elements from `s` until `p` returns `true`.
-- `Drop(s Stream[T], n int) Stream[T]`: given stream `s`, returns a new stream
-  that doesn't include the first `n` elements of `s`.
-- `DropWhile(s Stream[T], p func(T) bool) Stream[T]`: given stream `s` and a
-  predicate `p`, returns a new stream that will skip elements from `s` as long
-  as `p` returns `true`
-- `DropUntil(s Stream[T], p func(T) bool) Stream[T]`: like `DropWhile`, but the
-  output stream will skip elements from `s` until `p` returns `true`.
 
-### Take, TakeWhile and TakeUntil
+Here's the source for `Take`, `TakeWhile` and `TakeUntil`:
 
-### Drop, DropWhile and DropUntil
+```go
+func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	if n == 0 || stream == nil {
+		return nil
+	}
+	return &Stream[T]{
+		Value: stream.Value,
+		Next: func() *Stream[T] {
+			return Take(stream.Next(), n-1)
+		},
+	}
+}
+
+func TakeWhile[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	if stream == nil {
+		return nil
+	}
+	if f(stream.Value) {
+		return &Stream[T]{
+			Value: stream.Value,
+			Next: func() *Stream[T] {
+				return TakeWhile(stream.Next(), f)
+			},
+		}
+	}
+	return nil
+}
+
+func TakeUntil[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	return TakeWhile(stream, func(v T) bool { return !f(v) })
+}
+```
+
+Notice how `TakeUntil` is simply implemented in terms of `TakeWhile`. As a
+matter of fact, `Take` could also be implemented with `TakeWhile` and a
+closure:
+
+```go
+func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	return TakeWhile(stream, func(T) bool {
+		if n == 0 {
+			return false
+		}
+		n--
+		return true
+	})
+}
+```
 
 ## Putting it all together in a realistic example
 
