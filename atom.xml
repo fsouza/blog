@@ -4,8 +4,426 @@
 	<link href="https://blog.fsouza.dev/atom.xml" rel="self" type="application/atom+xml"/>
   <link href="https://blog.fsouza.dev"/>
 	<generator uri="https://www.getzola.org/">Zola</generator>
-	<updated>2021-02-12T00:00:00+00:00</updated>
+	<updated>2022-02-12T00:00:00+00:00</updated>
 	<id>https://blog.fsouza.dev/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Implementing functional streams with generics in Go</title>
+		<published>2022-02-12T00:00:00+00:00</published>
+		<updated>2022-02-12T00:00:00+00:00</updated>
+		<link href="https://blog.fsouza.dev/functional-streams-in-go/" type="text/html"/>
+		<id>https://blog.fsouza.dev/functional-streams-in-go/</id>
+		<content type="html">&lt;!-- START doctoc generated TOC please keep comment here to allow auto update --&gt;
+&lt;!-- DON&#x27;T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#the-basic-type-definition&quot;&gt;The basic type definition&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#creating-streams&quot;&gt;Creating streams&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#infinite-streams&quot;&gt;Infinite streams&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#manipulating-streams&quot;&gt;Manipulating streams&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#higher-order-functions&quot;&gt;Higher-order functions&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#map&quot;&gt;Map&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#filter&quot;&gt;Filter&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#fold&quot;&gt;Fold&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#flatmap&quot;&gt;FlatMap&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#combining-and-slicing-streams&quot;&gt;Combining and slicing streams&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#take-takewhile-and-takeuntil&quot;&gt;Take, TakeWhile and TakeUntil&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#drop-dropwhile-and-dropuntil&quot;&gt;Drop, DropWhile and DropUntil&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#putting-it-all-together-in-a-realistic-example&quot;&gt;Putting it all together in a realistic example&lt;&#x2F;a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#another-more-interesting-example&quot;&gt;Another more interesting example&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#why-not-methods&quot;&gt;Why not methods?&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#feedback&quot;&gt;Feedback&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;!-- END doctoc generated TOC please keep comment here to allow auto update --&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note 1:&lt;&#x2F;strong&gt; this is an experiment with an upcoming change in Go&#x27;s type system.
+If you need something like what&#x27;s described in the post in the real world,
+use channels, or something like RxGo.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Note 2:&lt;&#x2F;strong&gt; I originally started this post in August and almost abandoned it,
+but figured it&#x27;s still a useful exploration of an important upcoming feature
+use channels, or something like RxGo.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Go 1.18 will support generics, and I decided I would give it a shot. I&#x27;ve been
+playing with the idea of &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;channels&quot;&gt;representing streams with
+channels&lt;&#x2F;a&gt; and higher order functions that
+operate on those channels, allowing processes to execute on streams of data
+somewhat-lazily. This is 100% a toy project and a production-ready version of
+&amp;quot;lazy&#x2F;generic streams&amp;quot; will likely come in some future release of
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ReactiveX&#x2F;RxGo&quot;&gt;RxGo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Still, while working on a solution to get this working with channels, I figured
+we could also try to get it working in a more traditional representation, at
+least in functional languages: streams can be represented by a pair - a value
+and a function to generate the next value.&lt;&#x2F;p&gt;
+&lt;p&gt;I started with a question: with generics, is the Go type-system expressive
+enough to represent such streams. And how bad would it look without Ocaml&#x27;s or
+Haskell&#x27;s type inference capabilities? Turns out we &lt;em&gt;can&lt;&#x2F;em&gt; represent streams,
+and the limited type-inference makes it a bit annoying, but it isn&#x27;t too bad!&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-basic-type-definition&quot;&gt;The basic type definition&lt;&#x2F;h2&gt;
+&lt;p&gt;First, let&#x27;s start with the type definition. Like mentioned above, we want to
+represent a stream of T as a nullable pair of some value T and a function that
+produces the next value of the stream T. A &lt;code&gt;nil&lt;&#x2F;code&gt; stream represents an empty
+stream.&lt;&#x2F;p&gt;
+&lt;p&gt;Go doesn&#x27;t directly support pairs, so we&#x27;re going to use a struct here:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;type Stream[T any] struct {
+	Value T
+	Next  func() *Stream[T]
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And we&#x27;ll represent streams as pointers to that struct, which takes care of the
+&lt;code&gt;nullable&lt;&#x2F;code&gt; part.&lt;&#x2F;p&gt;
+&lt;p&gt;It looks like a linked-list, but since we want to be able to represent a
+potentially infinite linked list, instead of making &lt;code&gt;Next&lt;&#x2F;code&gt; a pointer to Stream,
+we make it a function that returns the pointer, and lazily execute that
+function as needed.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;creating-streams&quot;&gt;Creating streams&lt;&#x2F;h2&gt;
+&lt;p&gt;First, let&#x27;s start with some very basic streams: an empty stream, and a
+singleton stream (that contains a single element). We&#x27;ll use helper functions
+to implement those:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Empty[T any]() *Stream[T] {
+	return nil
+}
+
+func Singleton[T any](element T) *Stream[T] {
+	return &amp;amp;Stream[T]{
+		Value: element,
+		Next:  Empty[T],
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;A more interesting helper function is a function that takes a slice and returns
+a stream with the elements of that slice:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func FromSlice[T any](items []T) *Stream[T] {
+	if len(items) == 0 {
+		return nil
+	}
+	return &amp;amp;Stream[T]{
+		Value: items[0],
+		Next: func() *Stream[T] {
+			return FromSlice(items[1:])
+		},
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To keep the context around of where we are in the slice as the stream is
+consumed, we introduce a helper function that takes the index that we want to
+consume in the slice, and &lt;code&gt;FromSlice&lt;&#x2F;code&gt; invokes that helper function starting at
+index 0. The stream becomes nil as soon as the index grows too large,
+indicating that we finished iterating over the slice.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;infinite-streams&quot;&gt;Infinite streams&lt;&#x2F;h3&gt;
+&lt;p&gt;Using a slice is no fun, we probably want to be able to implement streams that
+are potentially infinite. For example, a stream of natural numbers could be
+represented as follows:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func nat(start int) *Stream[int] {
+	return &amp;amp;Stream[int]{
+		Value: start,
+		Next: func() *Stream[int] {
+			return nat(start + 1)
+		},
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Here is where the limitation with Go&#x27;s type inference starts to show: since it
+can&#x27;t infer return types, we have to manually specify &lt;code&gt;Stream[int]&lt;&#x2F;code&gt; in multiple
+places.&lt;&#x2F;p&gt;
+&lt;p&gt;Note how we never return &lt;code&gt;nil&lt;&#x2F;code&gt; in the function above, indicating that this
+stream doesn&#x27;t really end.&lt;&#x2F;p&gt;
+&lt;p&gt;One potentially&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;manipulating-streams&quot;&gt;Manipulating streams&lt;&#x2F;h2&gt;
+&lt;p&gt;Now that we know how to create them, we need to understand how to manipulate
+them to accomplish something useful. Two useful helper functions, useful for
+debugging and what not, are &lt;code&gt;Iter&lt;&#x2F;code&gt; and &lt;code&gt;ToSlice&lt;&#x2F;code&gt;: &lt;code&gt;Iter&lt;&#x2F;code&gt; takes a stream and a
+function, and iterates over the stream, invoking the function for each element,
+while &lt;code&gt;ToSlice&lt;&#x2F;code&gt; converts a stream to a slice.&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s &lt;code&gt;Iter&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Iter[T any](stream *Stream[T], f func(T)) {
+	for ; stream != nil; stream = stream.Next() {
+		f(stream.Value)
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And here&#x27;s &lt;code&gt;ToSlice&lt;&#x2F;code&gt;, built on top of &lt;code&gt;Iter&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func ToSlice[T any](stream *Stream[T]) []T {
+	var result []T
+	Iter(stream, func(value T) {
+		result = append(result, value)
+	})
+	return result
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(folks who are paying attention will probably suggest that we use something
+like &lt;code&gt;Fold&lt;&#x2F;code&gt; instead of &lt;code&gt;Iter&lt;&#x2F;code&gt; to implement &lt;code&gt;ToSlice&lt;&#x2F;code&gt;, we&#x27;ll get there).&lt;&#x2F;p&gt;
+&lt;p&gt;And now that we have &lt;code&gt;Iter&lt;&#x2F;code&gt; and an infinite stream, we should try to use it
+maybe? :)&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func main() {
+	Iter(nat(0), func(v int) {
+		fmt.Println(v)
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This is a very fancy way of making an infinite loop :)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;higher-order-functions&quot;&gt;Higher-order functions&lt;&#x2F;h2&gt;
+&lt;p&gt;Higher-order functions make streams more interesting. There are many possible
+high-order functions, but we&#x27;ll explore some common names here: &lt;code&gt;Map&lt;&#x2F;code&gt;, &lt;code&gt;Filter&lt;&#x2F;code&gt;
+and &lt;code&gt;Fold&lt;&#x2F;code&gt; (&lt;code&gt;Fold&lt;&#x2F;code&gt; may also be called &lt;code&gt;Reduce&lt;&#x2F;code&gt; in other contexts). Then we&#x27;ll
+do a fun one with &lt;code&gt;FlatMap&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;&#x2F;strong&gt; different from actual lists&#x2F;arrays, with streams one can&#x27;t
+implement &lt;code&gt;Map&lt;&#x2F;code&gt; or &lt;code&gt;Filter&lt;&#x2F;code&gt; using &lt;code&gt;Fold&lt;&#x2F;code&gt;, as &lt;code&gt;Fold&lt;&#x2F;code&gt; always consumes the
+stream.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;The interesting thing with streams is that functions such as &lt;code&gt;Filter&lt;&#x2F;code&gt; and &lt;code&gt;Map&lt;&#x2F;code&gt;
+don&#x27;t do any computation unless needed: streams are lazy by nature, and actual
+computations only happen when they&#x27;re consumed.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;map&quot;&gt;Map&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;Map&lt;&#x2F;code&gt; takes a stream of type &lt;code&gt;T&lt;&#x2F;code&gt; and a function from &lt;code&gt;T&lt;&#x2F;code&gt; to &lt;code&gt;U&lt;&#x2F;code&gt; and returns a
+stream of &lt;code&gt;U&lt;&#x2F;code&gt;. Here&#x27;s the implementation of &lt;code&gt;Map&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Map[T, U any](stream *Stream[T], f func(T) U) *Stream[U] {
+	if stream == nil {
+		return nil
+	}
+	return &amp;amp;Stream[U]{
+		Value: f(stream.Value),
+		Next: func() *Stream[U] {
+			return Map(stream.Next(), f)
+		},
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;How can we use &lt;code&gt;Map&lt;&#x2F;code&gt;? A simple&#x2F;stupid example would be to double all numbers
+from the &lt;code&gt;nat&lt;&#x2F;code&gt; stream to get a stream of even numbers:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func main() {
+	evens := Map(nat(0), func(v int) int {
+		return v * 2
+	})
+	Iter(evens, func(v int) {
+		fmt.Println(v)
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;filter&quot;&gt;Filter&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;Filter&lt;&#x2F;code&gt; takes a stream of type &lt;code&gt;T&lt;&#x2F;code&gt; and a predicate function from &lt;code&gt;T&lt;&#x2F;code&gt; to &lt;code&gt;bool&lt;&#x2F;code&gt;
+and returns a new stream of &lt;code&gt;T&lt;&#x2F;code&gt;, containing only the elements of the original
+stream for which the given predicate returns &lt;code&gt;true&lt;&#x2F;code&gt;. Here&#x27;s the implementation
+of &lt;code&gt;filter&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Filter[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	for ; stream != nil; stream = stream.Next() {
+		if f(stream.Value) {
+			return &amp;amp;Stream[T]{
+				Value: stream.Value,
+				Next: func() *Stream[T] {
+					return Filter(stream.Next(), f)
+				},
+			}
+		}
+	}
+	return stream
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Since a non-nil Stream is required to have a valid element, &lt;code&gt;Filter&lt;&#x2F;code&gt; isn&#x27;t
+totally lazy, as it has to consume the source stream until the predicate &lt;code&gt;p&lt;&#x2F;code&gt;
+returns &lt;code&gt;true&lt;&#x2F;code&gt;. Here&#x27;s how we can get a stream of even numbers using &lt;code&gt;Filter&lt;&#x2F;code&gt;
+instead of &lt;code&gt;Map&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func main() {
+	evens := Filter(nat(0), func(v int) bool {
+		return v%2 == 0
+	})
+	Iter(evens, func(v int) {
+		fmt.Println(v)
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;fold&quot;&gt;Fold&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;Fold&lt;&#x2F;code&gt; can be used to eagerly fold the elements of a stream into some other
+value. For example, if you have a finite stream of integers, you could use
+&lt;code&gt;Fold&lt;&#x2F;code&gt; to find the largest, the smallest or the sum of all elements in the
+stream.&lt;&#x2F;p&gt;
+&lt;p&gt;Since &lt;code&gt;Fold&lt;&#x2F;code&gt; is eager, it can&#x27;t really operate on infinite streams, as that
+would loop forever. Let&#x27;s look at the implementation of &lt;code&gt;Fold&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Fold[T, U any](stream *Stream[T], init U, f func(U, T) U) U {
+	acc := init
+	for ; stream != nil; stream = stream.Next() {
+		acc = f(acc, stream.Value)
+	}
+	return acc
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And here&#x27;s an implementation of &lt;code&gt;ToSlice&lt;&#x2F;code&gt; that uses &lt;code&gt;Fold&lt;&#x2F;code&gt; instead of &lt;code&gt;Iter&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func ToSlice[T any](stream *Stream[T]) []T {
+	return Fold(stream, []T{}, func(acc []T, elm T) []T {
+		return append(acc, elm)
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h3 id=&quot;flatmap&quot;&gt;FlatMap&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;FlatMap&lt;&#x2F;code&gt; works like &lt;code&gt;Map&lt;&#x2F;code&gt;, but instead of taking a function from &lt;code&gt;T&lt;&#x2F;code&gt; to &lt;code&gt;U&lt;&#x2F;code&gt;,
+it takes a function from &lt;code&gt;T&lt;&#x2F;code&gt; to &lt;code&gt;Stream[U]&lt;&#x2F;code&gt;. In order to implement &lt;code&gt;FlatMap&lt;&#x2F;code&gt;,
+we&#x27;ll first implement another useful function: &lt;code&gt;Append&lt;&#x2F;code&gt;, which takes two
+streams &lt;code&gt;s1&lt;&#x2F;code&gt; and &lt;code&gt;s2&lt;&#x2F;code&gt; and returns a stream that will have all elements from
+&lt;code&gt;s1&lt;&#x2F;code&gt;, then all elements from &lt;code&gt;s2&lt;&#x2F;code&gt;. Here&#x27;s the code for both &lt;code&gt;Append&lt;&#x2F;code&gt; and
+&lt;code&gt;FlatMap&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Append[T any](stream1 *Stream[T], stream2 *Stream[T]) *Stream[T] {
+	if stream1 == nil {
+		return stream2
+	}
+	return &amp;amp;Stream[T]{
+		Value: stream1.Value,
+		Next: func() *Stream[T] {
+			return Append(stream1.Next(), stream2)
+		},
+	}
+}
+
+func FlatMap[T, U any](stream *Stream[T], f func(T) *Stream[U]) *Stream[U] {
+	if stream == nil {
+		return nil
+	}
+	return Append(f(stream.Value), FlatMap(stream.Next(), f))
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;One simple-ish example is taking a stream of strings and turning that into a
+stream of runes:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;var s *Stream[string] = ...
+FlatMap(s, func(v string) *Stream[rune] {
+	return FromSlice([]rune(v))
+})
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;combining-and-slicing-streams&quot;&gt;Combining and slicing streams&lt;&#x2F;h2&gt;
+&lt;p&gt;On top of filtering, mapping, appending and others, one may want to combine
+multiple streams, or get some elements of a stream, or drop some items from a
+stream. For that, let&#x27;s look at how we&#x27;d implement some other helper functions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Take(s Stream[T], n int) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt;, returns a new stream
+with at most &lt;code&gt;n&lt;&#x2F;code&gt; elements.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;TakeWhile(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt; and a
+predicate &lt;code&gt;p&lt;&#x2F;code&gt;, returns a new stream that will have elements from &lt;code&gt;s&lt;&#x2F;code&gt; as long
+as &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;TakeUntil(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: like &lt;code&gt;TakeWhile&lt;&#x2F;code&gt;, but the
+output stream will have elements from &lt;code&gt;s&lt;&#x2F;code&gt; until &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;Drop(s Stream[T], n int) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt;, returns a new stream
+that doesn&#x27;t include the first &lt;code&gt;n&lt;&#x2F;code&gt; elements of &lt;code&gt;s&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;DropWhile(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt; and a
+predicate &lt;code&gt;p&lt;&#x2F;code&gt;, returns a new stream that will skip elements from &lt;code&gt;s&lt;&#x2F;code&gt; as long
+as &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;DropUntil(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: like &lt;code&gt;DropWhile&lt;&#x2F;code&gt;, but the
+output stream will skip elements from &lt;code&gt;s&lt;&#x2F;code&gt; until &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;take-takewhile-and-takeuntil&quot;&gt;Take, TakeWhile and TakeUntil&lt;&#x2F;h3&gt;
+&lt;h3 id=&quot;drop-dropwhile-and-dropuntil&quot;&gt;Drop, DropWhile and DropUntil&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;putting-it-all-together-in-a-realistic-example&quot;&gt;Putting it all together in a realistic example&lt;&#x2F;h2&gt;
+&lt;p&gt;Let&#x27;s do a very simple REPL style application: it has a shell where we can
+enter commands, and those commands will have some side-effect. Let&#x27;s implement
+a poor man &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;memcached.org&#x2F;&quot;&gt;memcached&lt;&#x2F;a&gt; that operates via stdin, and
+supports three commands &lt;code&gt;set&lt;&#x2F;code&gt;, &lt;code&gt;get&lt;&#x2F;code&gt; and &lt;code&gt;del&lt;&#x2F;code&gt; (which will set a key-value
+pair, get the value of a key and delete a key, respectively). We want to be
+able to have two separate layers: one for parsing and another one for executing
+commands, and we want to be able to send commands from stdin to the execution
+layer.&lt;&#x2F;p&gt;
+&lt;p&gt;This is an extremely simple example that doesn&#x27;t &lt;em&gt;really&lt;&#x2F;em&gt; need generics (it&#x27;s
+stringly-typed :D), but should give an idea of how functional streams can be
+used.&lt;&#x2F;p&gt;
+&lt;p&gt;First, let&#x27;s introduce a helper function that allow us to generate a lines
+stream from an &lt;code&gt;io.Reader&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func FromReader(r io.Reader) *Stream[string] {
+	return fromReader(bufio.NewReader(r))
+}
+
+func fromReader(r *bufio.Reader) *Stream[string] {
+	line, isPrefix, err := r.ReadLine()
+	if err != nil {
+		return nil
+	}
+	parts := []string{string(line)}
+	for isPrefix {
+		line, isPrefix, err = r.ReadLine()
+		if err != nil {
+			return nil
+		}
+		parts = append(parts, string(line))
+	}
+	return &amp;amp;Stream[string]{
+		Value: strings.Join(parts, &amp;quot;&amp;quot;),
+		Next: func() *Stream[string] {
+			return fromReader(r)
+		},
+	}
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;&#x2F;strong&gt; that we&#x27;re eating errors here, just another demonstration that you
+shouldn&#x27;t do this in production, at least not the way it&#x27;s described in this
+blog post :)&lt;&#x2F;p&gt;
+&lt;p&gt;The code below will also not handle any errors. Don&#x27;t do this at home.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;Now that we have that function, we can create our &amp;quot;database&amp;quot; instance, loop
+through the input and execute commands:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func ProcessCommands(input io.Reader, output io.Writer) {
+	s := stream.FromReader(input)
+	stream.Fold(s, NewDB(output), func(db *DB, line string) *DB {
+		cmd := strings.Fields(line)
+		db.Execute(cmd[0], cmd[1:])
+		return db
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(for runnable code, checkout the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;blog&#x2F;blob&#x2F;main&#x2F;content&#x2F;2022-02-12-functional-streams-in-go&#x2F;stream&#x2F;kvdb&#x2F;kvdb.go&quot;&gt;GitHub
+repository&lt;&#x2F;a&gt;)&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;another-more-interesting-example&quot;&gt;Another more interesting example&lt;&#x2F;h3&gt;
+&lt;p&gt;A less realistic, but interesting example is taking a stream of numbers from
+stdin, parse them, and sum all the prime numbers. This requires using the
+helper &lt;code&gt;FromReader&lt;&#x2F;code&gt;, &lt;code&gt;Map&lt;&#x2F;code&gt; to parse the number, &lt;code&gt;Filter&lt;&#x2F;code&gt; to discard non-prime
+numbers and &lt;code&gt;Fold&lt;&#x2F;code&gt; to sum the filtered values. Notice that this is stdin, so
+values are getting piped through as they are read from stdin.&lt;&#x2F;p&gt;
+&lt;p&gt;Here&#x27;s what that &amp;quot;pipeline&amp;quot; looks like:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func main() {
+	stdin := stream.FromReader(os.Stdin)
+	numbers := stream.Map(stdin, parseLine)
+	primes := stream.Filter(numbers, isPrime)
+	sum := stream.Fold(primes, 0, sum)
+	fmt.Println(sum)
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;(again, for runnable code, checkout the GitHub repo)&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;why-not-methods&quot;&gt;Why not methods?&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;strong&gt;TL;DR:&lt;&#x2F;strong&gt; Go doesn&#x27;t really support it. &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;golang&#x2F;go&#x2F;issues&#x2F;43390&quot;&gt;It may in the
+future&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;One thing one may notice from the example above is that using functions makes
+the code quite verbose, we have to introduce variables for intermediary streams
+(or we could nest function calls).
+Functional languages get away with that by having some sort of function
+composition or using pipe operators &#x2F; threading macros. But in more
+object-oriented languages, methods are used, which is a better fit for Go. So the code below:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;stdin := stream.FromReader(os.Stdin)
+numbers := stream.Map(stdin, parseLine)
+primes := stream.Filter(numbers, isPrime)
+sum := stream.Fold(primes, 0, sum)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Could become something like:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;sum := stream.FromReader(os.Stdin).Map(parseLine).Filter(isPrime).Fold(0, sum)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Why can&#x27;t we do that in Go? The problem is that methods can&#x27;t really be generic
+in Go, it&#x27;s not currently supported by the generics implementation, which mean
+the &lt;code&gt;Map&lt;&#x2F;code&gt; function in the pipeline below cannot be implemented. It&#x27;s an issues
+with how methods are used for structural subtyping &amp;amp; interfaces, so it may be
+complicated to address or not happen at hall. See the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;golang&#x2F;go&#x2F;issues&#x2F;43390&quot;&gt;issue in the Go issue
+tracker for more details&lt;&#x2F;a&gt;!&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;feedback&quot;&gt;Feedback&lt;&#x2F;h2&gt;
+&lt;p&gt;Do you have any feedback? Questions? Concerns? Wanna fix a typo? Checkout the
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;blog&#x2F;blob&#x2F;HEAD&#x2F;content&#x2F;2022-02-12-functional-streams-in-go&#x2F;index.md&quot;&gt;source for this post in
+GitHub&lt;&#x2F;a&gt;
+(feel free to send a PR), or the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;blog&#x2F;discussions&#x2F;12&quot;&gt;discussion in the GitHub
+repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+	</entry>
 	<entry xml:lang="en">
 		<title>Making format-on-save fast with prettierd</title>
 		<published>2021-02-12T00:00:00+00:00</published>
@@ -22,6 +440,7 @@
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;prettierd-neovim-format-on-save&#x2F;#integrating-neovim-with-prettierd&quot;&gt;Integrating Neovim with prettierd&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;prettierd-neovim-format-on-save&#x2F;#not-just-typescript-and-javascript&quot;&gt;Not just TypeScript and JavaScript&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;prettierd-neovim-format-on-save&#x2F;#bonus-using-it-on-the-command-line-with-prettierme&quot;&gt;Bonus: using it on the command line with prettierme&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;prettierd-neovim-format-on-save&#x2F;#feedback&quot;&gt;Feedback&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;!-- END doctoc generated TOC please keep comment here to allow auto update --&gt;
 &lt;h2 id=&quot;intro&quot;&gt;Intro&lt;&#x2F;h2&gt;
@@ -259,6 +678,12 @@ client in your editor configuration, you can leverage &lt;a rel=&quot;noopener&q
 prettierme&lt;&#x2F;a&gt; to use a command line
 interface that is more similar to the standard prettier interface. prettierme
 is basically a wrapper around our &lt;code&gt;netcat&lt;&#x2F;code&gt; example.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;feedback&quot;&gt;Feedback&lt;&#x2F;h2&gt;
+&lt;p&gt;Do you have any feedback? Questions? Concerns? Wanna fix a typo? Checkout the
+&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;blog&#x2F;blob&#x2F;HEAD&#x2F;content&#x2F;2021-02-12-prettierd-neovim-format-on-save&#x2F;index.md&quot;&gt;source for this post in
+GitHub&lt;&#x2F;a&gt;
+(feel free to send a PR), or the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;fsouza&#x2F;blog&#x2F;discussions&#x2F;14&quot;&gt;discussion in the GitHub
+repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 </content>
 	</entry>
 	<entry xml:lang="en">

@@ -4,6 +4,10 @@
         <loc>https://blog.fsouza.dev/</loc>
     </url>
     <url>
+        <loc>https://blog.fsouza.dev/functional-streams-in-go/</loc>
+        <lastmod>2022-02-12</lastmod>
+    </url>
+    <url>
         <loc>https://blog.fsouza.dev/go-solution-for-dining-philosophers/</loc>
         <lastmod>2011-10-30</lastmod>
     </url>
@@ -48,6 +52,12 @@
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/django/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/generics/</loc>
+    </url>
+    <url>
+        <loc>https://blog.fsouza.dev/tags/generics/page/1/</loc>
     </url>
     <url>
         <loc>https://blog.fsouza.dev/tags/go/</loc>
