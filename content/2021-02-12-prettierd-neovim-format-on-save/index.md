@@ -15,6 +15,7 @@ tags = ["javascript", "neovim", "prettier", "typescript"]
 - [Integrating Neovim with prettierd](#integrating-neovim-with-prettierd)
 - [Not just TypeScript and JavaScript](#not-just-typescript-and-javascript)
 - [Bonus: using it on the command line with prettierme](#bonus-using-it-on-the-command-line-with-prettierme)
+- [Feedback](#feedback)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -315,3 +316,11 @@ client in your editor configuration, you can leverage [Ruy Adorno's
 prettierme](https://github.com/ruyadorno/prettierme) to use a command line
 interface that is more similar to the standard prettier interface. prettierme
 is basically a wrapper around our `netcat` example.
+
+## Feedback
+
+Do you have any feedback? Questions? Concerns? Wanna fix a typo? Checkout the
+[source for this post in
+GitHub](https://github.com/fsouza/blog/blob/HEAD/content/2021-02-12-prettierd-neovim-format-on-save/index.md)
+(feel free to send a PR), or the [discussion in the GitHub
+repo](https://github.com/fsouza/blog/discussions/14).
