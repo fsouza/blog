@@ -30,12 +30,7 @@
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#flatmap&quot;&gt;FlatMap&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#combining-and-slicing-streams&quot;&gt;Combining and slicing streams&lt;&#x2F;a&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#take-takewhile-and-takeuntil&quot;&gt;Take, TakeWhile and TakeUntil&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#drop-dropwhile-and-dropuntil&quot;&gt;Drop, DropWhile and DropUntil&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#slicing-streams&quot;&gt;Slicing streams&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#putting-it-all-together-in-a-realistic-example&quot;&gt;Putting it all together in a realistic example&lt;&#x2F;a&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;blog.fsouza.dev&#x2F;functional-streams-in-go&#x2F;#another-more-interesting-example&quot;&gt;Another more interesting example&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
@@ -297,10 +292,11 @@ FlatMap(s, func(v string) *Stream[rune] {
 	return FromSlice([]rune(v))
 })
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;h2 id=&quot;combining-and-slicing-streams&quot;&gt;Combining and slicing streams&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;slicing-streams&quot;&gt;Slicing streams&lt;&#x2F;h2&gt;
 &lt;p&gt;On top of filtering, mapping, appending and others, one may want to combine
-multiple streams, or get some elements of a stream, or drop some items from a
-stream. For that, let&#x27;s look at how we&#x27;d implement some other helper functions:&lt;&#x2F;p&gt;
+multiple streams (using &lt;code&gt;Append&lt;&#x2F;code&gt; declared above), or get some elements of a
+stream, or drop some items from a stream. For that, let&#x27;s look at how we&#x27;d
+implement some other helper functions:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;Take(s Stream[T], n int) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt;, returns a new stream
 with at most &lt;code&gt;n&lt;&#x2F;code&gt; elements.&lt;&#x2F;li&gt;
@@ -309,16 +305,52 @@ predicate &lt;code&gt;p&lt;&#x2F;code&gt;, returns a new stream that will have e
 as &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;&lt;code&gt;TakeUntil(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: like &lt;code&gt;TakeWhile&lt;&#x2F;code&gt;, but the
 output stream will have elements from &lt;code&gt;s&lt;&#x2F;code&gt; until &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;Drop(s Stream[T], n int) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt;, returns a new stream
-that doesn&#x27;t include the first &lt;code&gt;n&lt;&#x2F;code&gt; elements of &lt;code&gt;s&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;DropWhile(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: given stream &lt;code&gt;s&lt;&#x2F;code&gt; and a
-predicate &lt;code&gt;p&lt;&#x2F;code&gt;, returns a new stream that will skip elements from &lt;code&gt;s&lt;&#x2F;code&gt; as long
-as &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;DropUntil(s Stream[T], p func(T) bool) Stream[T]&lt;&#x2F;code&gt;: like &lt;code&gt;DropWhile&lt;&#x2F;code&gt;, but the
-output stream will skip elements from &lt;code&gt;s&lt;&#x2F;code&gt; until &lt;code&gt;p&lt;&#x2F;code&gt; returns &lt;code&gt;true&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
-&lt;h3 id=&quot;take-takewhile-and-takeuntil&quot;&gt;Take, TakeWhile and TakeUntil&lt;&#x2F;h3&gt;
-&lt;h3 id=&quot;drop-dropwhile-and-dropuntil&quot;&gt;Drop, DropWhile and DropUntil&lt;&#x2F;h3&gt;
+&lt;p&gt;Here&#x27;s the source for &lt;code&gt;Take&lt;&#x2F;code&gt;, &lt;code&gt;TakeWhile&lt;&#x2F;code&gt; and &lt;code&gt;TakeUntil&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	if n == 0 || stream == nil {
+		return nil
+	}
+	return &amp;amp;Stream[T]{
+		Value: stream.Value,
+		Next: func() *Stream[T] {
+			return Take(stream.Next(), n-1)
+		},
+	}
+}
+
+func TakeWhile[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	if stream == nil {
+		return nil
+	}
+	if f(stream.Value) {
+		return &amp;amp;Stream[T]{
+			Value: stream.Value,
+			Next: func() *Stream[T] {
+				return TakeWhile(stream.Next(), f)
+			},
+		}
+	}
+	return nil
+}
+
+func TakeUntil[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	return TakeWhile(stream, func(v T) bool { return !f(v) })
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Notice how &lt;code&gt;TakeUntil&lt;&#x2F;code&gt; is simply implemented in terms of &lt;code&gt;TakeWhile&lt;&#x2F;code&gt;. As a
+matter of fact, &lt;code&gt;Take&lt;&#x2F;code&gt; could also be implemented with &lt;code&gt;TakeWhile&lt;&#x2F;code&gt; and a
+closure:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	return TakeWhile(stream, func(T) bool {
+		if n == 0 {
+			return false
+		}
+		n--
+		return true
+	})
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;h2 id=&quot;putting-it-all-together-in-a-realistic-example&quot;&gt;Putting it all together in a realistic example&lt;&#x2F;h2&gt;
 &lt;p&gt;Let&#x27;s do a very simple REPL style application: it has a shell where we can
 enter commands, and those commands will have some side-effect. Let&#x27;s implement

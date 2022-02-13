@@ -26,15 +26,13 @@ func Fold[T, U any](stream *Stream[T], init U, f func(U, T) U) U {
 }
 
 func Take[T any](stream *Stream[T], n uint) *Stream[T] {
-	if n == 0 || stream == nil {
-		return nil
-	}
-	return &Stream[T]{
-		Value: stream.Value,
-		Next: func() *Stream[T] {
-			return Take(stream.Next(), n-1)
-		},
-	}
+	return TakeWhile(stream, func(T) bool {
+		if n == 0 {
+			return false
+		}
+		n--
+		return true
+	})
 }
 
 func Map[T, U any](stream *Stream[T], f func(T) U) *Stream[U] {

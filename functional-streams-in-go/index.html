@@ -101,12 +101,7 @@
 <li><a href="https://blog.fsouza.dev/functional-streams-in-go/#flatmap">FlatMap</a></li>
 </ul>
 </li>
-<li><a href="https://blog.fsouza.dev/functional-streams-in-go/#combining-and-slicing-streams">Combining and slicing streams</a>
-<ul>
-<li><a href="https://blog.fsouza.dev/functional-streams-in-go/#take-takewhile-and-takeuntil">Take, TakeWhile and TakeUntil</a></li>
-<li><a href="https://blog.fsouza.dev/functional-streams-in-go/#drop-dropwhile-and-dropuntil">Drop, DropWhile and DropUntil</a></li>
-</ul>
-</li>
+<li><a href="https://blog.fsouza.dev/functional-streams-in-go/#slicing-streams">Slicing streams</a></li>
 <li><a href="https://blog.fsouza.dev/functional-streams-in-go/#putting-it-all-together-in-a-realistic-example">Putting it all together in a realistic example</a>
 <ul>
 <li><a href="https://blog.fsouza.dev/functional-streams-in-go/#another-more-interesting-example">Another more interesting example</a></li>
@@ -368,10 +363,11 @@ FlatMap(s, func(v string) *Stream[rune] {
 	return FromSlice([]rune(v))
 })
 </code></pre>
-<h2 id="combining-and-slicing-streams">Combining and slicing streams</h2>
+<h2 id="slicing-streams">Slicing streams</h2>
 <p>On top of filtering, mapping, appending and others, one may want to combine
-multiple streams, or get some elements of a stream, or drop some items from a
-stream. For that, let's look at how we'd implement some other helper functions:</p>
+multiple streams (using <code>Append</code> declared above), or get some elements of a
+stream, or drop some items from a stream. For that, let's look at how we'd
+implement some other helper functions:</p>
 <ul>
 <li><code>Take(s Stream[T], n int) Stream[T]</code>: given stream <code>s</code>, returns a new stream
 with at most <code>n</code> elements.</li>
@@ -380,16 +376,52 @@ predicate <code>p</code>, returns a new stream that will have elements from <cod
 as <code>p</code> returns <code>true</code></li>
 <li><code>TakeUntil(s Stream[T], p func(T) bool) Stream[T]</code>: like <code>TakeWhile</code>, but the
 output stream will have elements from <code>s</code> until <code>p</code> returns <code>true</code>.</li>
-<li><code>Drop(s Stream[T], n int) Stream[T]</code>: given stream <code>s</code>, returns a new stream
-that doesn't include the first <code>n</code> elements of <code>s</code>.</li>
-<li><code>DropWhile(s Stream[T], p func(T) bool) Stream[T]</code>: given stream <code>s</code> and a
-predicate <code>p</code>, returns a new stream that will skip elements from <code>s</code> as long
-as <code>p</code> returns <code>true</code></li>
-<li><code>DropUntil(s Stream[T], p func(T) bool) Stream[T]</code>: like <code>DropWhile</code>, but the
-output stream will skip elements from <code>s</code> until <code>p</code> returns <code>true</code>.</li>
 </ul>
-<h3 id="take-takewhile-and-takeuntil">Take, TakeWhile and TakeUntil</h3>
-<h3 id="drop-dropwhile-and-dropuntil">Drop, DropWhile and DropUntil</h3>
+<p>Here's the source for <code>Take</code>, <code>TakeWhile</code> and <code>TakeUntil</code>:</p>
+<pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	if n == 0 || stream == nil {
+		return nil
+	}
+	return &amp;Stream[T]{
+		Value: stream.Value,
+		Next: func() *Stream[T] {
+			return Take(stream.Next(), n-1)
+		},
+	}
+}
+
+func TakeWhile[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	if stream == nil {
+		return nil
+	}
+	if f(stream.Value) {
+		return &amp;Stream[T]{
+			Value: stream.Value,
+			Next: func() *Stream[T] {
+				return TakeWhile(stream.Next(), f)
+			},
+		}
+	}
+	return nil
+}
+
+func TakeUntil[T any](stream *Stream[T], f func(T) bool) *Stream[T] {
+	return TakeWhile(stream, func(v T) bool { return !f(v) })
+}
+</code></pre>
+<p>Notice how <code>TakeUntil</code> is simply implemented in terms of <code>TakeWhile</code>. As a
+matter of fact, <code>Take</code> could also be implemented with <code>TakeWhile</code> and a
+closure:</p>
+<pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">func Take[T any](stream *Stream[T], n uint) *Stream[T] {
+	return TakeWhile(stream, func(T) bool {
+		if n == 0 {
+			return false
+		}
+		n--
+		return true
+	})
+}
+</code></pre>
 <h2 id="putting-it-all-together-in-a-realistic-example">Putting it all together in a realistic example</h2>
 <p>Let's do a very simple REPL style application: it has a shell where we can
 enter commands, and those commands will have some side-effect. Let's implement
