@@ -1,9 +1,32 @@
+
 +++
 title = "Implementing functional streams with generics in Go"
 
 [taxonomies]
 tags = ["golang", "go", "generics"]
 +++
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [The basic type definition](#the-basic-type-definition)
+- [Creating streams](#creating-streams)
+  - [Infinite streams](#infinite-streams)
+- [Manipulating streams](#manipulating-streams)
+- [Higher-order functions](#higher-order-functions)
+  - [Map](#map)
+  - [Filter](#filter)
+  - [Fold](#fold)
+  - [FlatMap](#flatmap)
+- [Combining and slicing streams](#combining-and-slicing-streams)
+  - [Take, TakeWhile and TakeUntil](#take-takewhile-and-takeuntil)
+  - [Drop, DropWhile and DropUntil](#drop-dropwhile-and-dropuntil)
+- [Putting it all together in a realistic example](#putting-it-all-together-in-a-realistic-example)
+  - [Another more interesting example](#another-more-interesting-example)
+- [Why not methods?](#why-not-methods)
+- [Feedback](#feedback)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 > **Note 1:** this is an experiment with an upcoming change in Go's type system.
 > If you need something like what's described in the post in the real world,
