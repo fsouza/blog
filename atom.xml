@@ -443,8 +443,8 @@ sum := stream.Fold(primes, 0, sum)
 &lt;pre data-lang=&quot;go&quot; class=&quot;language-go &quot;&gt;&lt;code class=&quot;language-go&quot; data-lang=&quot;go&quot;&gt;sum := stream.FromReader(os.Stdin).Map(parseLine).Filter(isPrime).Fold(0, sum)
 &lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Why can&#x27;t we do that in Go? The problem is that methods can&#x27;t really be generic
-in Go, it&#x27;s not currently supported by the generics implementation, which mean
-the &lt;code&gt;Map&lt;&#x2F;code&gt; function in the pipeline below cannot be implemented. It&#x27;s an issues
+in Go, it&#x27;s not currently supported by the generics implementation, which means
+the &lt;code&gt;Map&lt;&#x2F;code&gt; method in the pipeline above cannot be implemented. It&#x27;s an issues
 with how methods are used for structural subtyping &amp;amp; interfaces, so it may be
 complicated to address or not happen at hall. See the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;golang&#x2F;go&#x2F;issues&#x2F;43390&quot;&gt;issue in the Go issue
 tracker for more details&lt;&#x2F;a&gt;!&lt;&#x2F;p&gt;
