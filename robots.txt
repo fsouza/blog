@@ -1,3 +1,4 @@
 User-agent: *
+Disallow:
 Allow: /
 Sitemap: https://blog.fsouza.dev/sitemap.xml

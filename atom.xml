@@ -10,7 +10,7 @@
 		<title>Implementing functional streams with generics in Go</title>
 		<published>2022-02-12T00:00:00+00:00</published>
 		<updated>2022-02-12T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/functional-streams-in-go/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/functional-streams-in-go/" type="text/html"/>
 		<id>https://blog.fsouza.dev/functional-streams-in-go/</id>
 		<content type="html">&lt;!-- START doctoc generated TOC please keep comment here to allow auto update --&gt;
 &lt;!-- DON&#x27;T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE --&gt;
@@ -460,7 +460,7 @@ repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 		<title>Making format-on-save fast with prettierd</title>
 		<published>2021-02-12T00:00:00+00:00</published>
 		<updated>2021-02-12T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/" type="text/html"/>
 		<id>https://blog.fsouza.dev/prettierd-neovim-format-on-save/</id>
 		<content type="html">&lt;!-- START doctoc generated TOC please keep comment here to allow auto update --&gt;
 &lt;!-- DON&#x27;T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE --&gt;
@@ -722,7 +722,7 @@ repo&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 		<title>Using Juju to orchestrate CentOS-based cloud services</title>
 		<published>2012-07-28T00:00:00+00:00</published>
 		<updated>2012-07-28T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/" type="text/html"/>
 		<id>https://blog.fsouza.dev/using-juju-to-orchestrate-centos-based/</id>
 		<content type="html">&lt;p&gt;Earlier this week I had the opportunity to meet &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;kylemacdonald&#x2F;&quot;&gt;Kyle
 MacDonald&lt;&#x2F;a&gt;, head of &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;cloud.ubuntu.com&#x2F;&quot;&gt;Ubuntu
@@ -921,7 +921,7 @@ that makes it extensible to any other OS, not Ubuntu and CentOS only.&lt;&#x2F;p
 		<title>Setting up a Django production environment: compiling and configuring nginx</title>
 		<published>2011-11-06T00:00:00+00:00</published>
 		<updated>2011-11-06T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/setting-up-django-production/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/setting-up-django-production/" type="text/html"/>
 		<id>https://blog.fsouza.dev/setting-up-django-production/</id>
 		<content type="html">&lt;p&gt;Here is another series of posts: now I’m going to write about setting up a
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;djangoproject.com&quot;&gt;Django&lt;&#x2F;a&gt; production environment using
@@ -1065,7 +1065,7 @@ other posts, we’ll see how to make automated deploys using
 		<title>Go solution for the Dining philosophers problem</title>
 		<published>2011-10-30T00:00:00+00:00</published>
 		<updated>2011-10-30T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/go-solution-for-dining-philosophers/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/go-solution-for-dining-philosophers/" type="text/html"/>
 		<id>https://blog.fsouza.dev/go-solution-for-dining-philosophers/</id>
 		<content type="html">&lt;p&gt;I spent part of the Sunday solving the &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Dining_philosophers_problem&quot;&gt;Dining
 Philosophers&lt;&#x2F;a&gt; using
@@ -1204,7 +1204,7 @@ func main() {
 		<title>Testing jQuery plugins with Jasmine</title>
 		<published>2011-05-28T00:00:00+00:00</published>
 		<updated>2011-05-28T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/" type="text/html"/>
 		<id>https://blog.fsouza.dev/testing-jquery-plugins-with-jasmine/</id>
 		<content type="html">&lt;p&gt;Since I started working at &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;http:&#x2F;&#x2F;globo.com&quot;&gt;Globo.com&lt;&#x2F;a&gt;, I developed some
 jQuery plugins (for internal use) with my team, and we are starting to test
@@ -1375,7 +1375,7 @@ repository&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 		<title>Splinter: Python tool for acceptance tests on web applications</title>
 		<published>2011-05-14T00:00:00+00:00</published>
 		<updated>2011-05-14T00:00:00+00:00</updated>
-		<link href="https://blog.fsouza.dev/splinter-python-tool-for-acceptance/" type="text/html"/>
+		<link rel="alternate" href="https://blog.fsouza.dev/splinter-python-tool-for-acceptance/" type="text/html"/>
 		<id>https://blog.fsouza.dev/splinter-python-tool-for-acceptance/</id>
 		<content type="html">&lt;p&gt;&lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;jnicklas&#x2F;capybara&quot;&gt;Capybara&lt;&#x2F;a&gt; and
 &lt;a rel=&quot;noopener&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;brynary&#x2F;webrat&quot;&gt;Webrat&lt;&#x2F;a&gt; are great Ruby tools for acceptance
