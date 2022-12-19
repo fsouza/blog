@@ -11,9 +11,7 @@ feed_filename = "atom.xml"
 
 theme = "hyde"
 
-taxonomies = [
-    { name = "tags", paginate_by = 9 },
-]
+taxonomies = [{ name = "tags", paginate_by = 9 }]
 
 [markdown]
 highlight_code = false
@@ -23,6 +21,7 @@ external_links_target_blank = true
 author = "Francisco Souza"
 hyde_reverse = true
 hyde_links = [
-    {url = "https://github.com/fsouza", name = "GitHub"},
-    {url = "https://twitter.com/franciscosouza", name = "Twitter"},
+    { url = "https://github.com/fsouza", name = "GitHub" },
+    { url = "https://twitter.com/franciscosouza", name = "Twitter" },
+    { url = "https://fosstodon.org/@fsouza", name = "Mastodon" },
 ]
