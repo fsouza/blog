@@ -143,8 +143,6 @@ places.
 Note how we never return `nil` in the function above, indicating that this
 stream doesn't really end.
 
-One potentially
-
 ## Manipulating streams
 
 Now that we know how to create them, we need to understand how to manipulate
