@@ -132,7 +132,6 @@ can&#x27;t infer return types, we have to manually specify &lt;code&gt;Stream[in
 places.&lt;&#x2F;p&gt;
 &lt;p&gt;Note how we never return &lt;code&gt;nil&lt;&#x2F;code&gt; in the function above, indicating that this
 stream doesn&#x27;t really end.&lt;&#x2F;p&gt;
-&lt;p&gt;One potentially&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;manipulating-streams&quot;&gt;Manipulating streams&lt;&#x2F;h2&gt;
 &lt;p&gt;Now that we know how to create them, we need to understand how to manipulate
 them to accomplish something useful. Two useful helper functions, useful for
