@@ -20,8 +20,4 @@ external_links_target_blank = true
 [extra]
 author = "Francisco Souza"
 hyde_reverse = true
-hyde_links = [
-    { url = "https://github.com/fsouza", name = "GitHub" },
-    { url = "https://twitter.com/franciscosouza", name = "Twitter" },
-    { url = "https://fosstodon.org/@fsouza", name = "Mastodon" },
-]
+hyde_links = [{ url = "https://github.com/fsouza", name = "GitHub" }]
