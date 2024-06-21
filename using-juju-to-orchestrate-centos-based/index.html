@@ -21,7 +21,9 @@
             href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"
         />
 
-         <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">  
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://blog.fsouza.dev/rss.xml">
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+        
 
 <!-- prettier ignore -->
 <link rel="stylesheet" href="https://blog.fsouza.dev/custom-style.css?h=4061651ab4fa87df8bc6" />
@@ -92,7 +94,7 @@ Globo.com. Then I decided to write this post explaining how we came up with a
 <a rel="noopener" target="_blank" href="https://github.com/globocom/juju-centos-6">patched version of Juju</a> that
 allows us to have CentOS clouds managed by Juju.<a name="more"></a></p>
 <p>For those who doesn't know Juju, it's a service orchestration tool, focused on
-<a rel="noopener" target="_blank" href="https://en.wikipedia.org/wiki/DevOps">devops</a> &quot;development method&quot;. It allows
+<a rel="noopener" target="_blank" href="https://en.wikipedia.org/wiki/DevOps">devops</a> "development method". It allows
 you to deploy services on clouds, local machine and even bare metal machines
 (using Canonical's MAAS).</p>
 <p>It's based on <a rel="noopener" target="_blank" href="https://juju.ubuntu.com/docs/charm-store.html">charms</a> and very
@@ -118,7 +120,7 @@ some changes to Juju and
 to spawn machines with proper dependencies set up, and it's based on modules.
 All we need to do, is add a module able to install rpm packages using <code>yum</code>.</p>
 <p><code>cloud-init</code> modules are Python modules that starts with <code>cc_</code> and implement a
-<code>handle</code> function (for example, a module called &quot;yum_packages&quot; would be written
+<code>handle</code> function (for example, a module called "yum_packages" would be written
 to a file called <code>cc_yum_packages.py</code>). So, here is the code for the module
 <code>yum_packages</code>:</p>
 <pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">import subprocess

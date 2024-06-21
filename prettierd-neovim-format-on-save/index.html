@@ -21,7 +21,9 @@
             href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"
         />
 
-         <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">  
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://blog.fsouza.dev/rss.xml">
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+        
 
 <!-- prettier ignore -->
 <link rel="stylesheet" href="https://blog.fsouza.dev/custom-style.css?h=4061651ab4fa87df8bc6" />
@@ -95,7 +97,7 @@
 <ul>
 <li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#intro">Intro</a></li>
 <li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#who-cares">Who cares?!</a></li>
-<li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#my-visual-studio-code-doesn-t-take-a-second-to-format-on-save-your-vim-is-trash">&quot;My Visual Studio Code doesn't take a second to format-on-save, your Vim is trash&quot;</a></li>
+<li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#my-visual-studio-code-doesn-t-take-a-second-to-format-on-save-your-vim-is-trash">"My Visual Studio Code doesn't take a second to format-on-save, your Vim is trash"</a></li>
 <li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#installing-and-starting-prettierd">Installing and starting prettierd</a></li>
 <li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#integrating-neovim-with-prettierd">Integrating Neovim with prettierd</a></li>
 <li><a href="https://blog.fsouza.dev/prettierd-neovim-format-on-save/#not-just-typescript-and-javascript">Not just TypeScript and JavaScript</a></li>
@@ -163,7 +165,7 @@ setup, not very fancy:</p>
 <p><a rel="noopener" target="_blank" href="https://github.com/fsouza/dotfiles/blob/0b6d3daaa844796f916b3f056a66af0e25a76c3c/autoload/fsouza/prettier.vim#L19-L30">(it was a bit fancier than that, but not by much)</a></p>
 <p>So, imagine you're using Neovim and every time you save the file you have to
 wait 1 second. You'd be mad, right?! There must be a better way...</p>
-<h2 id="my-visual-studio-code-doesn-t-take-a-second-to-format-on-save-your-vim-is-trash">&quot;My Visual Studio Code doesn't take a second to format-on-save, your Vim is trash&quot;</h2>
+<h2 id="my-visual-studio-code-doesn-t-take-a-second-to-format-on-save-your-vim-is-trash">"My Visual Studio Code doesn't take a second to format-on-save, your Vim is trash"</h2>
 <p>To be fair, coc-prettier was pretty fast too. How is that even possible?</p>
 <p>Let's go back to our sample files, but this time let's see what prettier does
 if we pass all 5 files to it instead of invoking it 5 times:</p>
@@ -199,7 +201,7 @@ formatting code using prettier!</p>
 <h2 id="installing-and-starting-prettierd">Installing and starting prettierd</h2>
 <p>The code for prettierd is pretty boring, as it is basically a tiny wrapper
 around core_d to invoke the proper prettier functions whenever the server
-receives a &quot;request&quot;. The two important things to know about are:</p>
+receives a "request". The two important things to know about are:</p>
 <ol>
 <li>You can install it with npm and start it with <code>prettierd start</code>:</li>
 </ol>

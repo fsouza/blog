@@ -21,7 +21,9 @@
             href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"
         />
 
-         <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">  
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://blog.fsouza.dev/rss.xml">
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+        
 
 <!-- prettier ignore -->
 <link rel="stylesheet" href="https://blog.fsouza.dev/custom-style.css?h=4061651ab4fa87df8bc6" />
@@ -106,12 +108,12 @@ easier and funnier.</p>
 <p>In this post, I will show some basic usage of Splinter for simple web
 application tests. <a rel="noopener" target="_blank" href="https://github.com/cobrateam/splinter">Splinter</a> is a tool
 useful on tests of any web application. You can even test a Java web
-application using Splinter. This post example is a &quot;test&quot; of a Facebook
+application using Splinter. This post example is a "test" of a Facebook
 feature, just because I want to focus on how to use Splinter, not on how to
 write a web application. The feature to be tested is the creation of an event
 (the Splinter sprint), following all the flow: first the user will login on
-Facebook, then click on &quot;Events&quot; menu item, then click on &quot;Create an Event&quot;
-button, enter all event information and click on &quot;Create event&quot; button. So,
+Facebook, then click on "Events" menu item, then click on "Create an Event"
+button, enter all event information and click on "Create event" button. So,
 let’s do it…</p>
 <p>First step is create a
 <a rel="noopener" target="_blank" href="https://splinter.readthedocs.io/en/latest/api/driver-and-element-api.html#module-splinter.browser">Browser</a>
@@ -183,7 +185,7 @@ So, we get the first element of the list (even when the selector returns only
 an element, the return type is still a <em>list</em>) and click on it. Like <code>visit</code>
 method, <code>click</code> is a blocking operation: the driver will only listen for new
 actions when the request is finished (the page is loaded).</p>
-<p>We’re finally on &quot;new event&quot; page, and there is a form on screen waiting for data of the <em>Splinter Sprint</em>. Let’s fill the form. Here is the code for it:</p>
+<p>We’re finally on "new event" page, and there is a form on screen waiting for data of the <em>Splinter Sprint</em>. Let’s fill the form. Here is the code for it:</p>
 <pre data-lang="python" class="language-python "><code class="language-python" data-lang="python">browser.fill(&#x27;event_startIntlDisplay&#x27;, &#x27;5&#x2F;21&#x2F;2011&#x27;)
 browser.select(&#x27;start_time_min&#x27;, &#x27;480&#x27;)
 browser.fill(&#x27;name&#x27;, &#x27;Splinter sprint&#x27;)
@@ -194,7 +196,7 @@ browser.fill(&#x27;desc&#x27;, &#x27;For more info, check out the #cobratem chan
 morning (480 minutes). As we know, the event name is <em>Splinter sprint</em>, and we
 are going to join some guys down here in Brazil. We filled out the form using
 <code>fill</code> and <code>select</code> methods.</p>
-<p>The <code>fill</code> method is used to fill a &quot;fillable&quot; field (a textarea, an input,
+<p>The <code>fill</code> method is used to fill a "fillable" field (a textarea, an input,
 etc.). It receives two strings: the first is the <em>name</em> of the field to fill
 and the second is the <em>value</em> that will fill the field. <code>select</code> is used to
 select an option in a select element (a “combo box”). It also receives two
@@ -236,9 +238,8 @@ seconds, the method returns <code>False</code>, otherwise it returns <code>True<
 <blockquote>
 <p><strong>Important:</strong> <code>fail</code> is a pseudocode sample and doesn’t exist (if you’re
 using <code>unittest</code> library, you can invoke <code>self.fail</code> in a TestCase, exactly
-what I did in [complete snippet for this
-example](https://github.com/cobrateam/splinter/blob/master/samples/test_facebook_events.py
-&quot;Snippet for creating a new event on Facebook using Splinter&quot;), available at
+what I did in <a rel="noopener" target="_blank" title="Snippet for creating a new event on Facebook using Splinter" href="https://github.com/cobrateam/splinter/blob/master/samples/test_facebook_events.py">complete snippet for this
+example</a>, available at
 Github).</p>
 </blockquote>
 <p>Now we see the <code>iframe</code> element on screen and we can finally upload the

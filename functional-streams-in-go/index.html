@@ -21,7 +21,9 @@
             href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface"
         />
 
-         <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">  
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://blog.fsouza.dev/rss.xml">
+        <link rel="alternate" type="application/atom+xml" title="RSS" href="https://blog.fsouza.dev/atom.xml">
+        
 
 <!-- prettier ignore -->
 <link rel="stylesheet" href="https://blog.fsouza.dev/custom-style.css?h=4061651ab4fa87df8bc6" />
@@ -124,7 +126,7 @@ playing with the idea of <a rel="noopener" target="_blank" href="https://github.
 channels</a> and higher order functions that
 operate on those channels, allowing processes to execute on streams of data
 somewhat-lazily. This is 100% a toy project and a production-ready version of
-&quot;lazy/generic streams&quot; will likely come in some future release of
+"lazy/generic streams" will likely come in some future release of
 <a rel="noopener" target="_blank" href="https://github.com/ReactiveX/RxGo">RxGo</a>.</p>
 <p>Still, while working on a solution to get this working with channels, I figured
 we could also try to get it working in a more traditional representation, at
@@ -466,7 +468,7 @@ shouldn't do this in production, at least not the way it's described in this
 blog post :)</p>
 <p>The code below will also not handle any errors. Don't do this at home.</p>
 </blockquote>
-<p>Now that we have that function, we can create our &quot;database&quot; instance, loop
+<p>Now that we have that function, we can create our "database" instance, loop
 through the input and execute commands:</p>
 <pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">func ProcessCommands(input io.Reader, output io.Writer) {
 	s := stream.FromReader(input)
@@ -485,7 +487,7 @@ stdin, parse them, and sum all the prime numbers. This requires using the
 helper <code>FromReader</code>, <code>Map</code> to parse the number, <code>Filter</code> to discard non-prime
 numbers and <code>Fold</code> to sum the filtered values. Notice that this is stdin, so
 values are getting piped through as they are read from stdin.</p>
-<p>Here's what that &quot;pipeline&quot; looks like:</p>
+<p>Here's what that "pipeline" looks like:</p>
 <pre data-lang="go" class="language-go "><code class="language-go" data-lang="go">func main() {
 	stdin := stream.FromReader(os.Stdin)
 	numbers := stream.Map(stdin, parseLine)
