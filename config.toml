@@ -6,8 +6,8 @@ compile_sass = false
 default_language = "en"
 build_search_index = true
 
-generate_feed = true
-feed_filename = "atom.xml"
+generate_feeds = true
+feed_filenames = ["atom.xml", "rss.xml"]
 
 theme = "hyde"
 
